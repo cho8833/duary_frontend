@@ -1,21 +1,21 @@
-import 'package:duary/screen/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
 import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/member_provider.dart';
 import 'package:duary/provider/theme_provider.dart';
 import 'package:duary/provider/token_provider.dart';
 import 'package:duary/repository/impl/secure_storage_impl.dart';
 import 'package:duary/repository/repository_container.dart';
-import 'package:duary/repository/secure_storage.dart';
-import 'package:provider/provider.dart';
+import 'package:duary/screen/home_screen.dart';
+import 'package:duary/screen/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // secure storage
   FlutterSecureStorage ss = const FlutterSecureStorage();
-  final SecureStorage secureStorage = SecureStorageImpl(ss);
+  final SecureStorageImpl secureStorage = SecureStorageImpl(ss);
 
   // token provider
   TokenProvider tokenProvider = TokenProvider();
@@ -59,6 +59,9 @@ class Main extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           darkTheme: ThemeProvider.dark,
           home: const HomeScreen(),
+          routes: {
+            '/login': (context) => const LoginScreen(),
+          },
         );
       }),
     );
