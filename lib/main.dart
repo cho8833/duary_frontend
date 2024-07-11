@@ -1,4 +1,4 @@
-import 'package:duary/screen/home_screen.dart';
+import 'package:duary/screen/diary_edit_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:duary/provider/auth_provider.dart';
@@ -58,7 +58,7 @@ class Main extends StatelessWidget {
           theme: provider.selected,
           debugShowCheckedModeBanner: false,
           darkTheme: ThemeProvider.dark,
-          home: const HomeScreen(),
+          home: DiaryEditScreen(),
         );
       }),
     );
