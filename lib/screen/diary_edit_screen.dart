@@ -1,5 +1,5 @@
-import 'package:duary/widget/drawing_board/drawing_board.dart';
-import 'package:duary/widget/drawing_board/drawing_controller.dart';
+import 'package:duary/widget/drawing_board/sketch_board.dart';
+import 'package:duary/widget/drawing_board/sketch_controller.dart';
 import 'package:flutter/material.dart';
 
 class DiaryEditScreen extends StatefulWidget {
@@ -10,22 +10,21 @@ class DiaryEditScreen extends StatefulWidget {
 }
 
 class _DiaryEditScreenState extends State<DiaryEditScreen> {
-  late final DrawingController controller;
+  late final SketchController controller;
 
   @override
   void initState() {
+    controller = SketchController(backgroundColor: Colors.red);
     super.initState();
-    controller = DrawingController(
-      currentColor: Colors.blue,
-      currentStrokeWidth: 3.0
-    );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: DrawingBoard(
+        body: SketchBoard(
       controller: controller,
-      size: const Size(500, 500),
+      height: double.maxFinite,
+      width: double.maxFinite,
     ));
   }
 }
