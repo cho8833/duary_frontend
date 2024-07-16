@@ -58,7 +58,7 @@ class Main extends StatelessWidget {
           theme: provider.selected,
           debugShowCheckedModeBanner: false,
           darkTheme: ThemeProvider.dark,
-          home: DiaryEditScreen(),
+          home: const DiaryEditScreen(title: "해운대 데이트",),
         );
       }),
     );

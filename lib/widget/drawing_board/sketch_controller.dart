@@ -57,4 +57,11 @@ class SketchController {
       currentSketch.value = null;
     }
   }
+
+  void rollback() {
+    if (sketches.value.isNotEmpty) {
+      sketches.value.removeLast();
+      sketches.value = List<Sketch>.from(sketches.value);
+    }
+  }
 }
