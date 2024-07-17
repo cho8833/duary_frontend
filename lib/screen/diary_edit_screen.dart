@@ -48,7 +48,6 @@ class _DiaryEditScreenState extends State<DiaryEditScreen> {
               Expanded(
                 child: SketchBoard(
                   controller: controller,
-                  height: double.infinity,
                   width: double.infinity,
                 ),
               ),

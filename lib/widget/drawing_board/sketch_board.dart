@@ -18,11 +18,14 @@ class SketchBoard extends StatelessWidget {
       width: width,
       height: height,
       color: controller.backgroundColor.value,
-      child: Stack(
-        children: [
-          buildAllSketches(context),
-          buildCurrentPath(context),
-        ],
+      child: ClipRect(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            buildAllSketches(context),
+            buildCurrentPath(context),
+          ],
+        ),
       ),
     );
   }
@@ -50,7 +53,7 @@ class SketchBoard extends StatelessWidget {
         return RepaintBoundary(
           child: SizedBox(
             width: width,
-            height: height,
+            // height: height,
             child: CustomPaint(
               painter: SketchPainter(
                 sketches: sketches,
