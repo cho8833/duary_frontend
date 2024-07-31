@@ -2,20 +2,12 @@ import 'package:duary/widget/drawing_board/model/drawing_mode.dart';
 import 'package:flutter/material.dart';
 
 class Sketch {
-  final List<Offset> points;
-  final Color color;
-  final double size;
-  final SketchType type;
-  final bool filled;
-  final int sides;
+  final Color color; // *
+  final double thickness; // *
 
   Sketch({
-    required this.points,
-    this.color = Colors.black,
-    this.type = SketchType.scribble,
-    this.filled = true,
-    this.sides = 3,
-    required this.size,
+    required this.color,
+    required this.thickness,
   });
 
   factory Sketch.fromDrawingMode(
@@ -24,57 +16,22 @@ class Sketch {
     bool filled,
   ) {
     return Sketch(
-      points: sketch.points,
       color: sketch.color,
-      size: sketch.size,
-      filled: drawingMode == DrawingMode.line ||
-              drawingMode == DrawingMode.pencil ||
-              drawingMode == DrawingMode.eraser
-          ? false
-          : filled,
-      sides: sketch.sides,
-      type: () {
-        switch (drawingMode) {
-          case DrawingMode.eraser:
-          case DrawingMode.pencil:
-            return SketchType.scribble;
-          case DrawingMode.line:
-            return SketchType.line;
-          case DrawingMode.square:
-            return SketchType.square;
-          case DrawingMode.circle:
-            return SketchType.circle;
-          case DrawingMode.polygon:
-            return SketchType.polygon;
-          default:
-            return SketchType.scribble;
-        }
-      }(),
+      thickness: sketch.thickness,
     );
   }
 
   Map<String, dynamic> toJson() {
-    List<Map> pointsMap = points.map((e) => {'dx': e.dx, 'dy': e.dy}).toList();
     return {
-      'points': pointsMap,
       'color': color.toHex(),
-      'size': size,
-      'filled': filled,
-      'type': type.toRegularString(),
-      'sides': sides,
+      'size': thickness,
     };
   }
 
   factory Sketch.fromJson(Map<String, dynamic> json) {
-    List<Offset> points =
-        (json['points'] as List).map((e) => Offset(e['dx'], e['dy'])).toList();
     return Sketch(
-      points: points,
       color: (json['color'] as String).toColor(),
-      size: json['size'],
-      filled: json['filled'],
-      type: (json['type'] as String).toSketchTypeEnum(),
-      sides: json['sides'],
+      thickness: json['size'],
     );
   }
 }
@@ -106,4 +63,69 @@ extension ColorExtension on String {
 
 extension ColorExtensionX on Color {
   String toHex() => '#${value.toRadixString(16).substring(2, 8)}';
+}
+
+class Scribble extends Sketch {
+  final List<Offset> points;
+
+  Scribble(
+      {required this.points,
+      required super.thickness,
+      required super.color});
+
+  factory Scribble.fromJson(
+          Map<String, dynamic> json, double thickness, Color color) =>
+      Scribble(
+          points: (json['points'] as List)
+              .map((e) => Offset(e['dx'], e['dy']))
+              .toList(),
+          thickness: thickness,
+          color: color);
+
+}
+
+class Rectangle extends Sketch {
+  Offset center;
+  double width;
+  double height;
+
+  Rectangle(
+      {required this.center,
+      required this.width,
+      required this.height,
+      required super.thickness,
+      required super.color,});
+
+  factory Rectangle.fromJson(
+      Map<String, dynamic> json, double thickness, Color color) {
+    return Rectangle(
+        center: Offset((json['center_x'] as num).toDouble(),
+            (json['center_y'] as num).toDouble()),
+        width: (json['width'] as num).toDouble(),
+        height: (json['height'] as num).toDouble(),
+        thickness: thickness,
+        color: color);
+  }
+}
+
+class Circle extends Sketch {
+  double centerX;
+  double centerY;
+  double radius;
+
+  Circle(
+      {required this.centerX,
+      required this.centerY,
+      required this.radius,
+      required super.thickness,
+      required super.color, });
+
+  factory Circle.fromJson(
+          Map<String, dynamic> json, double thickness, Color color) =>
+      Circle(
+          centerX: (json['centerX'] as num).toDouble(),
+          centerY: (json['centerY'] as num).toDouble(),
+          radius: (json['radius'] as num).toDouble(),
+          thickness: thickness,
+          color: color);
 }
