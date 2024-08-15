@@ -1,0 +1,23 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1315dp"
+    android:height="1315dp"
+    android:viewportWidth="1315"
+    android:viewportHeight="1315">
+    <path
+        android:fillColor="#ff9000"
+        android:fillAlpha="0.75"
+        android:name="Ellipse 2 copy 3"
+        android:pathData="m657.5 0.4c363.1 0 657.4 294.3 657.4 657.4c0 363.1 -294.3 657.4 -657.4 657.4c-363.1 0 -657.4 -294.3 -657.4 -657.4c0 -363.1 294.3 -657.4 657.4 -657.4z" />
+    <path
+        android:fillColor="#eef7ff"
+        android:name="Ellipse 1 copy 6"
+        android:pathData="m1075.6 535.1c11.4 0 20.6 9.2 20.6 20.6c0 11.4 -9.2 20.6 -20.6 20.6c-11.4 0 -20.6 -9.2 -20.6 -20.6c0 -11.4 9.2 -20.6 20.6 -20.6z" />
+    <path
+        android:fillColor="#eef7ff"
+        android:name="Ellipse 1 copy 6"
+        android:pathData="m1139.4 535.1c11.4 0 20.6 9.2 20.6 20.6c0 11.4 -9.2 20.6 -20.6 20.6c-11.4 0 -20.6 -9.2 -20.6 -20.6c0 -11.4 9.2 -20.6 20.6 -20.6z" />
+    <path
+        android:fillColor="#fff7e5"
+        android:name="Rectangle 2 copy 3"
+        android:pathData="m540.8 454.2h598.5c11.2 0 20.3 9.1 20.3 20.3c0 11.2 -9.1 20.3 -20.3 20.3h-598.5c-11.2 0 -20.3 -9.1 -20.3 -20.3c0 -11.2 9.1 -20.3 20.3 -20.3z" />
+</vector>

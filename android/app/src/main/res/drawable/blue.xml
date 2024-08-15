@@ -1,0 +1,27 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1016dp"
+    android:height="1750dp"
+    android:viewportWidth="1016"
+    android:viewportHeight="1750">
+    <path
+        android:fillColor="#0024ff"
+        android:fillAlpha="0.75"
+        android:name="Rectangle 1 copy 3"
+        android:pathData="m509.2 0.6c280.8 0 508.5 227.6 508.5 508.5v733.2c0 280.8 -227.6 508.5 -508.5 508.5c-280.8 0 -508.5 -227.6 -508.5 -508.5v-733.2c0 -280.8 227.6 -508.5 508.5 -508.5z" />
+    <path
+        android:strokeColor="#eef7ff"
+        android:strokeWidth="5"
+        android:strokeMiterLimit="100"
+        android:name="Ellipse 1 copy 6"
+        android:pathData="m117.2 619.6c11.4 0 20.6 9.2 20.6 20.6c0 11.4 -9.2 20.6 -20.6 20.6c-11.4 0 -20.6 -9.2 -20.6 -20.6c0 -11.4 9.2 -20.6 20.6 -20.6z" />
+    <path
+        android:strokeColor="#eef7ff"
+        android:strokeWidth="5"
+        android:strokeMiterLimit="100"
+        android:name="Ellipse 1 copy 7"
+        android:pathData="m182.2 619.6c11.4 0 20.6 9.2 20.6 20.6c0 11.4 -9.2 20.6 -20.6 20.6c-11.4 0 -20.6 -9.2 -20.6 -20.6c0 -11.4 9.2 -20.6 20.6 -20.6z" />
+    <path
+        android:fillColor="#eef7ff"
+        android:name="Rectangle 2 copy 3"
+        android:pathData="m132.4 694h249.5c20.8 0 37.6 16.8 37.6 37.6c0 20.8 -16.8 37.6 -37.6 37.6h-249.5c-20.8 0 -37.6 -16.8 -37.6 -37.6c0 -20.8 16.8 -37.6 37.6 -37.6z" />
+</vector>
