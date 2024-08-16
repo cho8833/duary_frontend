@@ -76,6 +76,17 @@ flutter:
   assets:
     - asset/
 
+  fonts:
+    - family: NanumSquareRound
+      fonts:
+        - asset: asset/font/nanum_square_round/NanumSquareRoundB.ttf
+          weight: 600
+        - asset: asset/font/nanum_square_round/NanumSquareRoundEB.ttf
+          weight: 700
+        - asset: asset/font/nanum_square_round/NanumSquareRoundL.ttf
+          weight: 500
+        - asset: asset/font/nanum_square_round/NanumSquareRoundR.ttf
+          weight: 400
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

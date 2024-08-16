@@ -18,13 +18,18 @@ class SketchBoard extends StatelessWidget {
       width: width,
       height: height,
       color: controller.backgroundColor.value,
-      child: ClipRect(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            buildAllSketches(context),
-            buildCurrentPath(context),
-          ],
+      child: InteractiveViewer(
+        minScale: 0.5,
+        maxScale: 5.0,
+        boundaryMargin: const EdgeInsets.all(20),
+        child: ClipRect(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              buildAllSketches(context),
+              buildCurrentPath(context),
+            ],
+          ),
         ),
       ),
     );
@@ -89,4 +94,3 @@ class SketchBoard extends StatelessWidget {
     );
   }
 }
-

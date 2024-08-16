@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:duary/widget/drawing_board/model/drawing_mode.dart';
 import 'package:duary/widget/drawing_board/model/sketch.dart';
 import 'package:flutter/material.dart';
 
@@ -98,12 +101,22 @@ class SketchPainter extends CustomPainter {
       for (int i = 0; i < points.length - 1; ++i) {
         final Offset p0 = points[i];
         final Offset p1 = points[i + 1];
-        path.quadraticBezierTo(
-          p0.dx,
-          p0.dy,
-          (p0.dx + p1.dx) / 2,
-          (p0.dy + p1.dy) / 2,
-        );
+        if (scribble.drawingMode == DrawingMode.pen) {
+          path.quadraticBezierTo(
+            p0.dx,
+            p0.dy,
+            (p0.dx + p1.dx) / 2,
+            (p0.dy + p1.dy) / 2,
+          );
+        } else if (scribble.drawingMode == DrawingMode.pencil) {
+          final random = Random();
+          final double controlX =
+              (p0.dx + p1.dx) / 2 + (random.nextDouble() - 0.5) * 2;
+          final double controlY =
+              (p0.dy + p1.dy) / 2 + (random.nextDouble() - 0.5) * 2;
+          path.quadraticBezierTo(p0.dx + (random.nextDouble() - 0.5) * 2,
+              p0.dy + (random.nextDouble() - 0.5) * 2, controlX, controlY);
+        }
       }
     }
     canvas.drawPath(path, paint);

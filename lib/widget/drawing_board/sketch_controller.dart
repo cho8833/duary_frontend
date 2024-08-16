@@ -23,6 +23,7 @@ class SketchController {
 
   void onPointerDown(Offset offset) {
     currentSketch.value = Scribble(
+      drawingMode: currentMode.value,
       points: [offset],
       thickness: currentMode.value == DrawingMode.eraser
           ? eraserSize.value
@@ -39,6 +40,8 @@ class SketchController {
     }
     currentSketch.value!.points.add(offset);
     currentSketch.value = Scribble(
+      drawingMode: currentMode.value,
+
         points: currentSketch.value!.points,
       thickness: currentMode.value == DrawingMode.eraser
           ? eraserSize.value

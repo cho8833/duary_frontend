@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 class Sketch {
   final Color color; // *
   final double thickness; // *
+  final DrawingMode drawingMode;
 
   Sketch({
+    required this.drawingMode,
     required this.color,
     required this.thickness,
   });
@@ -16,6 +18,7 @@ class Sketch {
     bool filled,
   ) {
     return Sketch(
+      drawingMode: drawingMode,
       color: sketch.color,
       thickness: sketch.thickness,
     );
@@ -30,6 +33,7 @@ class Sketch {
 
   factory Sketch.fromJson(Map<String, dynamic> json) {
     return Sketch(
+      drawingMode: DrawingMode.fromJson(json['drawingMode']),
       color: (json['color'] as String).toColor(),
       thickness: json['size'],
     );
@@ -69,13 +73,15 @@ class Scribble extends Sketch {
   final List<Offset> points;
 
   Scribble(
-      {required this.points,
+      { required super.drawingMode,
+        required this.points,
       required super.thickness,
       required super.color});
 
   factory Scribble.fromJson(
           Map<String, dynamic> json, double thickness, Color color) =>
       Scribble(
+        drawingMode: DrawingMode.fromJson(json['drawingMode']),
           points: (json['points'] as List)
               .map((e) => Offset(e['dx'], e['dy']))
               .toList(),
@@ -90,7 +96,8 @@ class Rectangle extends Sketch {
   double height;
 
   Rectangle(
-      {required this.center,
+      {required super.drawingMode,
+        required this.center,
       required this.width,
       required this.height,
       required super.thickness,
@@ -99,6 +106,7 @@ class Rectangle extends Sketch {
   factory Rectangle.fromJson(
       Map<String, dynamic> json, double thickness, Color color) {
     return Rectangle(
+      drawingMode: DrawingMode.fromJson(json['drawingMode']),
         center: Offset((json['center_x'] as num).toDouble(),
             (json['center_y'] as num).toDouble()),
         width: (json['width'] as num).toDouble(),
@@ -114,7 +122,8 @@ class Circle extends Sketch {
   double radius;
 
   Circle(
-      {required this.centerX,
+      {required super.drawingMode,
+        required this.centerX,
       required this.centerY,
       required this.radius,
       required super.thickness,
@@ -123,6 +132,7 @@ class Circle extends Sketch {
   factory Circle.fromJson(
           Map<String, dynamic> json, double thickness, Color color) =>
       Circle(
+        drawingMode: DrawingMode.fromJson(json['drawingMode']),
           centerX: (json['centerX'] as num).toDouble(),
           centerY: (json['centerY'] as num).toDouble(),
           radius: (json['radius'] as num).toDouble(),
