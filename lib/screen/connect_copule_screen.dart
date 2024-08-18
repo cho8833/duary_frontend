@@ -1,7 +1,7 @@
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/support/button_base.dart';
+import 'package:duary/widget/main_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class ConnectCoupleScreen extends StatefulWidget {
   const ConnectCoupleScreen({super.key});
@@ -14,29 +14,16 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: MainAppBar(
+        appBarObj: AppBar(),
+        trailingBuilder: (context) => const Icon(Icons.close),
+      ),
       body: SafeArea(
         child: SizedBox(
           width: double.infinity,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: double.infinity,
-                height: 48,
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      AssetPath.duaryLogo,
-                      height: 48,
-                    ),
-                    const Positioned(
-                        right: 0,
-                        child: Icon(Icons.close, color: Color(0xFF9A9A9A))),
-                  ],
-                ),
-              ),
               const SizedBox(
                 height: 64,
               ),
@@ -44,7 +31,6 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                 "커플 연결 후\n우리만의 다이어리를 열어보세요.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontFamily: "NanumSquareRound",
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF464646),
                     fontSize: 18),
@@ -63,7 +49,6 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
               const Text(
                 "나의 코드 복사",
                 style: TextStyle(
-                  fontFamily: "NanumSquareRound",
                   fontWeight: FontWeight.w500,
                   fontSize: 16,
                   color: Color(0xFF464646),
@@ -72,7 +57,6 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
               const Text(
                 "hbge4frvr",
                 style: TextStyle(
-                    fontFamily: "NanumSquareRound",
                     fontWeight: FontWeight.w600,
                     fontSize: 18,
                     color: Color(0xFF464646),
@@ -97,7 +81,6 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                           child: const Text(
                             "초대장 보내기",
                             style: TextStyle(
-                                fontFamily: "NanumSquareRound",
                                 color: Color(0xFF573200),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 15),
@@ -119,7 +102,6 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                             'or',
                             style: TextStyle(
                                 fontWeight: FontWeight.w500,
-                                fontFamily: "NanumSquareRound",
                                 color: Color(0xFF9A9A9A),
                                 fontSize: 16),
                           ),
@@ -146,7 +128,6 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                           child: const Text(
                             "상대방 코드로 연결하기",
                             style: TextStyle(
-                                fontFamily: "NanumSquareRound",
                                 color: Color(0xFF573200),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 15),

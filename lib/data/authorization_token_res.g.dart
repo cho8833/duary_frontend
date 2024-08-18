@@ -11,5 +11,5 @@ AuthorizationTokenRes _$AuthorizationTokenResFromJson(
     AuthorizationTokenRes(
       json['accessToken'] as String,
       json['refreshToken'] as String,
-      json['id'] as int,
+      (json['id'] as num).toInt(),
     );

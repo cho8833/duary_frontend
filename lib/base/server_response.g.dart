@@ -12,7 +12,7 @@ ServerResponse<T> _$ServerResponseFromJson<T>(
 ) =>
     ServerResponse<T>(
       message: json['message'] as String?,
-      status: json['status'] as int,
+      status: (json['status'] as num).toInt(),
       code: json['code'] as String?,
       data: fromJsonT(json['data']),
       error: json['error'] as bool,
@@ -25,26 +25,26 @@ PagedData<T> _$PagedDataFromJson<T>(
     PagedData<T>(
       (json['content'] as List<dynamic>).map(fromJsonT).toList(),
       Pageable.fromJson(json['pageable'] as Map<String, dynamic>),
-      json['totalElements'] as int,
-      json['totalPages'] as int,
+      (json['totalElements'] as num).toInt(),
+      (json['totalPages'] as num).toInt(),
       last: json['last'] as bool?,
       first: json['first'] as bool?,
-      size: json['size'] as int?,
-      number: json['number'] as int?,
+      size: (json['size'] as num?)?.toInt(),
+      number: (json['number'] as num?)?.toInt(),
       sort: json['sort'] == null
           ? null
           : Sort.fromJson(json['sort'] as Map<String, dynamic>),
-      numberOfElements: json['numberOfElements'] as int?,
+      numberOfElements: (json['numberOfElements'] as num?)?.toInt(),
       empty: json['empty'] as bool?,
     );
 
 Pageable _$PageableFromJson(Map<String, dynamic> json) => Pageable(
-      json['pageNumber'] as int,
-      json['pageSize'] as int,
+      (json['pageNumber'] as num).toInt(),
+      (json['pageSize'] as num).toInt(),
       sort: json['sort'] == null
           ? null
           : Sort.fromJson(json['sort'] as Map<String, dynamic>),
-      offset: json['offset'] as int?,
+      offset: (json['offset'] as num?)?.toInt(),
       paged: json['paged'] as bool?,
       unpaged: json['unpaged'] as bool?,
     );

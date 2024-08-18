@@ -1,7 +1,8 @@
+import 'package:duary/provider/event_provider.dart';
+import 'package:duary/provider/user_provider.dart';
 import 'package:duary/screen/splash_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/theme_provider.dart';
@@ -37,23 +38,30 @@ void main() async {
   // pre cache splash logo
   // Native Splash Screen -> SplashScreen.dart 전환 중 로고 깜빡임 제거
   const loader = SvgAssetLoader(AssetPath.duarySplashLogo);
-  svg.cache.putIfAbsent(loader.cacheKey(null), () => loader.loadBytes(null));
+  await svg.cache.putIfAbsent(loader.cacheKey(null), () => loader.loadBytes(null));
+
+  // get couple
+  UserProvider userProvider = UserProvider(rc.coupleRepository);
+  await userProvider.getMyCouple();
 
   runApp(Main(
-    authProvider: authProvider,
+    authProvider: authProvider, userProvider: userProvider,
   ));
 }
 
 class Main extends StatelessWidget {
-  const Main({super.key, required this.authProvider});
+  const Main({super.key, required this.authProvider, required this.userProvider});
 
   final AuthProvider authProvider;
+  final UserProvider userProvider;
 
   @override
   Widget build(BuildContext context) {
     RepositoryContainer rc = RepositoryContainer();
     return MultiProvider(
       providers: [
+        Provider.value(value: userProvider),
+        Provider(create: (context) => EventProvider(rc.eventRepository)),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       builder: (context, _) =>

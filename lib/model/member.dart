@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:duary/model/enums/role.dart';
 
 part 'member.g.dart';
 
@@ -7,9 +6,10 @@ part 'member.g.dart';
 class Member {
   int id;
   String username;
-  Role role;
+  int colorCode;
+  String character;
 
-  Member(this.id, this.username, this.role);
+  Member(this.id, this.username, this.colorCode, this.character);
 
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
 }
