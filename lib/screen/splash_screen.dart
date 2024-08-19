@@ -1,5 +1,6 @@
 import 'package:duary/model/couple.dart';
 import 'package:duary/provider/user_provider.dart';
+import 'package:duary/screen/base_screen.dart';
 import 'package:duary/screen/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
 import 'package:duary/support/asset_path.dart';
@@ -51,11 +52,11 @@ class _SplashScreenState extends State<SplashScreen>
             builder: (context) {
               if (userProvider.myCouple != null) {
                 // Couple 연결 완료 상태면 HomeScreen 으로 route
-                return const HomeScreen();
+                return const BaseScreen();
               } else {
                 // Couple 연결이 되어있지 않은 경우 ConnectCoupleScreen 으로 route
+                return const ConnectCoupleScreen();
               }
-              return const ConnectCoupleScreen();
             }));
       }
     });

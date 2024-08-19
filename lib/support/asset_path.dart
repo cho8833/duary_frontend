@@ -10,4 +10,6 @@ class AssetPath {
   static const String circle = "asset/circle.png";
   static const String long = "asset/long.png";
   static const String set = "asset/set.png";
+  static const String schedule = "asset/schedule.svg";
+  static const String union = "asset/union.svg";
 }
