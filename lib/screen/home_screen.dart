@@ -174,96 +174,98 @@ class ComingEventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color color = Color(event.member.colorCode);
-    return Container(
-      width: double.infinity,
-      height: 136,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: (event.isTogether ? const Color(0xFFFF488A) : color)
-            .withOpacity(0.2),
-      ),
-      child: Stack(
-        children: [
-          drawCharacter(event),
-          Positioned(
-            top: 20,
-            left: 0,
-            child: Container(
-              width: 80,
-              height: 45,
-              alignment: Alignment.centerLeft,
-              decoration: BoxDecoration(
-                  color: event.isTogether ? const Color(0xFFFF488A) : color,
-                  borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(10),
-                      bottomRight: Radius.circular(10))),
-              child: Row(
-                children: [
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  RichText(
-                    text: TextSpan(children: [
-                      TextSpan(
-                        text: DateFormat("a").format(event.startDateTime),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 11,
-                            color: Colors.white),
-                      ),
-                      TextSpan(
-                        text:
-                            " ${DateFormat("h:mm").format(event.startDateTime)}",
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16,
-                            color: Colors.white),
-                      )
-                    ], style: const TextStyle(fontFamily: "NanumSquareRound")),
-                  ),
-                ],
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        width: double.infinity,
+        height: 136,
+        decoration: BoxDecoration(
+          color: (event.isTogether ? const Color(0xFFFF488A) : color)
+              .withOpacity(0.2),
+        ),
+        child: Stack(
+          children: [
+            drawCharacter(event),
+            Positioned(
+              top: 20,
+              left: 0,
+              child: Container(
+                width: 80,
+                height: 45,
+                alignment: Alignment.centerLeft,
+                decoration: BoxDecoration(
+                    color: event.isTogether ? const Color(0xFFFF488A) : color,
+                    borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(10),
+                        bottomRight: Radius.circular(10))),
+                child: Row(
+                  children: [
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    RichText(
+                      text: TextSpan(children: [
+                        TextSpan(
+                          text: DateFormat("a").format(event.startDateTime),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 11,
+                              color: Colors.white),
+                        ),
+                        TextSpan(
+                          text:
+                              " ${DateFormat("h:mm").format(event.startDateTime)}",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                              color: Colors.white),
+                        )
+                      ], style: const TextStyle(fontFamily: "NanumSquareRound")),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          Positioned(
-            top: 25,
-            left: 110,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const Text(
-                  "다가오는 일정",
-                  style: TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
-                ),
-                Text(
-                  event.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      color: Color(0xFF2E1A00),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                const Text(
-                  "장소 및 메모",
-                  style: TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
-                ),
-                Text(
-                  event.content,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      color: Color(0xFF2E1A00),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15),
-                )
-              ],
-            ),
-          )
-        ],
+            Positioned(
+              top: 25,
+              left: 110,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Text(
+                    "다가오는 일정",
+                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
+                  ),
+                  Text(
+                    event.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        color: Color(0xFF2E1A00),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  const Text(
+                    "장소 및 메모",
+                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
+                  ),
+                  Text(
+                    event.content,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        color: Color(0xFF2E1A00),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
