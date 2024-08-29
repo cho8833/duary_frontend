@@ -42,6 +42,12 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+        def kakaoNativeKey = localProperties.getProperty("kakao.nativeAppKey")
+        if (kakaoNativeKey == null) {
+            throw new GradleException("KAKAO_NATIVE_KEY not found in local.properties")
+        }
+
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoNativeKey
     }
 
     buildTypes {
