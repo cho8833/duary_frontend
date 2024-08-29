@@ -1,4 +1,4 @@
-package com.example.duary_frontend
+package com.ivis.duary
 
 import android.os.Bundle
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
