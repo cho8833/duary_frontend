@@ -1,4 +1,5 @@
 import 'package:duary/screen/home_screen.dart';
+import 'package:duary/screen/timetable_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,14 +17,15 @@ class _BaseScreenState extends State<BaseScreen> {
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
-    Text(
-      'Index 1: Business',
-      style: optionStyle,
-    ),
+    TimetableScreen(),
     Text(
       'Index 2: School',
       style: optionStyle,
     ),
+    Text(
+      'my page',
+      style: optionStyle,
+    )
   ];
 
   void _onItemTapped(int index) {
@@ -52,8 +54,8 @@ class _BaseScreenState extends State<BaseScreen> {
           elevation: 0,
           backgroundColor: Colors.white,
           items: <BottomNavigationBarItem>[
-            const BottomNavigationBarItem(
-              icon: Icon(Icons.home),
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(AssetPath.home),
               label: '홈',
             ),
             BottomNavigationBarItem(

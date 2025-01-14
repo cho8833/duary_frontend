@@ -16,6 +16,17 @@ class ServerResponseException implements Exception {
   String toString() => message;
 }
 
+class CustomException implements Exception {
+  final String message;
+
+  CustomException(this.message);
+
+  @override
+  String toString() {
+    return message;
+  }
+}
+
 class EmptyListException implements Exception {
   String? message;
 
@@ -37,13 +48,12 @@ class JsonParsingException implements Exception {
 }
 
 class ForbiddenException implements Exception {
-
-
   @override
   String toString() {
     return '권한이 없습니다';
   }
 }
+
 class TypeException implements Exception {
   String? message;
 
@@ -51,7 +61,6 @@ class TypeException implements Exception {
 
   @override
   String toString() => message ?? "type error";
-
 }
 
 class ConnectionException implements Exception {

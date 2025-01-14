@@ -5,9 +5,11 @@
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -39,4 +41,9 @@ app.*.map.json
 
 # Android Studio will place build artifacts here
 android/opencv/
-ios/*
+ios/Flutter
+
+# Google Service credential
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart

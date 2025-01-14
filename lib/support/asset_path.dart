@@ -12,4 +12,7 @@ class AssetPath {
   static const String set = "asset/set.png";
   static const String schedule = "asset/schedule.svg";
   static const String union = "asset/union.svg";
+  static const String home = "asset/home.svg";
+  static const String kakaoLogin = 'asset/kakao_login.png';
+  static const String appleLogin = 'asset/apple_login.png';
 }

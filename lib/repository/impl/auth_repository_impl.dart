@@ -7,6 +7,8 @@ import 'package:duary/model/member.dart';
 import 'package:duary/repository/auth_repository.dart';
 import 'package:duary/support/http_response_handler.dart';
 import 'package:duary/support/uri_provider.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 final class AuthRepositoryImpl with HttpResponseHandler, UriProvider implements AuthRepository {
   AuthRepositoryImpl(this.client, this.interceptedClient);
@@ -15,9 +17,41 @@ final class AuthRepositoryImpl with HttpResponseHandler, UriProvider implements 
 
   final Client client;
 
+  static const String nonce = "gOlSrRa9l2xnpkeGFuKHVs6yMWfot6eODIDKrLGC3fMCUVZDbW";
+
   @override
-  Future<AuthorizationTokenRes> signIn({SignInReq? req}) async {
-    Uri uri = getUri("/auth/signIn");
+  Future<AuthorizationTokenRes> signInWithKakaoTalk() async {
+    late OAuthToken token;
+    if (await isKakaoTalkInstalled()) {
+      token = await UserApi.instance.loginWithKakaoTalk(
+        nonce: nonce
+      );
+    } else {
+      token = await UserApi.instance.loginWithKakaoAccount(
+        nonce: nonce
+      );
+    }
+
+    Uri uri = getUri("/auth/signin/kakao");
+
+    Response response = await client.post(uri, body: jsonEncode(token.toJson()));
+
+    return getData(response, (p0) => AuthorizationTokenRes.fromJson(p0)).data;
+  }
+
+  @override
+  Future<AuthorizationTokenRes> signInWithApple() async {
+    final credential = await SignInWithApple.getAppleIDCredential(scopes: [
+      AppleIDAuthorizationScopes.email,
+    ]);
+
+
+    throw Exception();
+  }
+
+  @override
+  Future<AuthorizationTokenRes> signInWithIdPw({SignInReq? req}) async {
+    Uri uri = getUri("/auth/signIn/idpw");
 
     Response response = await client.post(uri, body: jsonEncode(req?.toJson()));
 

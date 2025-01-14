@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:duary/data/sign_in_req.dart';
@@ -6,9 +8,10 @@ import 'package:duary/model/member.dart';
 import 'package:duary/provider/token_provider.dart';
 import 'package:duary/repository/auth_repository.dart';
 import 'package:duary/support/custom_exception.dart';
+import 'package:flutter/services.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 class AuthProvider {
-
   // singleton
   static final AuthProvider _instance = AuthProvider._internal();
   factory AuthProvider() => _instance;
@@ -27,9 +30,32 @@ class AuthProvider {
 
   Member? me;
 
+  Future<void> signInWithApple() async {
+    await _repository.signInWithApple();
+  }
+
+  Future<void> signInWithKakaoTalk() async {
+    await _repository.signInWithKakaoTalk().then((res) async {
+      await tokenProvider.storeAccessToken(res.accessToken);
+      await tokenProvider.storeRefreshToken(res.refreshToken);
+      await _repository.getUserInfo().then((user) {
+        me = user;
+      });
+      isLoggedIn.value = true;
+    }).catchError((e) {
+      if (e is PlatformException) {
+        if (e.code == "CANCELED") {
+          throw CustomException("취소되었습니다");
+        }
+      }
+      throw ServerResponseException(e.toString());
+    });
+
+  }
+
   Future<void> signInIdPw(String username, String password) async {
     SignInReq req = SignInReq(username, password);
-    await _repository.signIn(req: req).then((res) async {
+    await _repository.signInWithIdPw(req: req).then((res) async {
       await tokenProvider.storeAccessToken(res.accessToken);
       await tokenProvider.storeRefreshToken(res.refreshToken);
       await _repository.getUserInfo().then((user) {

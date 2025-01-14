@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "695506435412",
+    "project_id": "duary-8c5b2",
+    "storage_bucket": "duary-8c5b2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695506435412:android:a062763891d4494f42dcc1",
+        "android_client_info": {
+          "package_name": "com.ivis.duary"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzC6J0YDTFK83XSf5Ott2cOfRTCi_smik"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
