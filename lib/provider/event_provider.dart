@@ -32,17 +32,7 @@ class EventProvider {
     });
   }
 
-  Future<void> getEvent(DateTime day) async {
-    if (comingEventStatus.value != Status.success) {
-      comingEventStatus.value = Status.loading;
-    }
-
-    await eventRepository.getComingEvents().then((events) {
-      comingEvents = events;
-      comingEventStatus.value = Status.success;
-    }).catchError((e) {
-      comingEventErrorMessage = e.toString();
-      comingEventStatus.value = Status.fail;
-    });
+  Future<List<Event>> getEvent(DateTime day) async {
+    return eventRepository.getComingEvents();
   }
 }

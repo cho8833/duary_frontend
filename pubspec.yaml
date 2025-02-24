@@ -50,9 +50,13 @@ dependencies:
   intl: ^0.19.0
   kakao_flutter_sdk_user: ^1.9.2
   sign_in_with_apple: ^6.1.2
-  infinite_scroll_pagination: ^4.0.0
+  infinite_scroll_pagination:
+    git:
+      url: https://github.com/cho8833/infinite_scroll_pagination
+      ref: master
 #  firebase_messaging: ^15.1.0
   firebase_core: ^3.4.0
+  get: ^4.6.6
 
 dev_dependencies:
   flutter_test:

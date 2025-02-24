@@ -7,15 +7,11 @@ part of 'member.dart';
 // **************************************************************************
 
 Member _$MemberFromJson(Map<String, dynamic> json) => Member(
-      (json['id'] as num).toInt(),
-      json['username'] as String,
-      (json['colorCode'] as num).toInt(),
+      json['name'] as String,
       json['character'] as String,
     );
 
 Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
-      'id': instance.id,
-      'username': instance.username,
-      'colorCode': instance.colorCode,
+      'name': instance.name,
       'character': instance.character,
     };

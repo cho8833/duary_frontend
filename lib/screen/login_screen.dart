@@ -1,4 +1,6 @@
 import 'package:duary/provider/auth_provider.dart';
+import 'package:duary/screen/home_screen.dart';
+import 'package:duary/screen/input_couple_info_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -20,6 +22,24 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
   }
 
+  void onSignInComplete(bool? isRegister) {
+    // 회원가입 성공 시 커플 정보 입력화면으로 이동
+    if (isRegister == true) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const InputCoupleInfoScreen()),
+          (p) => false);
+    }
+    // 회원가입된 회원이면 홈화면으로 이동
+    else if (isRegister == false) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (p) => false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,38 +52,44 @@ class _LoginScreenState extends State<LoginScreen> {
               child: SvgPicture.asset(AssetPath.duarySplashLogo),
             ),
             Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  _ButtonShadow(
-                    button: Image.asset(
-                      AssetPath.kakaoLogin,
-                      width: double.infinity,
-                    ),
-                    onClick: () {
-                      authProvider.signInWithKakaoTalk().catchError((e) {
-                        Fluttertoast.showToast(msg: e.toString());
-                      });
-                    },
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _ButtonShadow(
+                  button: Image.asset(
+                    AssetPath.kakaoLogin,
+                    width: double.infinity,
                   ),
-                  const SizedBox(
-                    height: 8,
+                  onClick: () async {
+                    bool? isRegister = await authProvider
+                        .signInWithKakaoTalk()
+                        .catchError((e) {
+                      Fluttertoast.showToast(msg: e.toString());
+                      return null;
+                    });
+                    onSignInComplete(isRegister);
+                  },
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                _ButtonShadow(
+                  button: Image.asset(
+                    AssetPath.appleLogin,
+                    width: double.infinity,
                   ),
-                  _ButtonShadow(
-                    button: Image.asset(
-                      AssetPath.appleLogin,
-                      width: double.infinity,
-                    ),
-                    onClick: () {
-                      authProvider.signInWithApple();
-                    },
-                  ),
-                  const SizedBox(height: 48,)
-                ],
-              ),
+                  onClick: () {
+                    authProvider.signInWithApple();
+                  },
+                ),
+                const SizedBox(
+                  height: 48,
+                )
+              ],
+            ),
           ],
         ),
-        ),
+      ),
     );
   }
 }

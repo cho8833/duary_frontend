@@ -6,6 +6,6 @@ class CoupleRepositoryMock implements CoupleRepository {
   @override
   Future<Couple> getMyCouple() async {
     return Future.value(Couple(DateTime(2023, 07, 20),
-        Member(1, "조현빈", 0xFF0024ff, "long"), Member(2, "이고은", 0xFFFFA93A, "circle")));
+        Member("조현빈", "long"), Member("이고은", "circle")));
   }
 }

@@ -32,9 +32,9 @@ class TokenInterceptor implements InterceptorContract {
       }
       AuthorizationTokenRes res =
       await _authRepository.reissue(accessToken ?? "", refreshToken);
-      accessToken = res.accessToken;
-      await tokenProvider.storeAccessToken(res.accessToken);
-      await tokenProvider.storeRefreshToken(res.refreshToken);
+      accessToken = res.token.accessToken;
+      await tokenProvider.storeAccessToken(accessToken);
+      await tokenProvider.storeRefreshToken(res.token.refreshToken);
     }
     data.headers['Content-Type'] = 'application/json';
     data.headers['Authorization'] = 'Bearer $accessToken';

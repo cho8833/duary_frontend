@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/event_provider.dart';
+import 'package:duary/screen/timetable_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/support/button_base.dart';
 import 'package:duary/widget/circle_character.dart';
@@ -38,86 +39,115 @@ class _HomeScreenState extends State<HomeScreen> {
         leadingBuilder: (context) => const Icon(Icons.menu),
         trailingBuilder: (context) => const Icon(Icons.notifications_outlined),
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 20,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+            child: Column(
               children: [
-                MenuButton(
-                  icon: Image.asset(AssetPath.coupleStamp),
-                  title: "커플 스탬프",
-                  onTap: () {},
-                ),
                 const SizedBox(
-                  width: 24,
+                  height: 20,
                 ),
-                MenuButton(
-                  icon: Image.asset(AssetPath.todayDuary),
-                  title: "오늘 Duary",
-                  onTap: () {},
-                ),
-                const SizedBox(
-                  width: 24,
-                ),
-                MenuButton(
-                  icon: Image.asset(AssetPath.newSchedule),
-                  title: "새 일정",
-                  onTap: () {},
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 24,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ButtonBase(
-                    onTap: () {},
-                    child: const Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "오늘 일정 보기",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 11,
-                              color: Color(0xFF939393)),
-                        ),
-                        Icon(
-                          Icons.chevron_right,
-                          color: Color(0xFF939393),
-                          size: 14,
-                        )
-                      ],
-                    )),
-              ],
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            StatusBuilder(
-                statusNotifier: eventProvider.comingEventStatus,
-                successBuilder: (context) {
-                  return ListView.separated(
-                    separatorBuilder: (context, index) => const SizedBox(
-                      height: 10,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    MenuButton(
+                      icon: Image.asset(AssetPath.coupleStamp),
+                      title: "커플 스탬프",
+                      onTap: () {},
                     ),
-                    shrinkWrap: true,
-                    itemCount: eventProvider.comingEvents.length,
-                    itemBuilder: (context, index) {
-                      return ComingEventCard(
-                          event: eventProvider.comingEvents[index]);
-                    },
-                  );
-                })
-          ],
-        ),
+                    const SizedBox(
+                      width: 24,
+                    ),
+                    MenuButton(
+                      icon: Image.asset(AssetPath.todayDuary),
+                      title: "오늘 Duary",
+                      onTap: () {},
+                    ),
+                    const SizedBox(
+                      width: 24,
+                    ),
+                    MenuButton(
+                      icon: Image.asset(AssetPath.newSchedule),
+                      title: "새 일정",
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 24,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ButtonBase(
+                        onTap: () {},
+                        child: const Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              "오늘 일정 보기",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 11,
+                                  color: Color(0xFF939393)),
+                            ),
+                            Icon(
+                              Icons.chevron_right,
+                              color: Color(0xFF939393),
+                              size: 14,
+                            )
+                          ],
+                        )),
+                  ],
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                StatusBuilder(
+                    statusNotifier: eventProvider.comingEventStatus,
+                    successBuilder: (context) {
+                      return ListView.separated(
+                        separatorBuilder: (context, index) => const SizedBox(
+                          height: 10,
+                        ),
+                        shrinkWrap: true,
+                        itemCount: eventProvider.comingEvents.length,
+                        itemBuilder: (context, index) {
+                          return ComingEventCard(
+                              event: eventProvider.comingEvents[index]);
+                        },
+                      );
+                    })
+              ],
+            ),
+          ),
+          DraggableScrollableSheet(
+              snap: true,
+              initialChildSize: 0.15,
+              minChildSize: 0.15,
+              builder: (context, controller) {
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: const [
+                      BoxShadow(
+                          color: Color.from(alpha: 0.1, red: 0, green: 0, blue: 0),
+                          offset: Offset(0, -2),
+                          blurRadius: 15)
+                    ],
+                    color: Colors.white,
+                  ),
+                  child: SingleChildScrollView(
+                    controller: controller,
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height,
+                      child: const TimetableScreen(),
+                    ),
+                  ),
+                );
+              }),
+        ],
       ),
     );
   }
@@ -128,7 +158,15 @@ class ComingEventCard extends StatelessWidget {
 
   final Event event;
 
-  Widget drawCharacter(Event event) {
+  int getColor(String character) {
+    if (character == "circle") {
+      return 0xFFFFA93A;
+    } else {
+      return 0xFF0024ff;
+    }
+  }
+
+  Widget drawCharacter(Event event, Color color) {
     if (event.isTogether) {
       return Positioned(
         top: 61,
@@ -145,23 +183,22 @@ class ComingEventCard extends StatelessWidget {
     }
     if (event.member.character == "circle") {
       return Positioned(
-        top: 51, left: -5,
+        top: 51,
+        left: -5,
         child: CircleCharacter(
-            width: 113,
-            height: 113,
-            color: Color(event.member.colorCode),
-            opacity: 0.2),
+            width: 113, height: 113, color: color, opacity: 0.2),
       );
     } else if (event.member.character == "long") {
       return Positioned(
-        top: 44, left: -5,
+        top: 44,
+        left: -5,
         child: Transform(
           alignment: Alignment.center,
           transform: Matrix4.rotationY(pi),
           child: LongCharacter(
             width: 114,
             height: 196,
-            color: Color(event.member.colorCode),
+            color: color,
             opacity: 0.2,
           ),
         ),
@@ -173,7 +210,7 @@ class ComingEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color color = Color(event.member.colorCode);
+    Color color = Color(getColor(event.member.character));
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: Container(
@@ -185,7 +222,7 @@ class ComingEventCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            drawCharacter(event),
+            drawCharacter(event, color),
             Positioned(
               top: 20,
               left: 0,
@@ -204,23 +241,26 @@ class ComingEventCard extends StatelessWidget {
                       width: 8,
                     ),
                     RichText(
-                      text: TextSpan(children: [
-                        TextSpan(
-                          text: DateFormat("a").format(event.startDateTime),
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 11,
-                              color: Colors.white),
-                        ),
-                        TextSpan(
-                          text:
-                              " ${DateFormat("h:mm").format(event.startDateTime)}",
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16,
-                              color: Colors.white),
-                        )
-                      ], style: const TextStyle(fontFamily: "NanumSquareRound")),
+                      text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: DateFormat("a").format(event.startDateTime),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 11,
+                                  color: Colors.white),
+                            ),
+                            TextSpan(
+                              text:
+                                  " ${DateFormat("h:mm").format(event.startDateTime)}",
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                  color: Colors.white),
+                            )
+                          ],
+                          style:
+                              const TextStyle(fontFamily: "NanumSquareRound")),
                     ),
                   ],
                 ),

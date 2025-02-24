@@ -8,25 +8,19 @@ part 'server_response.g.dart';
 class ServerResponse<T> {
   String? message;
   int status;
-  String? code;
   T data;
-  bool error;
 
   ServerResponse(
       {required this.message,
       required this.status,
-      this.code,
-      required this.data,
-      required this.error});
+      required this.data,});
 
   factory ServerResponse.fromResponse(
       Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJson) {
     return ServerResponse(
       message: json['message'] as String?,
       status: json['status'] as int,
-      code: json['code'] as String?,
       data: fromJson(json['data']),
-      error: json['error'] as bool,
     );
   }
 }
@@ -35,8 +29,6 @@ class ServerPagedResponse<T> extends ServerResponse<PagedData<T>> {
   ServerPagedResponse(
       {required super.message,
       required super.status,
-      super.code,
-      required super.error,
       required super.data});
 
   factory ServerPagedResponse.fromResponse(
@@ -45,8 +37,6 @@ class ServerPagedResponse<T> extends ServerResponse<PagedData<T>> {
     return ServerPagedResponse(
         message: json['message'] as String?,
         status: json['status'] as int,
-        error: json['error'] as bool,
-        code: json['code'] as String?,
         data: data);
   }
 }

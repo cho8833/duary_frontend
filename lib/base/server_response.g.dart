@@ -13,9 +13,7 @@ ServerResponse<T> _$ServerResponseFromJson<T>(
     ServerResponse<T>(
       message: json['message'] as String?,
       status: (json['status'] as num).toInt(),
-      code: json['code'] as String?,
       data: fromJsonT(json['data']),
-      error: json['error'] as bool,
     );
 
 PagedData<T> _$PagedDataFromJson<T>(

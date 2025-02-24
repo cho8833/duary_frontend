@@ -14,7 +14,7 @@ class EventRepositoryMock implements EventRepository {
           now.add(const Duration(hours: 2)),
           "서면 삼바리 앞 / 학생증 챙겨가기!",
           "혜원이랑 조개구이 약속 🤙 ",
-          Member(1, "이고은", 0xFFff9000, "circle"),
+          Member("이고은", "circle"),
           false,
           1),
       Event(
@@ -23,7 +23,7 @@ class EventRepositoryMock implements EventRepository {
           now.add(const Duration(hours: 4)),
           "사상 타건샵 '몬스터기어매장",
           '타건샵 방문 후 키보드 수령 🤩',
-          Member(2, "조현빈", 0xFF0024ff, "long"),
+          Member("조현빈", "long"),
           false,
           1),
       Event(
@@ -32,7 +32,7 @@ class EventRepositoryMock implements EventRepository {
           now.add(const Duration(hours: 6)),
           "송상현 광장 / 응가가방 챙기기",
           "은동이랑 셋이서 산책하기 🐶",
-          Member(1, "이고은", 0xFFff9000, "circle"),
+          Member("이고은", "circle"),
           true,
           1)
     ];
@@ -49,7 +49,7 @@ class EventRepositoryMock implements EventRepository {
           now.add(const Duration(hours: 2)),
           "서면 삼바리 앞 / 학생증 챙겨가기!",
           "혜원이랑 조개구이 약속 🤙 ",
-          Member(1, "이고은", 0xFFff9000, "circle"),
+          Member("이고은", "circle"),
           false,
           1),
       Event(
@@ -58,7 +58,7 @@ class EventRepositoryMock implements EventRepository {
           now.add(const Duration(hours: 4)),
           "사상 타건샵 '몬스터기어매장",
           '타건샵 방문 후 키보드 수령 🤩',
-          Member(2, "조현빈", 0xFF0024ff, "long"),
+          Member("조현빈", "long"),
           false,
           1),
       Event(
@@ -67,7 +67,7 @@ class EventRepositoryMock implements EventRepository {
           now.add(const Duration(hours: 6)),
           "송상현 광장 / 응가가방 챙기기",
           "은동이랑 셋이서 산책하기 🐶",
-          Member(1, "이고은", 0xFFff9000, "circle"),
+          Member("이고은", "circle"),
           true,
           1)
     ];

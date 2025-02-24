@@ -392,6 +392,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  get:
+    dependency: "direct main"
+    description:
+      name: get
+      sha256: e4e7335ede17452b391ed3b2ede016545706c01a02292a6c97619705e7d2a85e
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.6.6"
   glob:
     dependency: transitive
     description:
@@ -451,11 +459,12 @@ packages:
   infinite_scroll_pagination:
     dependency: "direct main"
     description:
-      name: infinite_scroll_pagination
-      sha256: b68bce20752fcf36c7739e60de4175494f74e99e9a69b4dd2fe3a1dd07a7f16a
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.0"
+      path: "."
+      ref: master
+      resolved-ref: "40ac773f1eb600b2ce033b62d4939d730f2976a5"
+      url: "https://github.com/cho8833/infinite_scroll_pagination"
+    source: git
+    version: "4.1.0"
   intl:
     dependency: "direct main"
     description:

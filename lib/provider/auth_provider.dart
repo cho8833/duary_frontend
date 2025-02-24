@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:duary/data/authorization_token_res.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:duary/data/sign_in_req.dart';
@@ -9,7 +10,6 @@ import 'package:duary/provider/token_provider.dart';
 import 'package:duary/repository/auth_repository.dart';
 import 'package:duary/support/custom_exception.dart';
 import 'package:flutter/services.dart';
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 class AuthProvider {
   // singleton
@@ -34,14 +34,13 @@ class AuthProvider {
     await _repository.signInWithApple();
   }
 
-  Future<void> signInWithKakaoTalk() async {
-    await _repository.signInWithKakaoTalk().then((res) async {
-      await tokenProvider.storeAccessToken(res.accessToken);
-      await tokenProvider.storeRefreshToken(res.refreshToken);
-      await _repository.getUserInfo().then((user) {
-        me = user;
-      });
+  Future<bool?> signInWithKakaoTalk() async {
+    return await _repository.signInWithKakaoTalk().then((res) async {
+      await tokenProvider.storeAccessToken(res.token.accessToken);
+      await tokenProvider.storeRefreshToken(res.token.refreshToken);
+      me = res.member;
       isLoggedIn.value = true;
+      return res.isRegister;
     }).catchError((e) {
       if (e is PlatformException) {
         if (e.code == "CANCELED") {
@@ -50,14 +49,14 @@ class AuthProvider {
       }
       throw ServerResponseException(e.toString());
     });
-
+    return null;
   }
 
   Future<void> signInIdPw(String username, String password) async {
     SignInReq req = SignInReq(username, password);
     await _repository.signInWithIdPw(req: req).then((res) async {
-      await tokenProvider.storeAccessToken(res.accessToken);
-      await tokenProvider.storeRefreshToken(res.refreshToken);
+      await tokenProvider.storeAccessToken(res.token.accessToken);
+      await tokenProvider.storeRefreshToken(res.token.refreshToken);
       await _repository.getUserInfo().then((user) {
         me = user;
       });
@@ -74,8 +73,8 @@ class AuthProvider {
     }
     SignUpReq req = SignUpReq(username, password);
     await _repository.signUp(req).then((token) async {
-      await tokenProvider.storeAccessToken(token.accessToken);
-      await tokenProvider.storeRefreshToken(token.refreshToken);
+      await tokenProvider.storeAccessToken(token.token.accessToken);
+      await tokenProvider.storeRefreshToken(token.token.refreshToken);
       await _repository.getUserInfo().then((user) {
         me = user;
       });

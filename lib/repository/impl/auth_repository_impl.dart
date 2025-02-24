@@ -60,7 +60,7 @@ final class AuthRepositoryImpl with HttpResponseHandler, UriProvider implements 
 
   @override
   Future<Member> getUserInfo() async {
-    Uri uri = getUri("/auth/me");
+    Uri uri = getUri("/member/me");
 
     Response response = await interceptedClient.get(uri);
 

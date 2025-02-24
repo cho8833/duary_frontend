@@ -7,6 +7,7 @@ part 'couple.g.dart';
 class Couple {
   DateTime relationDate;
 
+
   Member me;
   Member lover;
 

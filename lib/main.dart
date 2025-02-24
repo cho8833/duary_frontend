@@ -14,6 +14,7 @@ import 'package:duary/repository/impl/secure_storage_impl.dart';
 import 'package:duary/repository/repository_container.dart';
 import 'package:duary/repository/secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
 
@@ -82,7 +83,7 @@ class Main extends StatelessWidget {
       ],
       builder: (context, _) =>
           Consumer<ThemeProvider>(builder: (context, provider, _) {
-        return MaterialApp(
+        return GetMaterialApp(
             theme: provider.selected,
             debugShowCheckedModeBanner: false,
             // darkTheme: ThemeProvider.dark,
