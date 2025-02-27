@@ -1,6 +1,4 @@
-import 'dart:io';
 
-import 'package:duary/data/authorization_token_res.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:duary/data/sign_in_req.dart';
@@ -34,13 +32,15 @@ class AuthProvider {
     await _repository.signInWithApple();
   }
 
-  Future<bool?> signInWithKakaoTalk() async {
+  Future<Member> signInWithKakaoTalk() async {
     return await _repository.signInWithKakaoTalk().then((res) async {
-      await tokenProvider.storeAccessToken(res.token.accessToken);
-      await tokenProvider.storeRefreshToken(res.token.refreshToken);
-      me = res.member;
+      await tokenProvider.storeAccessToken(res.accessToken);
+      await tokenProvider.storeRefreshToken(res.refreshToken);
+      await _repository.getUserInfo().then((user) {
+        me = user;
+      });
       isLoggedIn.value = true;
-      return res.isRegister;
+      return me!;
     }).catchError((e) {
       if (e is PlatformException) {
         if (e.code == "CANCELED") {
@@ -49,14 +49,13 @@ class AuthProvider {
       }
       throw ServerResponseException(e.toString());
     });
-    return null;
   }
 
   Future<void> signInIdPw(String username, String password) async {
     SignInReq req = SignInReq(username, password);
     await _repository.signInWithIdPw(req: req).then((res) async {
-      await tokenProvider.storeAccessToken(res.token.accessToken);
-      await tokenProvider.storeRefreshToken(res.token.refreshToken);
+      await tokenProvider.storeAccessToken(res.accessToken);
+      await tokenProvider.storeRefreshToken(res.refreshToken);
       await _repository.getUserInfo().then((user) {
         me = user;
       });
@@ -73,8 +72,8 @@ class AuthProvider {
     }
     SignUpReq req = SignUpReq(username, password);
     await _repository.signUp(req).then((token) async {
-      await tokenProvider.storeAccessToken(token.token.accessToken);
-      await tokenProvider.storeRefreshToken(token.token.refreshToken);
+      await tokenProvider.storeAccessToken(token.accessToken);
+      await tokenProvider.storeRefreshToken(token.refreshToken);
       await _repository.getUserInfo().then((user) {
         me = user;
       });

@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:duary/model/event.dart';
+import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/event_provider.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -20,10 +20,11 @@ class TimetableScreen extends StatefulWidget {
 class _TimetableScreenState extends State<TimetableScreen> {
   DateTime dayFocus = DateTime.now();
   int dayIndex = 0;
-  late final PagingController<DateTime, Event> _pagingUpController;
-  late final PagingController<DateTime, Event> _pagingDownController;
+  late final PagingController<DateTime, List<Event>> _pagingUpController;
+  late final PagingController<DateTime, List<Event>> _pagingDownController;
   late final ScrollController _scrollController;
   late final EventProvider _eventProvider;
+  final AuthProvider _authProvider = AuthProvider();
 
   // 중복 fetch 를 방지하기 위한 flag
   // 오늘 날짜 index 를 0으로, 내일 index 는 1, 어제 index 는 0
@@ -33,7 +34,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
   final Key downListKey = UniqueKey();
 
-  static const double _hourHeight = 62;
+  static const double _hourHeight = 60;
 
   @override
   void initState() {
@@ -99,7 +100,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
       final DateTime nextPageKey = pageKey.add(const Duration(days: 1));
 
-      _pagingDownController.appendPage(newItems, nextPageKey);
+      _pagingDownController.appendPage([newItems], nextPageKey);
     } catch (error) {
       _pagingDownController.error = error;
     }
@@ -111,7 +112,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
       final DateTime nextPageKey = pageKey.subtract(const Duration(days: 1));
 
-      _pagingUpController.appendPage(newItems, nextPageKey);
+      _pagingUpController.appendPage([newItems], nextPageKey);
     } catch (error) {
       _pagingUpController.error = error;
     }
@@ -187,6 +188,26 @@ class _TimetableScreenState extends State<TimetableScreen> {
     }
   }
 
+  List<Widget> _buildBubbles(List<Event> events) {
+    List<Widget> widgets = [];
+    for (int i = 0 ; i < events.length ; i++) {
+      Event event = events[i];
+
+      // 이벤트 위치 계산
+      double yPosition = event.startDateTime.hour * _hourHeight + event.startDateTime.minute;
+      late double xPosition;
+
+
+      // 이벤트 높이 계산, 1분 = 1px
+      double height = event.startDateTime.difference(event.endDateTime).inDays.toDouble();
+
+
+    }
+
+    return widgets;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     initializeDateFormatting("ko_KR");
@@ -209,7 +230,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
                 offset: position,
                 center: downListKey,
                 slivers: [
-                  PagedSliverList(
+                  PagedSliverList<DateTime, List<Event>>(
                       nextPageStrategy: () {
                         if (dayIndex < 0 && fetchFlag[dayIndex] == null) {
                           fetchFlag[dayIndex] = true;
@@ -220,16 +241,13 @@ class _TimetableScreenState extends State<TimetableScreen> {
                       },
                       pagingController: _pagingUpController,
                       builderDelegate: PagedChildBuilderDelegate(
-                          itemBuilder: (context, item, index) => Stack(
+                          itemBuilder: (context, items, index) => Stack(
                                 children: [
                                   _buildTimeLines(),
-                                  CustomPaint(
-                                    size: const Size(167, 62),
-                                    painter: _SpeechBubblePainter(isLeft: true),
-                                  ),
+                                  ..._buildBubbles(items)
                                 ],
                               ))),
-                  PagedSliverList(
+                  PagedSliverList<DateTime, List<Event>>(
                       key: downListKey,
                       nextPageStrategy: () {
                         if (dayIndex >= 0 && fetchFlag[dayIndex] == null) {
@@ -241,13 +259,10 @@ class _TimetableScreenState extends State<TimetableScreen> {
                       },
                       pagingController: _pagingDownController,
                       builderDelegate: PagedChildBuilderDelegate(
-                          itemBuilder: (context, item, index) => Stack(
+                          itemBuilder: (context, items, index) => Stack(
                                 children: [
                                   _buildTimeLines(),
-                                  CustomPaint(
-                                    size: const Size(167, 62),
-                                    painter: _SpeechBubblePainter(isLeft: true),
-                                  ),
+                                  ..._buildBubbles(items)
                                 ],
                               ))),
                 ],

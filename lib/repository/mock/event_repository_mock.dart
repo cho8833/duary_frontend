@@ -1,3 +1,4 @@
+import 'package:duary/model/enums/member_status.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/repository/event_repository.dart';
@@ -14,7 +15,7 @@ class EventRepositoryMock implements EventRepository {
           now.add(const Duration(hours: 2)),
           "서면 삼바리 앞 / 학생증 챙겨가기!",
           "혜원이랑 조개구이 약속 🤙 ",
-          Member("이고은", "circle"),
+          Member("이고은", "circle", MemberStatus.couple, 1, "kakao"),
           false,
           1),
       Event(
@@ -23,7 +24,7 @@ class EventRepositoryMock implements EventRepository {
           now.add(const Duration(hours: 4)),
           "사상 타건샵 '몬스터기어매장",
           '타건샵 방문 후 키보드 수령 🤩',
-          Member("조현빈", "long"),
+          Member("조현빈", "long", MemberStatus.couple, 3428835809, "kakao"),
           false,
           1),
       Event(
@@ -32,7 +33,7 @@ class EventRepositoryMock implements EventRepository {
           now.add(const Duration(hours: 6)),
           "송상현 광장 / 응가가방 챙기기",
           "은동이랑 셋이서 산책하기 🐶",
-          Member("이고은", "circle"),
+          Member("이고은", "circle", MemberStatus.couple, 1, "kakao"),
           true,
           1)
     ];
@@ -49,7 +50,7 @@ class EventRepositoryMock implements EventRepository {
           now.add(const Duration(hours: 2)),
           "서면 삼바리 앞 / 학생증 챙겨가기!",
           "혜원이랑 조개구이 약속 🤙 ",
-          Member("이고은", "circle"),
+          Member("이고은", "circle", MemberStatus.couple, 1, "kakao"),
           false,
           1),
       Event(
@@ -58,7 +59,7 @@ class EventRepositoryMock implements EventRepository {
           now.add(const Duration(hours: 4)),
           "사상 타건샵 '몬스터기어매장",
           '타건샵 방문 후 키보드 수령 🤩',
-          Member("조현빈", "long"),
+          Member("조현빈", "long", MemberStatus.couple, 3428835809, "kakao"),
           false,
           1),
       Event(
@@ -67,7 +68,7 @@ class EventRepositoryMock implements EventRepository {
           now.add(const Duration(hours: 6)),
           "송상현 광장 / 응가가방 챙기기",
           "은동이랑 셋이서 산책하기 🐶",
-          Member("이고은", "circle"),
+          Member("이고은", "circle", MemberStatus.couple, 1, "kakao"),
           true,
           1)
     ];

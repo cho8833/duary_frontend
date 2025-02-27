@@ -1,3 +1,4 @@
+import 'package:duary/model/enums/member_status.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'member.g.dart';
@@ -6,9 +7,12 @@ part 'member.g.dart';
 class Member {
   String name;
   String character;
+  MemberStatus status;
+  int socialId;
+  String provider;
 
 
-  Member(this.name, this.character);
+  Member(this.name, this.character, this.status, this.socialId, this.provider);
 
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
 }

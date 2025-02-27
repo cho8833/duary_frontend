@@ -10,31 +10,31 @@ import 'package:duary/support/uri_provider.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-final class AuthRepositoryImpl with HttpResponseHandler, UriProvider implements AuthRepository {
+final class AuthRepositoryImpl
+    with HttpResponseHandler, UriProvider
+    implements AuthRepository {
   AuthRepositoryImpl(this.client, this.interceptedClient);
 
   final Client interceptedClient;
 
   final Client client;
 
-  static const String nonce = "gOlSrRa9l2xnpkeGFuKHVs6yMWfot6eODIDKrLGC3fMCUVZDbW";
+  static const String nonce =
+      "gOlSrRa9l2xnpkeGFuKHVs6yMWfot6eODIDKrLGC3fMCUVZDbW";
 
   @override
   Future<AuthorizationTokenRes> signInWithKakaoTalk() async {
     late OAuthToken token;
     if (await isKakaoTalkInstalled()) {
-      token = await UserApi.instance.loginWithKakaoTalk(
-        nonce: nonce
-      );
+      token = await UserApi.instance.loginWithKakaoTalk(nonce: nonce);
     } else {
-      token = await UserApi.instance.loginWithKakaoAccount(
-        nonce: nonce
-      );
+      token = await UserApi.instance.loginWithKakaoAccount(nonce: nonce);
     }
 
     Uri uri = getUri("/auth/signin/kakao");
 
-    Response response = await client.post(uri, body: jsonEncode(token.toJson()));
+    Response response =
+        await client.post(uri, body: jsonEncode(token.toJson()));
 
     return getData(response, (p0) => AuthorizationTokenRes.fromJson(p0)).data;
   }
@@ -44,7 +44,6 @@ final class AuthRepositoryImpl with HttpResponseHandler, UriProvider implements 
     final credential = await SignInWithApple.getAppleIDCredential(scopes: [
       AppleIDAuthorizationScopes.email,
     ]);
-
 
     throw Exception();
   }
@@ -64,9 +63,9 @@ final class AuthRepositoryImpl with HttpResponseHandler, UriProvider implements 
 
     Response response = await interceptedClient.get(uri);
 
-
     return getData(response, (p0) => Member.fromJson(p0)).data;
   }
+
   @override
   Future<AuthorizationTokenRes> reissue(
       String accessToken, String refreshToken) async {
@@ -78,8 +77,9 @@ final class AuthRepositoryImpl with HttpResponseHandler, UriProvider implements 
       "accessToken": accessToken,
       "refreshToken": refreshToken
     };
+
     Response response =
-    await client.post(uri, headers: header, body: jsonEncode(reqBody));
+        await client.post(uri, headers: header, body: jsonEncode(reqBody));
 
     return getData(response, (p0) => AuthorizationTokenRes.fromJson(p0)).data;
   }
