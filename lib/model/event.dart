@@ -13,10 +13,11 @@ class Event {
   Member member;
   bool isTogether;
   int coupleId;
+  String? location;
 
 
   Event(this.id, this.startDateTime, this.endDateTime, this.content, this.title,
-      this.member, this.isTogether, this.coupleId);
+      this.member, this.isTogether, this.coupleId, {this.location});
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
 }

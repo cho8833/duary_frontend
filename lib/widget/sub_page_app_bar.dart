@@ -11,7 +11,7 @@ class SubPageAppBar extends StatelessWidget
       required this.title,
       this.trailingBuilder, this.backgroundColor});
 
-  final String title;
+  final Text title;
   final AppBar appBarObj;
   final Widget Function(BuildContext)? trailingBuilder;
   final Color? backgroundColor;
@@ -30,9 +30,16 @@ class SubPageAppBar extends StatelessWidget
       color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       padding: EdgeInsets.fromLTRB(16, statusBarHeight, 16, 0),
       height: preferredSize.height + statusBarHeight,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      width: preferredSize.width,
+      child: Stack(
+        alignment: Alignment.centerLeft,
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              title,
+            ],
+          ),
           GestureDetector(
             onTap: () {
               Navigator.pop(context);
@@ -42,14 +49,6 @@ class SubPageAppBar extends StatelessWidget
               color: Theme.of(context).colorScheme.primary,
               size: 30,
             ),
-          ),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black
-            )
           ),
           trailingBuilder != null ? trailingBuilder!(context) : Container()
         ],

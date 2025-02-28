@@ -3,6 +3,6 @@ import 'package:duary/model/event.dart';
 abstract interface class EventRepository {
   Future<List<Event>> getComingEvents();
 
-  Future<List<Event>> getEventByDay(DateTime day);
+  Future<List<Event>> getEvent(DateTime day);
 
 }

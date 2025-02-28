@@ -2,10 +2,8 @@ import 'package:duary/model/couple.dart';
 import 'package:duary/provider/user_provider.dart';
 import 'package:duary/screen/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
-import 'package:duary/screen/login_screen.dart';
 import 'package:duary/support/asset_path.dart';
-import 'package:duary/widget/circle_character.dart';
-import 'package:duary/widget/long_character.dart';
+import 'package:duary/widget/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -86,7 +84,7 @@ class _SplashScreenState extends State<SplashScreen>
             builder: (context, child) => Align(
                   alignment: Alignment(_yellowBounceXAnimation.value,
                       _yellowBounceYAnimation.value),
-                  child: const CircleCharacter(
+                  child: const Yellow(
                     color:
                         null,
                     width: 190,
@@ -100,8 +98,7 @@ class _SplashScreenState extends State<SplashScreen>
                 alignment: Alignment.bottomRight,
                 child: Transform.translate(
                     offset: _blueSlideUpAnimation.value,
-                    child: const LongCharacter(
-                      color: null,
+                    child: const Blue(
                       width: 200,
                       height: 524,
                     )),

@@ -33,6 +33,6 @@ class EventProvider {
   }
 
   Future<List<Event>> getEvent(DateTime day) async {
-    return eventRepository.getComingEvents();
+    return eventRepository.getEvent(day);
   }
 }

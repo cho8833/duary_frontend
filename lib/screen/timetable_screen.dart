@@ -1,8 +1,12 @@
 import 'dart:async';
 
+import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/event_provider.dart';
+import 'package:duary/screen/edit_event_screen.dart';
+import 'package:duary/widget/bubble_painter.dart';
+import 'package:duary/widget/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -35,14 +39,16 @@ class _TimetableScreenState extends State<TimetableScreen> {
   final Key downListKey = UniqueKey();
 
   static const double _hourHeight = 60;
+  static const double _timelineLength = 22;
 
   @override
   void initState() {
     super.initState();
+
     _eventProvider = context.read<EventProvider>();
 
-    _pagingUpController =
-        PagingController(firstPageKey: DateTime.now().subtract(const Duration(days: 1)));
+    _pagingUpController = PagingController(
+        firstPageKey: DateTime.now().subtract(const Duration(days: 1)));
     _pagingDownController = PagingController(firstPageKey: DateTime.now());
     _pagingUpController.addPageRequestListener((pageKey) {
       _fetchUpPage(pageKey);
@@ -64,7 +70,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
   }
 
   void updateDayIndex() {
-
     int index = getCurrentDateIndex();
 
     if (dayIndex != index) {
@@ -83,12 +88,14 @@ class _TimetableScreenState extends State<TimetableScreen> {
     late final double offset;
 
     // 위로 스크롤 중이면 화면 상단을 기준으로 어느 날짜 블록에 있는지 계산
-    if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
+    if (_scrollController.position.userScrollDirection ==
+        ScrollDirection.forward) {
       offset = _scrollController.offset;
     }
     // 아래로 스크롤 중이면 화면 하단을 기준으로 어느 날짜 블록에 있는지 계산
     else {
-      offset = _scrollController.offset + _scrollController.position.viewportDimension;
+      offset = _scrollController.offset +
+          _scrollController.position.viewportDimension;
     }
 
     return (offset / dayBlockHeight).floor();
@@ -118,33 +125,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
     }
   }
 
-  Widget _buildTimeLines() {
-    return SizedBox(
-      width: double.infinity,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(24, (index) {
-          return Container(
-            color: const Color(0xFFFBFBFB),
-            width: 22,
-            height: _hourHeight,
-            child: SizedBox(
-              child: Text(
-                index.toString(),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF858585)),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget _buildDateTitle() {
+  Widget _buildTitleBar() {
     late String title;
 
     switch (dayIndex) {
@@ -188,87 +169,276 @@ class _TimetableScreenState extends State<TimetableScreen> {
     }
   }
 
-  List<Widget> _buildBubbles(List<Event> events) {
-    List<Widget> widgets = [];
-    for (int i = 0 ; i < events.length ; i++) {
-      Event event = events[i];
+  // Widget _buildAllDay() {
+  //
+  // }
 
-      // 이벤트 위치 계산
-      double yPosition = event.startDateTime.hour * _hourHeight + event.startDateTime.minute;
-      late double xPosition;
-
-
-      // 이벤트 높이 계산, 1분 = 1px
-      double height = event.startDateTime.difference(event.endDateTime).inDays.toDouble();
-
-
-    }
-
-    return widgets;
+  Widget _buildTimeLines() {
+    return Column(
+      children: List.generate(24, (index) {
+        return Container(
+          color: const Color(0xFFFBFBFB),
+          width: _timelineLength,
+          height: _hourHeight,
+          child: SizedBox(
+            child: Text(
+              index.toString(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF858585)),
+            ),
+          ),
+        );
+      }),
+    );
   }
 
+  List<Widget> _buildBubbles(
+      BuildContext context, List<Event> events, bool isMine) {
+    List<Widget> widgets = [];
+
+    for (int i = 0; i < events.length; i++) {
+      Event event = events[i];
+      // 이벤트 위치 계산
+      double yPosition =
+          event.startDateTime.hour * _hourHeight + event.startDateTime.minute;
+      // 이벤트 높이 계산, 1분 = 1px
+      double height = event.endDateTime
+          .difference(event.startDateTime)
+          .inMinutes
+          .toDouble();
+
+      // 일정 내용
+      String time =
+          "${DateFormat("hh:mm").format(event.startDateTime)} - ${DateFormat("hh:mm").format(event.endDateTime)}";
+      Widget content = Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+        child: Column(
+          crossAxisAlignment:
+              isMine ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              time,
+              style: TextStyle(
+                  color: event.member.character.fontColor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(
+              height: 4,
+            ),
+            Text(
+              event.title,
+              style: TextStyle(
+                  color: event.member.character.fontBlackColor,
+                  fontSize: 13,
+                  height: 1.1,
+                  fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(
+              height: 4,
+            ),
+            event.location != null ? Text(event.location!) : Container()
+          ],
+        ),
+      );
+
+      // 캐릭터
+      late Widget character;
+      if (event.member.character == Character.blue) {
+        character = const Blue(
+          width: 39,
+          height: 67,
+          opacity: 0.2,
+        );
+      } else {
+        character = const Yellow(
+          width: 39,
+          height: 39,
+          opacity: 0.2,
+        );
+      }
+
+      // draw bubble
+      late Widget bubble;
+      if (isMine && event.member.socialId == _authProvider.me!.socialId) {
+        bubble = Positioned(
+          top: yPosition,
+          left: 0,
+          right: 0,
+          child: SizedBox(
+            height: height,
+            child: CustomPaint(
+              painter: SpeechBubblePainter(
+                  isLeft: false, character: event.member.character),
+              child: ClipPath(
+                clipper: RightBottomRoundedClipper(),
+                child: Stack(
+                  children: [
+                    content,
+                    Positioned(bottom: -21, right: 13, child: character)
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        widgets.add(bubble);
+      } else if (!isMine &&
+          event.member.socialId != _authProvider.me!.socialId) {
+        bubble = Positioned(
+          left: 0,
+          right: 0,
+          top: yPosition,
+          child: SizedBox(
+            height: height,
+            child: CustomPaint(
+              painter: SpeechBubblePainter(
+                  isLeft: true, character: event.member.character),
+              child: ClipPath(
+                clipper: LeftBottomRoundedClipper(),
+                child: Stack(
+                  children: [
+                    content,
+                    Positioned(bottom: -21, left: 13, child: character)
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        widgets.add(bubble);
+      }
+    }
+    return widgets;
+  }
 
   @override
   Widget build(BuildContext context) {
     initializeDateFormatting("ko_KR");
-    return Column(
+    return Stack(
       children: [
-        SizedBox(
-            height: 100,
-            child: Column(
+        Positioned(
+          right: 16,
+          top: 16,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const EditEventScreen()));
+            },
+            child: const Icon(
+              Icons.add,
+              color: Color(0xFFFFAC40),
+            ),
+          ),
+        ),
+        Column(
+          children: [
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildDateTitle(),
+                const SizedBox(
+                  height: 16,
+                ),
+                _buildTitleBar(),
               ],
-            )),
-        // Two way(up, down) Infinite Scroll View
-        Expanded(
-          child: Scrollable(
-            controller: _scrollController,
-            viewportBuilder: (BuildContext context, ViewportOffset position) {
-              return Viewport(
-                offset: position,
-                center: downListKey,
-                slivers: [
-                  PagedSliverList<DateTime, List<Event>>(
-                      nextPageStrategy: () {
-                        if (dayIndex < 0 && fetchFlag[dayIndex] == null) {
-                          fetchFlag[dayIndex] = true;
-                          return true;
-                        } else {
-                          return false;
-                        }
-                      },
-                      pagingController: _pagingUpController,
-                      builderDelegate: PagedChildBuilderDelegate(
-                          itemBuilder: (context, items, index) => Stack(
-                                children: [
-                                  _buildTimeLines(),
-                                  ..._buildBubbles(items)
-                                ],
-                              ))),
-                  PagedSliverList<DateTime, List<Event>>(
-                      key: downListKey,
-                      nextPageStrategy: () {
-                        if (dayIndex >= 0 && fetchFlag[dayIndex] == null) {
-                          fetchFlag[dayIndex] = true;
-                          return true;
-                        } else {
-                          return false;
-                        }
-                      },
-                      pagingController: _pagingDownController,
-                      builderDelegate: PagedChildBuilderDelegate(
-                          itemBuilder: (context, items, index) => Stack(
-                                children: [
-                                  _buildTimeLines(),
-                                  ..._buildBubbles(items)
-                                ],
-                              ))),
-                ],
-              );
-            },
-          ),
+            ),
+            // Two way(up, down) Infinite Scroll View
+            Expanded(
+              child: Scrollable(
+                controller: _scrollController,
+                viewportBuilder:
+                    (BuildContext context, ViewportOffset position) {
+                  return Viewport(
+                    offset: position,
+                    center: downListKey,
+                    slivers: [
+                      PagedSliverList<DateTime, List<Event>>(
+                          nextPageStrategy: () {
+                            if (dayIndex < 0 && fetchFlag[dayIndex] == null) {
+                              fetchFlag[dayIndex] = true;
+                              return true;
+                            } else {
+                              return false;
+                            }
+                          },
+                          pagingController: _pagingUpController,
+                          builderDelegate: PagedChildBuilderDelegate(
+                              itemBuilder: (context, items, index) => SizedBox(
+                                    height: 1440,
+                                    // 60px per hour, 24 hour = 60 * 24 = 1440 px
+                                    child: Row(
+                                      children: [
+                                        const SizedBox(
+                                          width: 20,
+                                        ),
+                                        Expanded(
+                                          child: Stack(
+                                            children: _buildBubbles(
+                                                context, items, true),
+                                          ),
+                                        ),
+                                        _buildTimeLines(),
+                                        Expanded(
+                                            child: Stack(
+                                          children: _buildBubbles(
+                                              context, items, false),
+                                        )),
+                                        const SizedBox(
+                                          width: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  ))),
+                      PagedSliverList<DateTime, List<Event>>(
+                          key: downListKey,
+                          nextPageStrategy: () {
+                            if (dayIndex >= 0 && fetchFlag[dayIndex] == null) {
+                              fetchFlag[dayIndex] = true;
+                              return true;
+                            } else {
+                              return false;
+                            }
+                          },
+                          pagingController: _pagingDownController,
+                          builderDelegate: PagedChildBuilderDelegate(
+                              itemBuilder: (context, items, index) => SizedBox(
+                                    height: 1440,
+                                    // 60px per hour, 24 hour = 60 * 24 = 1440 px
+                                    child: Row(
+                                      children: [
+                                        const SizedBox(
+                                          width: 20,
+                                        ),
+                                        Expanded(
+                                          child: Stack(
+                                            children: _buildBubbles(
+                                                context, items, true),
+                                          ),
+                                        ),
+                                        _buildTimeLines(),
+                                        Expanded(
+                                            child: Stack(
+                                          children: _buildBubbles(
+                                              context, items, false),
+                                        )),
+                                        const SizedBox(
+                                          width: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  ))),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -279,58 +449,5 @@ class _TimetableScreenState extends State<TimetableScreen> {
     _pagingDownController.dispose();
     _pagingUpController.dispose();
     super.dispose();
-  }
-}
-
-class _SpeechBubblePainter extends CustomPainter {
-  final bool isLeft;
-
-  _SpeechBubblePainter({required this.isLeft});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = const Color(0xFFFFA93A).withOpacity(0.2)
-      ..style = PaintingStyle.fill;
-
-    // Draw the rounded rectangle
-    if (isLeft) {
-      // If flipped, draw the rectangle on the right
-      final RRect roundedRect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(size.width * 0.1, 0, size.width * 0.9, size.height),
-        const Radius.circular(20),
-      );
-      canvas.drawRRect(roundedRect, paint);
-
-      // Draw the triangle on the left
-      final Path trianglePath = Path();
-      trianglePath.moveTo(size.width * 0.1, size.height * 0.5);
-      trianglePath.lineTo(size.width * 0.1, size.height * 0.7);
-      trianglePath.lineTo(0, size.height * 0.6);
-      trianglePath.close();
-
-      canvas.drawPath(trianglePath, paint);
-    } else {
-      // If not flipped, draw the rectangle on the left
-      final RRect roundedRect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width * 0.9, size.height),
-        const Radius.circular(20),
-      );
-      canvas.drawRRect(roundedRect, paint);
-
-      // Draw the triangle on the right
-      final Path trianglePath = Path();
-      trianglePath.moveTo(size.width * 0.9, size.height * 0.5);
-      trianglePath.lineTo(size.width * 0.9, size.height * 0.7);
-      trianglePath.lineTo(size.width, size.height * 0.6);
-      trianglePath.close();
-
-      canvas.drawPath(trianglePath, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _SpeechBubblePainter oldDelegate) {
-    return false;
   }
 }

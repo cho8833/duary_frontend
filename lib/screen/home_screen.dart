@@ -1,12 +1,12 @@
 import 'dart:math';
 
+import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/timetable_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/support/button_base.dart';
-import 'package:duary/widget/circle_character.dart';
-import 'package:duary/widget/long_character.dart';
+import 'package:duary/widget/characters.dart';
 import 'package:duary/widget/main_app_bar.dart';
 import 'package:duary/widget/set_character.dart';
 import 'package:flutter/material.dart';
@@ -158,14 +158,6 @@ class ComingEventCard extends StatelessWidget {
 
   final Event event;
 
-  int getColor(String character) {
-    if (character == "circle") {
-      return 0xFFFFA93A;
-    } else {
-      return 0xFF0024ff;
-    }
-  }
-
   Widget drawCharacter(Event event, Color color) {
     if (event.isTogether) {
       return Positioned(
@@ -181,24 +173,23 @@ class ComingEventCard extends StatelessWidget {
             )),
       );
     }
-    if (event.member.character == "circle") {
+    if (event.member.character == Character.yellow) {
       return Positioned(
         top: 51,
         left: -5,
-        child: CircleCharacter(
+        child: Yellow(
             width: 113, height: 113, color: color, opacity: 0.2),
       );
-    } else if (event.member.character == "long") {
+    } else if (event.member.character == Character.blue) {
       return Positioned(
         top: 44,
         left: -5,
         child: Transform(
           alignment: Alignment.center,
           transform: Matrix4.rotationY(pi),
-          child: LongCharacter(
+          child: Blue(
             width: 114,
             height: 196,
-            color: color,
             opacity: 0.2,
           ),
         ),
@@ -210,7 +201,7 @@ class ComingEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color color = Color(getColor(event.member.character));
+    Color color = event.member.character.strokeColor;
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: Container(
@@ -218,7 +209,7 @@ class ComingEventCard extends StatelessWidget {
         height: 136,
         decoration: BoxDecoration(
           color: (event.isTogether ? const Color(0xFFFF488A) : color)
-              .withOpacity(0.2),
+              .withValues(alpha: 0.2),
         ),
         child: Stack(
           children: [
@@ -335,7 +326,7 @@ class MenuButton extends StatelessWidget {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 6,
                     spreadRadius: 3,
                     offset: const Offset(2, 2))
