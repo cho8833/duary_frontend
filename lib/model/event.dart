@@ -8,16 +8,17 @@ class Event {
   int id;
   DateTime startDateTime;
   DateTime endDateTime;
-  String content;
+  String? content;
   String title;
   Member member;
   bool isTogether;
   int coupleId;
   String? location;
+  String? meetWith;
 
 
-  Event(this.id, this.startDateTime, this.endDateTime, this.content, this.title,
-      this.member, this.isTogether, this.coupleId, {this.location});
+  Event(this.id, this.startDateTime, this.endDateTime, this.title,
+      this.member, this.isTogether, this.coupleId, {this.location, this.meetWith, this.content});
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
 }

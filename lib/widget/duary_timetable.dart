@@ -347,6 +347,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
 
   List<Widget> _buildBubbles(double maxWidth, List<Event> events, bool isLeft) {
     List<Widget> widgets = [];
+    List<_BubblePosition> positions = [];
 
     for (int i = 0; i < events.length; i++) {
       Event event = events[i];
@@ -358,6 +359,8 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
           event.endDateTime.difference(event.startDateTime).inMinutes *
               hourHeight /
               60.toDouble();
+
+      positions.add(_BubblePosition(yPosition, yPosition + height));
 
       // 일정 내용
       String time =
@@ -471,7 +474,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
             child: CustomPaint(
               painter: SpeechBubblePainter(isLeft: isLeft, character: character),
               child: ClipPath(
-                clipper: RightBottomRoundedClipper(),
+                clipper: LeftBottomRoundedClipper(),
                 child: Stack(
                   children: [
                     content,
@@ -519,6 +522,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
       } else {
         continue;
       }
+
       widgets.add(Positioned(
         left: 0,
         right: 0,
@@ -564,4 +568,11 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     _pagingDownController.dispose();
     _pagingUpController.dispose();
   }
+}
+
+class _BubblePosition {
+  final double yPosStart;
+  final double yPosEnd;
+
+  _BubblePosition(this.yPosStart, this.yPosEnd);
 }

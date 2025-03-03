@@ -10,11 +10,13 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
       (json['id'] as num).toInt(),
       DateTime.parse(json['startDateTime'] as String),
       DateTime.parse(json['endDateTime'] as String),
-      json['content'] as String,
       json['title'] as String,
       Member.fromJson(json['member'] as Map<String, dynamic>),
       json['isTogether'] as bool,
       (json['coupleId'] as num).toInt(),
+      location: json['location'] as String?,
+      meetWith: json['meetWith'] as String?,
+      content: json['content'] as String?,
     );
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
@@ -26,4 +28,6 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'member': instance.member,
       'isTogether': instance.isTogether,
       'coupleId': instance.coupleId,
+      'location': instance.location,
+      'meetWith': instance.meetWith,
     };

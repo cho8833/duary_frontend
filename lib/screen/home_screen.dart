@@ -290,7 +290,7 @@ class ComingEventCard extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
                   ),
                   Text(
-                    event.content,
+                    event.content ?? "",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
