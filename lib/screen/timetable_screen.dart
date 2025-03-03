@@ -20,13 +20,10 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
   late final PageController _pageController;
 
-  late ScrollController _timeTableScrollController;
-
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 2);
-    _timeTableScrollController = ScrollController();
   }
 
   @override
@@ -81,7 +78,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
   @override
   void dispose() {
     _pageController.dispose();
-    _timeTableScrollController.dispose();
     super.dispose();
   }
 }

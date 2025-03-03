@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class YearCalendar extends StatefulWidget {
-  const YearCalendar({super.key, required this.initialMonth, required this.onMonthTap});
+  const YearCalendar(
+      {super.key, required this.initialMonth, required this.onMonthTap});
 
   final DateTime initialMonth;
   final void Function(DateTime) onMonthTap;
@@ -13,44 +14,73 @@ class YearCalendar extends StatefulWidget {
 
 class _YearCalendarState extends State<YearCalendar> {
   late DateTime focusYear;
+  late final PageController _pageController;
+  static const _totalPage = 500;
+  static const _initialPage = 250;
 
   @override
   void initState() {
     super.initState();
     focusYear = widget.initialMonth;
+    _pageController = PageController(initialPage: _initialPage);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 16),
-        const Text(
-          "2025",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        // 12개월을 3열로 배치 (3×4=12)
-        AlignedGridView.count(
-          shrinkWrap: true,
-          crossAxisCount: 3,
-          itemCount: 12,
-          itemBuilder: (context, index) {
-            final int month = index + 1;
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                DateTime tapped = DateTime(focusYear.year, month,);
-                widget.onMonthTap(tapped);
-              },
-              child: SingleMonthWidget(
-                year: 2025,
-                month: month,
-              ),
-            );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: PageView.builder(
+          controller: _pageController,
+          itemCount: _totalPage,
+          onPageChanged: (index) {
+            setState(() {
+              // index와 initialPage의 차이를 이용해 현재 페이지의 년을 계산
+              final int yearOffset = index - _initialPage;
+              focusYear = DateTime(
+                widget.initialMonth.year + yearOffset,
+                1,
+              );
+            });
           },
-        ),
-      ],
+          itemBuilder: (context, index) {
+            return Column(
+              children: [
+                Text(
+                  "${focusYear.year}년",
+                  style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFFFE8F00)),
+                ),
+                const SizedBox(height: 12),
+                // 12개월을 3열로 배치 (3×4=12)
+                AlignedGridView.count(
+                  shrinkWrap: true,
+                  crossAxisCount: 3,
+                  itemCount: 12,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 12,
+                  itemBuilder: (context, index) {
+                    final int month = index + 1;
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        DateTime tapped = DateTime(
+                          focusYear.year,
+                          month,
+                        );
+                        widget.onMonthTap(tapped);
+                      },
+                      child: SingleMonthWidget(
+                        year: 2025,
+                        month: month,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            );
+          }),
     );
   }
 }
@@ -64,6 +94,8 @@ class SingleMonthWidget extends StatelessWidget {
     required this.year,
     required this.month,
   });
+
+  static const double _dayHeight = 14;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +114,9 @@ class SingleMonthWidget extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(
+          height: 4,
+        ),
         // 날짜 테이블
         _buildCalendarBody(weeks),
       ],
@@ -97,22 +131,23 @@ class SingleMonthWidget extends StatelessWidget {
           children: week.map((day) {
             if (day == null) {
               // 다른 달에 속하는 빈 칸
-              return const SizedBox(height: 20);
+              return const SizedBox(height: _dayHeight);
             } else {
               // 요일에 따라 색상 지정
               Color textColor = Colors.black87;
               if (day.weekday == DateTime.sunday) {
-                textColor = Colors.red;
+                textColor = const Color(0xFFF22424);
               } else if (day.weekday == DateTime.saturday) {
-                textColor = Colors.blue;
+                textColor = const Color(0xFF4058F9);
               }
               return Container(
-                height: 20,
+                height: _dayHeight,
                 alignment: Alignment.center,
                 child: Text(
                   "${day.day}",
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w600,
                     color: textColor,
                   ),
                 ),

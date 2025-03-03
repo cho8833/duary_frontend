@@ -1,5 +1,9 @@
+import 'package:duary/model/enums/character.dart';
+import 'package:duary/model/event.dart';
+import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 class MonthCalendar extends StatefulWidget {
@@ -37,6 +41,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // appbar
         SizedBox(
           width: double.infinity,
           height: 58,
@@ -73,6 +78,8 @@ class _MonthCalendarState extends State<MonthCalendar> {
             ],
           ),
         ),
+
+        // body
         Expanded(
           child: PageView.builder(
             controller: _pageController,
@@ -124,6 +131,7 @@ class _CalendarMonthWidget extends StatefulWidget {
 
 class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
   late EventProvider _eventProvider;
+  final AuthProvider _authProvider = AuthProvider();
 
   @override
   void initState() {
@@ -149,7 +157,17 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
           color: const Color(0xFFF3F3F3),
         ),
         // 날짜 그리드
-        Expanded(child: _buildCalendarBody(weeks)),
+        Expanded(
+            child: FutureBuilder(
+                future: _eventProvider.getEvent(
+                    DateTime(widget.year, widget.month, 1),
+                    DateTime(widget.year, widget.month + 1, 1)),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    Fluttertoast.showToast(msg: "오류가 발생했습니다");
+                  }
+                  return _buildCalendarBody(weeks, snapshot.data);
+                })),
       ],
     );
   }
@@ -177,16 +195,61 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
     );
   }
 
-  Widget _buildCalendarBody(List<List<DateTime?>> weeks) {
+  Widget _buildCalendarBody(List<List<DateTime?>> weeks, List<Event>? events) {
     return Table(
       children: weeks.map((week) {
-
         return TableRow(
           children: week.map((day) {
             if (day == null) {
               return const SizedBox(height: 40);
             } else {
+              // 날짜 아래 점 찍기
+              late Widget dot;
+              if (events == null) {
+                dot = Container();
+              } else {
+                // 해당 날짜의 이벤트 필터링
+                List<Event> dayEvents = events
+                    .where((event) => event.startDateTime.day == day.day)
+                    .toList();
+                if (dayEvents.isEmpty) {
+                  dot = Container();
+                } else {
+                  List<int> dotIndex = [-1, -1, -1];
+                  // 해당 날짜에 함께하는 일정이 아니고, 내 일정이 있는 경우 내 점 찍기
+                  dotIndex[0] = dayEvents.indexWhere((event) =>
+                      event.member.socialId == _authProvider.me!.socialId &&
+                      !event.isTogether);
+                  // 해당 날짜에 함께하는 일정이 아니고, 상대방 일정이 있는 경우 상대방 점 찍기
+                  dotIndex[1] = dayEvents.indexWhere((event) =>
+                      event.member.socialId != _authProvider.me!.socialId &&
+                      !event.isTogether);
+                  // 해당 날짜에 함께하는 일정이 있으면 분홍색 점 찍기
+                  dotIndex[2] =
+                      dayEvents.indexWhere((event) => event.isTogether);
 
+                  dotIndex = dotIndex.where((i) => i != -1).toList();
+                  dot = ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    shrinkWrap: true,
+                    itemCount: dotIndex.length,
+                    itemBuilder: (context, index) {
+                      Event event = events[dotIndex[index]];
+                      if (event.isTogether) {
+                        return _CalendarDot(
+                            color: Character.together.characterColor);
+                      }
+                      return _CalendarDot(
+                          color: event.member.character.characterColor);
+                    },
+                    separatorBuilder: (BuildContext context, int index) =>
+                        const SizedBox(
+                      width: 3,
+                    ),
+                  );
+                }
+              }
+              // 날짜 그리기
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
@@ -195,12 +258,20 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
                 child: Container(
                   height: 40,
                   alignment: Alignment.center,
-                  child: Text(
-                    "${day.day}",
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF656565)),
+                  child: Column(
+                    children: [
+                      Text(
+                        "${day.day}",
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF656565)),
+                      ),
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      SizedBox(height: 5, child: dot)
+                    ],
                   ),
                 ),
               );
@@ -211,7 +282,7 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
     );
   }
 
-  // 지정한 연/월에 대한 날짜를 2차원 리스트(주 단위)로 생성하는 함수
+// 지정한 연/월에 대한 날짜를 2차원 리스트(주 단위)로 생성하는 함수
   List<List<DateTime?>> _generateDaysForMonth(int year, int month) {
     final DateTime firstDayOfMonth = DateTime(year, month, 1);
     final DateTime lastDayOfMonth =
@@ -243,5 +314,23 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
       weeks.add(currentWeek);
     }
     return weeks;
+  }
+}
+
+class _CalendarDot extends StatelessWidget {
+  const _CalendarDot({super.key, required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(99),
+      ),
+      height: 5,
+      width: 5,
+    );
   }
 }
