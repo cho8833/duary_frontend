@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ThemeProvider extends ChangeNotifier {
   static final ThemeData light = ThemeData(
     scaffoldBackgroundColor: Colors.white,
-      fontFamily: 'NanumSquareRound');
+      fontFamily: 'Pretendard');
   static final ThemeData dark =
       ThemeData(fontFamily: 'NanumSquareRound', brightness: Brightness.dark);
 

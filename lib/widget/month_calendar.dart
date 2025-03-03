@@ -1,0 +1,247 @@
+import 'package:duary/provider/event_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+class MonthCalendar extends StatefulWidget {
+  const MonthCalendar(
+      {super.key,
+      required this.initialDate,
+      required this.onDateTap,
+      required this.onYearTap});
+
+  final DateTime initialDate;
+  final void Function(DateTime) onYearTap;
+  final void Function(DateTime) onDateTap;
+
+  @override
+  State<MonthCalendar> createState() => _MonthCalendarState();
+}
+
+class _MonthCalendarState extends State<MonthCalendar> {
+  // 충분히 큰 초기 페이지를 지정해서, 양쪽 방향으로 스와이프 가능하게 함.
+  static const _totalPage = 500;
+  static const _initialPage = 250;
+  late final PageController _pageController;
+
+  late DateTime focusMonth;
+
+  @override
+  void initState() {
+    focusMonth = widget.initialDate;
+
+    _pageController = PageController(initialPage: _initialPage);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: 58,
+          child: Stack(
+            children: [
+              Positioned(
+                  left: 20,
+                  top: 18,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      widget.onYearTap(focusMonth);
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(Icons.chevron_left),
+                        Text(
+                          "${focusMonth.year}년",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600, fontSize: 16),
+                        )
+                      ],
+                    ),
+                  )),
+              Center(
+                child: Text(
+                  "${focusMonth.month}월",
+                  style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFFFE8F00)),
+                ),
+              )
+            ],
+          ),
+        ),
+        Expanded(
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: _totalPage,
+            onPageChanged: (index) {
+              setState(() {
+                // index와 initialPage의 차이를 이용해 현재 페이지의 달을 계산
+                final int monthOffset = index - _initialPage;
+
+                focusMonth = DateTime(
+                  widget.initialDate.year,
+                  widget.initialDate.month + monthOffset,
+                  1,
+                );
+              });
+            },
+            itemBuilder: (context, index) {
+              return Container(
+                color: Colors.white,
+                child: _CalendarMonthWidget(
+                  year: focusMonth.year,
+                  month: focusMonth.month,
+                  onDateTap: widget.onDateTap,
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CalendarMonthWidget extends StatefulWidget {
+  final int year;
+  final int month;
+
+  final void Function(DateTime) onDateTap;
+
+  const _CalendarMonthWidget(
+      {super.key,
+      required this.year,
+      required this.month,
+      required this.onDateTap});
+
+  @override
+  State<_CalendarMonthWidget> createState() => _CalendarMonthWidgetState();
+}
+
+class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
+  late EventProvider _eventProvider;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _eventProvider = context.read<EventProvider>();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<List<DateTime?>> weeks =
+        _generateDaysForMonth(widget.year, widget.month);
+    return Column(
+      children: [
+        // 요일 라벨
+        _buildWeekdayLabels(),
+        const SizedBox(
+          height: 12,
+        ),
+        Container(
+          height: 1,
+          width: double.infinity,
+          color: const Color(0xFFF3F3F3),
+        ),
+        // 날짜 그리드
+        Expanded(child: _buildCalendarBody(weeks)),
+      ],
+    );
+  }
+
+  Widget _buildWeekdayLabels() {
+    const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
+    return Row(
+      children: weekdays.map((day) {
+        late Color fontColor;
+        if (day == "일") {
+          fontColor = const Color(0xFFF22424);
+        } else if (day == "토") {
+          fontColor = const Color(0xFF4058F9);
+        } else {
+          fontColor = const Color(0xFF858585);
+        }
+        return Expanded(
+          child: Center(
+            child: Text(day,
+                style:
+                    TextStyle(fontWeight: FontWeight.w600, color: fontColor)),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildCalendarBody(List<List<DateTime?>> weeks) {
+    return Table(
+      children: weeks.map((week) {
+
+        return TableRow(
+          children: week.map((day) {
+            if (day == null) {
+              return const SizedBox(height: 40);
+            } else {
+
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  widget.onDateTap(day);
+                },
+                child: Container(
+                  height: 40,
+                  alignment: Alignment.center,
+                  child: Text(
+                    "${day.day}",
+                    style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF656565)),
+                  ),
+                ),
+              );
+            }
+          }).toList(),
+        );
+      }).toList(),
+    );
+  }
+
+  // 지정한 연/월에 대한 날짜를 2차원 리스트(주 단위)로 생성하는 함수
+  List<List<DateTime?>> _generateDaysForMonth(int year, int month) {
+    final DateTime firstDayOfMonth = DateTime(year, month, 1);
+    final DateTime lastDayOfMonth =
+        DateTime(year, month + 1, 1).subtract(const Duration(days: 1));
+    final int daysInMonth = lastDayOfMonth.day;
+
+    // Dart의 weekday는 월(1) ~ 일(7)이므로, 일요일을 0으로 보정해서 시작 위치를 계산
+    int startingWeekday = firstDayOfMonth.weekday % 7;
+
+    List<List<DateTime?>> weeks = [];
+    List<DateTime?> currentWeek = [];
+
+    // 첫 주 앞부분 빈 칸 추가
+    for (int i = 0; i < startingWeekday; i++) {
+      currentWeek.add(null);
+    }
+    for (int day = 1; day <= daysInMonth; day++) {
+      currentWeek.add(DateTime(year, month, day));
+      if (currentWeek.length == 7) {
+        weeks.add(currentWeek);
+        currentWeek = [];
+      }
+    }
+    // 마지막 주에 남은 빈 칸 채우기
+    if (currentWeek.isNotEmpty) {
+      while (currentWeek.length < 7) {
+        currentWeek.add(null);
+      }
+      weeks.add(currentWeek);
+    }
+    return weeks;
+  }
+}

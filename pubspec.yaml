@@ -57,6 +57,7 @@ dependencies:
 #  firebase_messaging: ^15.1.0
   firebase_core: ^3.4.0
   get: ^4.6.6
+  flutter_staggered_grid_view: ^0.7.0
 
 dev_dependencies:
   flutter_test:
@@ -89,14 +90,34 @@ flutter:
   fonts:
     - family: NanumSquareRound
       fonts:
-        - asset: asset/font/nanum_square_round/NanumSquareRoundB.ttf
-          weight: 600
         - asset: asset/font/nanum_square_round/NanumSquareRoundEB.ttf
           weight: 700
+        - asset: asset/font/nanum_square_round/NanumSquareRoundB.ttf
+          weight: 600
         - asset: asset/font/nanum_square_round/NanumSquareRoundL.ttf
           weight: 500
         - asset: asset/font/nanum_square_round/NanumSquareRoundR.ttf
           weight: 400
+    - family: Pretendard
+      fonts:
+        - asset: asset/font/pretendard/Pretendard-Thin.ttf
+          weight: 100
+        - asset: asset/font/pretendard/Pretendard-ExtraLight.ttf
+          weight: 200
+        - asset: asset/font/pretendard/Pretendard-Light.ttf
+          weight: 300
+        - asset: asset/font/pretendard/Pretendard-Medium.ttf
+          weight: 400
+        - asset: asset/font/pretendard/Pretendard-Regular.ttf
+          weight: 500
+        - asset: asset/font/pretendard/Pretendard-SemiBold.ttf
+          weight: 600
+        - asset: asset/font/pretendard/Pretendard-Bold.ttf
+          weight: 700
+        - asset: asset/font/pretendard/Pretendard-ExtraBold.ttf
+          weight: 800
+        - asset: asset/font/pretendard/Pretendard-Black.ttf
+          weight: 900
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

@@ -32,12 +32,27 @@ class AppBarBase extends StatelessWidget
       color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       padding: EdgeInsets.fromLTRB(16, statusBarHeight, 16, 0),
       height: preferredSize.height + statusBarHeight,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      width: preferredSize.width,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          leadingBuilder != null ? leadingBuilder!(context) : Container(),
-          centerBuilder != null ? centerBuilder!(context) : Container(),
-          trailingBuilder != null ? trailingBuilder!(context) : Container()
+          Positioned(
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                centerBuilder != null ? centerBuilder!(context) : Container(),
+              ],
+            ),
+          ),
+          Positioned(
+            left: 0,
+              child: leadingBuilder != null ? leadingBuilder!(context) : Container(),
+          ),
+          Positioned(
+            right: 0,
+              child: trailingBuilder != null ? trailingBuilder!(context) : Container())
         ],
       ),
     );

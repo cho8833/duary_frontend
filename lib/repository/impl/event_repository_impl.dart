@@ -10,9 +10,10 @@ class EventRepositoryImpl implements EventRepository {
   }
 
   @override
-  Future<List<Event>> getEvent(DateTime day) {
+  Future<List<Event>> getEvent(DateTime startDate, DateTime endDate) {
     // TODO: implement getEvent
     throw UnimplementedError();
   }
+
 
 }

@@ -32,7 +32,7 @@ class EventProvider {
     });
   }
 
-  Future<List<Event>> getEvent(DateTime day) async {
-    return eventRepository.getEvent(day);
+  Future<List<Event>> getEvent(DateTime startDate, DateTime endDate) async {
+    return eventRepository.getEvent(startDate, endDate);
   }
 }
