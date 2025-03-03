@@ -25,7 +25,7 @@ class SpeechBubblePainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     // Draw the rounded rectangle
-    if (isLeft) {
+    if (!isLeft) {
       // Draw the triangle on the left
       const Offset p1 = Offset(_triangleXPos, _triangleYPos1);
       const Offset p2 = Offset(_triangleXPos, _triangleYPos2);

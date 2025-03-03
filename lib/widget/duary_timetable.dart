@@ -14,7 +14,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class DuaryTimetable extends StatefulWidget {
-  const DuaryTimetable({super.key, required this.onDateTap, required this.initialDate});
+  const DuaryTimetable(
+      {super.key, required this.onDateTap, required this.initialDate});
 
   final void Function(DateTime) onDateTap;
 
@@ -58,7 +59,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     _eventProvider = context.read<EventProvider>();
 
     _pagingUpController = PagingController(
-        firstPageKey:  dayFocus.subtract(const Duration(days: 1)));
+        firstPageKey: dayFocus.subtract(const Duration(days: 1)));
     _pagingDownController = PagingController(firstPageKey: dayFocus);
     _pagingUpController.addPageRequestListener((pageKey) {
       _fetchUpPage(pageKey);
@@ -151,15 +152,15 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
         Flexible(
           child: Scrollable(
             controller: _scrollController,
-            viewportBuilder:
-                (BuildContext context, ViewportOffset position) {
+            viewportBuilder: (BuildContext context, ViewportOffset position) {
               return Viewport(
                 offset: position,
                 center: downListKey,
                 slivers: [
                   PagedSliverList<DateTime, List<Event>>(
                       nextPageStrategy: () {
-                        if (dayIndex < initialDayIndex && fetchFlag[dayIndex] == null) {
+                        if (dayIndex < initialDayIndex &&
+                            fetchFlag[dayIndex] == null) {
                           fetchFlag[dayIndex] = true;
                           return true;
                         } else {
@@ -169,34 +170,38 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                       pagingController: _pagingUpController,
                       builderDelegate: PagedChildBuilderDelegate(
                           itemBuilder: (context, items, index) => SizedBox(
-                            height: hourHeight * 24,
-                            child: Row(
-                              children: [
-                                const SizedBox(
-                                  width: 20,
+                                height: hourHeight * 24,
+                                child: Row(
+                                  children: [
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                    Expanded(
+                                      child: LayoutBuilder(
+                                        builder: (context, constraints) =>
+                                            Stack(
+                                          children: _buildBubbles(constraints.maxWidth, items, true),
+                                        ),
+                                      ),
+                                    ),
+                                    _buildTimeLines(),
+                                    Expanded(child: LayoutBuilder(
+                                        builder: (context, constraints) {
+                                      return Stack(
+                                        children: _buildBubbles(constraints.maxWidth, items, false),
+                                      );
+                                    })),
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                  ],
                                 ),
-                                Expanded(
-                                  child: Stack(
-                                    children: _buildBubbles(
-                                        context, items, true),
-                                  ),
-                                ),
-                                _buildTimeLines(),
-                                Expanded(
-                                    child: Stack(
-                                      children: _buildBubbles(
-                                          context, items, false),
-                                    )),
-                                const SizedBox(
-                                  width: 20,
-                                ),
-                              ],
-                            ),
-                          ))),
+                              ))),
                   PagedSliverList<DateTime, List<Event>>(
                       key: downListKey,
                       nextPageStrategy: () {
-                        if (dayIndex >= initialDayIndex && fetchFlag[dayIndex] == null) {
+                        if (dayIndex >= initialDayIndex &&
+                            fetchFlag[dayIndex] == null) {
                           fetchFlag[dayIndex] = true;
                           return true;
                         } else {
@@ -206,31 +211,34 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                       pagingController: _pagingDownController,
                       builderDelegate: PagedChildBuilderDelegate(
                           itemBuilder: (context, items, index) => SizedBox(
-                            height: hourHeight * 24,
-                            // 60px per hour, 24 hour = 60 * 24 = 1440 px
-                            child: Row(
-                              children: [
-                                const SizedBox(
-                                  width: 20,
-                                ),
-                                Expanded(
-                                  child: Stack(
-                                    children: _buildBubbles(
-                                        context, items, true),
-                                  ),
-                                ),
-                                _buildTimeLines(),
-                                Expanded(
-                                    child: Stack(
-                                      children: _buildBubbles(
-                                          context, items, false),
+                                height: hourHeight * 24,
+                                // 60px per hour, 24 hour = 60 * 24 = 1440 px
+                                child: Row(
+                                  children: [
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                    Expanded(
+                                      child: LayoutBuilder(
+                                          builder: (context, constraints) {
+                                        return Stack(
+                                          children: _buildBubbles(constraints.maxWidth, items, true),
+                                        );
+                                      }),
+                                    ),
+                                    _buildTimeLines(),
+                                    Expanded(
+                                        child: LayoutBuilder(
+                                      builder: (context, constraints) => Stack(
+                                        children: _buildBubbles(constraints.maxWidth, items, false),
+                                      ),
                                     )),
-                                const SizedBox(
-                                  width: 20,
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ))),
+                              ))),
                 ],
               );
             },
@@ -239,6 +247,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
       ],
     );
   }
+
   Widget _buildTitleBar() {
     late String title;
 
@@ -282,8 +291,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
             fontWeight: FontWeight.w800,
             fontSize: 18,
             color: Color(0xFFFE8F00),
-          letterSpacing: 0
-        ),
+            letterSpacing: 0),
       );
     }
 
@@ -326,20 +334,18 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
             ),
           ),
           Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                titleWidget,
-              ],
-            )
-          ),
+              child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              titleWidget,
+            ],
+          )),
         ],
       ),
     );
   }
 
-  List<Widget> _buildBubbles(
-      BuildContext context, List<Event> events, bool isMine) {
+  List<Widget> _buildBubbles(double maxWidth, List<Event> events, bool isLeft) {
     List<Widget> widgets = [];
 
     for (int i = 0; i < events.length; i++) {
@@ -356,19 +362,21 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
       // 일정 내용
       String time =
           "${DateFormat("hh:mm").format(event.startDateTime)} - ${DateFormat("hh:mm").format(event.endDateTime)}";
+      Character character =
+          event.isTogether ? Character.together : event.member.character;
       Widget content = Padding(
-        padding: isMine
+        padding: isLeft
             ? const EdgeInsets.fromLTRB(16, 8, 29, 8)
             : const EdgeInsets.fromLTRB(29, 8, 16, 8),
         child: Column(
           crossAxisAlignment:
-          isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              isLeft ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
               time,
               style: TextStyle(
-                  color: event.member.character.fontColor,
+                  color: character.fontColor,
                   fontSize: 11,
                   fontWeight: FontWeight.w600),
             ),
@@ -377,9 +385,9 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
             ),
             Text(
               event.title,
-              textAlign: isMine ? TextAlign.end : null,
+              textAlign: isLeft ? TextAlign.end : null,
               style: TextStyle(
-                  color: event.member.character.fontBlackColor,
+                  color: character.fontBlackColor,
                   fontSize: 13,
                   height: 1.1,
                   fontWeight: FontWeight.w600),
@@ -389,15 +397,49 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
       );
 
       // 캐릭터
-      late Widget character;
-      if (event.member.character == Character.blue) {
-        character = const Blue(
+      late Widget characterImage;
+      if (event.isTogether) {
+        if (isLeft) {
+          characterImage = const Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Yellow(
+                width: 39,
+                height: 39,
+                opacity: 0.2,
+              ),
+              Blue(
+                width: 39,
+                height: 67,
+                opacity: 0.2,
+              ),
+            ],
+          );
+        } else {
+          characterImage = const Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Blue(
+                width: 39,
+                height: 67,
+                opacity: 0.2,
+              ),
+              Yellow(
+                width: 39,
+                height: 39,
+                opacity: 0.2,
+              ),
+            ],
+          );
+        }
+      } else if (event.member.character == Character.blue) {
+        characterImage = const Blue(
           width: 39,
           height: 67,
           opacity: 0.2,
         );
       } else {
-        character = const Yellow(
+        characterImage = const Yellow(
           width: 39,
           height: 39,
           opacity: 0.2,
@@ -406,36 +448,69 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
 
       // draw bubble
       late Widget bubble;
-      if (isMine && event.member.socialId == _authProvider.me!.socialId) {
+      if (event.isTogether) {
+        if (isLeft) {
+          bubble = SizedBox(
+            height: height,
+            child: CustomPaint(
+              painter: SpeechBubblePainter(isLeft: isLeft, character: character),
+              child: ClipPath(
+                clipper: RightBottomRoundedClipper(),
+                child: Stack(
+                  children: [
+                    content,
+                    Positioned(bottom: -21, right: 13, child: characterImage)
+                  ],
+                ),
+              ),
+            ),
+          );
+        } else {
+          bubble = SizedBox(
+            height: height,
+            child: CustomPaint(
+              painter: SpeechBubblePainter(isLeft: isLeft, character: character),
+              child: ClipPath(
+                clipper: RightBottomRoundedClipper(),
+                child: Stack(
+                  children: [
+                    content,
+                    Positioned(bottom: -21, left: 13, child: characterImage)
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+      } else if (isLeft &&
+          event.member.socialId == _authProvider.me!.socialId) {
         bubble = SizedBox(
           height: height,
           child: CustomPaint(
-            painter: SpeechBubblePainter(
-                isLeft: false, character: event.member.character),
+            painter: SpeechBubblePainter(isLeft: isLeft, character: character),
             child: ClipPath(
               clipper: RightBottomRoundedClipper(),
               child: Stack(
                 children: [
                   content,
-                  Positioned(bottom: -21, right: 13, child: character)
+                  Positioned(bottom: -21, right: 13, child: characterImage)
                 ],
               ),
             ),
           ),
         );
-      } else if (!isMine &&
+      } else if (!isLeft &&
           event.member.socialId != _authProvider.me!.socialId) {
         bubble = SizedBox(
           height: height,
           child: CustomPaint(
-            painter: SpeechBubblePainter(
-                isLeft: true, character: event.member.character),
+            painter: SpeechBubblePainter(isLeft: isLeft, character: character),
             child: ClipPath(
               clipper: LeftBottomRoundedClipper(),
               child: Stack(
                 children: [
                   content,
-                  Positioned(bottom: -13, left: 13, child: character)
+                  Positioned(bottom: -21, left: 13, child: characterImage)
                 ],
               ),
             ),
