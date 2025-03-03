@@ -11,30 +11,38 @@ class EventRepositoryMock implements EventRepository {
     Future.delayed(const Duration(seconds: 1));
     return [
       Event(
-          1,
-          now.add(const Duration(hours: 1)),
-          now.add(const Duration(hours: 2)),
-          "서면 삼바리 앞 / 학생증 챙겨가기!",
-          Member("이고은", Character.yellow, MemberStatus.couple, 1, "kakao"),
-          false,
-          1, content: "혜원이랑 조개구이 약속 🤙 ",),
+        1,
+        now.add(const Duration(hours: 1)),
+        now.add(const Duration(hours: 2)),
+        "서면 삼바리 앞 / 학생증 챙겨가기!",
+        Member("이고은", Character.yellow, MemberStatus.couple, 1, "kakao"),
+        false,
+        1,
+        false,
+        content: "혜원이랑 조개구이 약속 🤙 ",
+      ),
       Event(
-          2,
-          now.add(const Duration(hours: 3)),
-          now.add(const Duration(hours: 4)),
-          "사상 타건샵 '몬스터기어매장",
-          Member(
-              "조현빈", Character.blue, MemberStatus.couple, 3428835809, "kakao"),
-          false,
-          1, content: '타건샵 방문 후 키보드 수령 🤩',),
+        2,
+        now.add(const Duration(hours: 3)),
+        now.add(const Duration(hours: 4)),
+        "사상 타건샵 '몬스터기어매장",
+        Member("조현빈", Character.blue, MemberStatus.couple, 3428835809, "kakao"),
+        false,
+        1,
+        false,
+        content: '타건샵 방문 후 키보드 수령 🤩',
+      ),
       Event(
-          3,
-          now.add(const Duration(hours: 5)),
-          now.add(const Duration(hours: 6)),
-          "송상현 광장 / 응가가방 챙기기",
-          Member("이고은", Character.yellow, MemberStatus.couple, 1, "kakao"),
-          true,
-          1, content: "은동이랑 셋이서 산책하기 🐶",)
+        3,
+        now.add(const Duration(hours: 5)),
+        now.add(const Duration(hours: 6)),
+        "송상현 광장 / 응가가방 챙기기",
+        Member("이고은", Character.yellow, MemberStatus.couple, 1, "kakao"),
+        true,
+        1,
+        false,
+        content: "은동이랑 셋이서 산책하기 🐶",
+      )
     ];
   }
 
@@ -44,30 +52,38 @@ class EventRepositoryMock implements EventRepository {
     Future.delayed(const Duration(seconds: 1));
     return [
       Event(
-          1,
-          now.add(const Duration(hours: 1)),
-          now.add(const Duration(hours: 2)),
-          "서면 삼바리 앞 / 학생증 챙겨가기!",
-          Member("이고은", Character.yellow, MemberStatus.couple, 1, "kakao"),
-          false,
-          1, content: "혜원이랑 조개구이 약속 🤙 ",),
+        1,
+        now.add(const Duration(hours: 1)),
+        now.add(const Duration(hours: 2)),
+        "서면 삼바리 앞 / 학생증 챙겨가기!",
+        Member("이고은", Character.yellow, MemberStatus.couple, 1, "kakao"),
+        false,
+        1,
+        false,
+        content: "혜원이랑 조개구이 약속 🤙 ",
+      ),
       Event(
-          2,
-          now.add(const Duration(hours: 3)),
-          now.add(const Duration(hours: 4)),
-          "사상 타건샵 '몬스터기어매장",
-          Member(
-              "조현빈", Character.blue, MemberStatus.couple, 3428835809, "kakao"),
-          false,
-          1, content: '타건샵 방문 후 키보드 수령 🤩',),
+        2,
+        now.add(const Duration(hours: 3)),
+        now.add(const Duration(hours: 4)),
+        "사상 타건샵 '몬스터기어매장",
+        Member("조현빈", Character.blue, MemberStatus.couple, 3428835809, "kakao"),
+        false,
+        1,
+        false,
+        content: '타건샵 방문 후 키보드 수령 🤩',
+      ),
       Event(
-          3,
-          now.add(const Duration(hours: 5)),
-          now.add(const Duration(hours: 6)),
-          "송상현 광장 / 응가가방 챙기기",
-          Member("이고은", Character.yellow, MemberStatus.couple, 1, "kakao"),
-          true,
-          1, content: "은동이랑 셋이서 산책하기 🐶",)
+        3,
+        now.add(const Duration(hours: 5)),
+        now.add(const Duration(hours: 6)),
+        "송상현 광장 / 응가가방 챙기기",
+        Member("이고은", Character.yellow, MemberStatus.couple, 1, "kakao"),
+        true,
+        1,
+        false,
+        content: "은동이랑 셋이서 산책하기 🐶",
+      )
     ];
   }
 
@@ -78,13 +94,16 @@ class EventRepositoryMock implements EventRepository {
     Future.delayed(const Duration(seconds: 1));
     return [
       Event(
-          1,
-          date.copyWith(hour: 4),
-          date.copyWith(hour: 5),
-          "${startDate.month}/${startDate.day} 송상현 광장 / 응가가방 챙기기",
-          Member("이고은", Character.yellow, MemberStatus.couple, 1, "kakao"),
-          true,
-          1, content: "${startDate.month}/${startDate.day} 은동이랑 셋이서 산책하기 🐶",),
+        1,
+        date.copyWith(hour: 4),
+        date.copyWith(hour: 5),
+        "${startDate.month}/${startDate.day} 송상현 광장 / 응가가방 챙기기",
+        Member("이고은", Character.yellow, MemberStatus.couple, 1, "kakao"),
+        true,
+        1,
+        false,
+        content: "${startDate.month}/${startDate.day} 은동이랑 셋이서 산책하기 🐶",
+      ),
       Event(
         2,
         date.copyWith(hour: 12),
@@ -93,6 +112,7 @@ class EventRepositoryMock implements EventRepository {
         Member("조현빈", Character.blue, MemberStatus.couple, 3428835809, "kakao"),
         false,
         1,
+        false,
         content: '${startDate.month}/${startDate.day} 타건샵 방문 후 키보드 수령 🤩',
       ),
       Event(
@@ -103,6 +123,7 @@ class EventRepositoryMock implements EventRepository {
         Member("이고은", Character.yellow, MemberStatus.couple, 1, "kakao"),
         true,
         1,
+        false,
         content: "${startDate.month}/${startDate.day} 은동이랑 셋이서 산책하기 🐶",
       ),
       Event(
@@ -113,6 +134,7 @@ class EventRepositoryMock implements EventRepository {
         Member("이고은", Character.yellow, MemberStatus.couple, 1, "kakao"),
         false,
         1,
+        false,
         content: "내용",
       )
     ];
