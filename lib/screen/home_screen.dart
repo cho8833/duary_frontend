@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/event_provider.dart';
-import 'package:duary/screen/timetable_screen.dart';
+import 'package:duary/screen/schedule_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/support/button_base.dart';
 import 'package:duary/widget/characters.dart';

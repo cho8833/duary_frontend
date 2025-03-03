@@ -281,7 +281,9 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
         style: const TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 18,
-            color: Color(0xFFFE8F00)),
+            color: Color(0xFFFE8F00),
+          letterSpacing: 0
+        ),
       );
     }
 
