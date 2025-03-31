@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void onSignInComplete(Member member) {
     // 회원가입 성공 시 커플 정보 입력화면으로 이동
-    if (member.coupleId != null) {
+    if (member.coupleId == null) {
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
