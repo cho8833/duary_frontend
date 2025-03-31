@@ -7,9 +7,11 @@ part 'couple.g.dart';
 class Couple {
   DateTime relationDate;
 
+  List<Member> members;
 
-  Member me;
-  Member lover;
+  late Member me;
 
-  Couple(this.relationDate, this.me, this.lover);
+  late Member lover;
+
+  Couple(this.relationDate, this.members);
 }

@@ -8,12 +8,16 @@ part of 'couple.dart';
 
 Couple _$CoupleFromJson(Map<String, dynamic> json) => Couple(
       DateTime.parse(json['relationDate'] as String),
-      Member.fromJson(json['me'] as Map<String, dynamic>),
-      Member.fromJson(json['lover'] as Map<String, dynamic>),
-    );
+      (json['members'] as List<dynamic>)
+          .map((e) => Member.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    )
+      ..me = Member.fromJson(json['me'] as Map<String, dynamic>)
+      ..lover = Member.fromJson(json['lover'] as Map<String, dynamic>);
 
 Map<String, dynamic> _$CoupleToJson(Couple instance) => <String, dynamic>{
       'relationDate': instance.relationDate.toIso8601String(),
+      'members': instance.members,
       'me': instance.me,
       'lover': instance.lover,
     };

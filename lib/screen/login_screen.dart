@@ -1,4 +1,3 @@
-import 'package:duary/model/enums/member_status.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/screen/home_screen.dart';
@@ -26,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void onSignInComplete(Member member) {
     // 회원가입 성공 시 커플 정보 입력화면으로 이동
-    if (member.status == MemberStatus.solo) {
+    if (member.coupleId != null) {
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
@@ -34,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
           (p) => false);
     }
     // 회원가입된 회원이면 홈화면으로 이동
-    else if (member.status == MemberStatus.couple) {
+    else {
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),

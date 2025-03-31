@@ -36,7 +36,7 @@ final class AuthRepositoryImpl
     Response response =
         await client.post(uri, body: jsonEncode(token.toJson()));
 
-    return getData(response, (p0) => AuthorizationTokenRes.fromJson(p0)).data;
+    return getData(response, (p0) => AuthorizationTokenRes.fromJson(p0['token'])).data;
   }
 
   @override

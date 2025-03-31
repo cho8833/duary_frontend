@@ -93,7 +93,9 @@ class AuthProvider {
     await _repository.getUserInfo().then((user) {
       me = user;
       isLoggedIn.value = true;
-    }).catchError((e) {});
+    }).catchError((e) {
+      print(e);
+    });
   }
 
   String? validateSignUp(String username, String password) {

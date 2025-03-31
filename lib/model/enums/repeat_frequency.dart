@@ -1,4 +1,5 @@
 enum RepeatFrequency {
+  daily("DAILY", "날마다"),
   weekly("WEEKLY", "주마다"),
   monthly("MONTHLY", "달마다"),
   yearly("YEARLY", "년마다");

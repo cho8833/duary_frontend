@@ -1,4 +1,6 @@
 import 'dart:ui';
+import 'package:duary/widget/characters.dart';
+import 'package:flutter/material.dart';
 
 
 enum Character {
@@ -33,5 +35,24 @@ enum Character {
 
   factory Character.fromJson(String json) {
     return Character.values.firstWhere((element) => element.toJson() == json);
+  }
+
+  static Widget characterWidget(Character character, {required double width, required double height, required double opacity}) {
+    switch (character) {
+      case Character.blue:
+        return Blue(
+          width: width,
+          height: height,
+          opacity: opacity,
+        );
+      case Character.yellow:
+        return Yellow(
+          width: width,
+          height: height,
+          opacity: opacity,
+        );
+      default:
+        throw Exception();
+    }
   }
 }

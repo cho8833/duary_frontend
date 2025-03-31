@@ -1,6 +1,5 @@
 import 'package:duary/firebase_options.dart';
-import 'package:duary/provider/event_provider.dart';
-import 'package:duary/provider/user_provider.dart';
+import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/splash_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -34,6 +33,12 @@ void main() async {
   );
   // final fcmToken = await FirebaseMessaging.instance.getToken();
 
+  // pre cache splash logo
+  // Native Splash Screen -> SplashScreen.dart 전환 중 로고 깜빡임 제거
+  const loader = SvgAssetLoader(AssetPath.duarySplashLogo);
+  await svg.cache
+      .putIfAbsent(loader.cacheKey(null), () => loader.loadBytes(null));
+
   // token provider
   TokenProvider tokenProvider = TokenProvider();
   tokenProvider.secureStorage = secureStorage;
@@ -45,40 +50,30 @@ void main() async {
   // initialize auth provider
   AuthProvider authProvider = AuthProvider();
   authProvider.init(rc.authRepository);
+  DuaryContext duaryContext = DuaryContext(rc.eventRepository, rc.coupleRepository);
 
   // check signIn
-  await authProvider.checkSignIn();
-
-  // pre cache splash logo
-  // Native Splash Screen -> SplashScreen.dart 전환 중 로고 깜빡임 제거
-  const loader = SvgAssetLoader(AssetPath.duarySplashLogo);
-  await svg.cache
-      .putIfAbsent(loader.cacheKey(null), () => loader.loadBytes(null));
-
-  // get couple
-  UserProvider userProvider = UserProvider(rc.coupleRepository);
-  await userProvider.getMyCouple();
+  await authProvider.checkSignIn().then((_) async {
+    if (authProvider.me != null) {
+      await duaryContext.getMyCouple(authProvider.me!);
+    }
+  });
 
   runApp(Main(
-    authProvider: authProvider,
-    userProvider: userProvider,
+    duaryContext: duaryContext,
   ));
 }
 
 class Main extends StatelessWidget {
   const Main(
-      {super.key, required this.authProvider, required this.userProvider});
-
-  final AuthProvider authProvider;
-  final UserProvider userProvider;
+      {super.key, required this.duaryContext});
+  final DuaryContext duaryContext;
 
   @override
   Widget build(BuildContext context) {
-    RepositoryContainer rc = RepositoryContainer();
     return MultiProvider(
       providers: [
-        Provider.value(value: userProvider),
-        Provider(create: (context) => EventProvider(rc.eventRepository)),
+        Provider.value(value: duaryContext),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       builder: (context, _) =>

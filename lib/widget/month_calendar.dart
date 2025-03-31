@@ -1,7 +1,7 @@
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/auth_provider.dart';
-import 'package:duary/provider/event_provider.dart';
+import 'package:duary/provider/duary_context.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
@@ -130,14 +130,14 @@ class _CalendarMonthWidget extends StatefulWidget {
 }
 
 class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
-  late EventProvider _eventProvider;
+  late DuaryContext _eventProvider;
   final AuthProvider _authProvider = AuthProvider();
 
   @override
   void initState() {
     super.initState();
 
-    _eventProvider = context.read<EventProvider>();
+    _eventProvider = context.read<DuaryContext>();
   }
 
   @override
@@ -159,9 +159,8 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
         // 날짜 그리드
         Expanded(
             child: FutureBuilder(
-                future: _eventProvider.getEvent(
-                    DateTime(widget.year, widget.month, 1),
-                    DateTime(widget.year, widget.month + 1, 1)),
+                future: _eventProvider.getEventByMonth(
+                    DateTime(widget.year, widget.month, 1)),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     Fluttertoast.showToast(msg: "오류가 발생했습니다");
@@ -218,11 +217,11 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
                   List<int> dotIndex = [-1, -1, -1];
                   // 해당 날짜에 함께하는 일정이 아니고, 내 일정이 있는 경우 내 점 찍기
                   dotIndex[0] = dayEvents.indexWhere((event) =>
-                      event.member.socialId == _authProvider.me!.socialId &&
+                      event.memberSocialId == _authProvider.me!.socialId &&
                       !event.isTogether);
                   // 해당 날짜에 함께하는 일정이 아니고, 상대방 일정이 있는 경우 상대방 점 찍기
                   dotIndex[1] = dayEvents.indexWhere((event) =>
-                      event.member.socialId != _authProvider.me!.socialId &&
+                      event.memberSocialId != _authProvider.me!.socialId &&
                       !event.isTogether);
                   // 해당 날짜에 함께하는 일정이 있으면 분홍색 점 찍기
                   dotIndex[2] =

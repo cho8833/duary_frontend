@@ -1,7 +1,9 @@
 import 'package:duary/model/couple.dart';
-import 'package:duary/provider/user_provider.dart';
+import 'package:duary/provider/auth_provider.dart';
+import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
+import 'package:duary/screen/login_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/widget/characters.dart';
 import 'package:flutter/material.dart';
@@ -21,11 +23,12 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<Offset> _blueSlideUpAnimation;
   late Animation<double> _yellowBounceYAnimation;
   late Animation<double> _yellowBounceXAnimation;
-  late UserProvider userProvider;
+  late DuaryContext duaryContext;
+  AuthProvider authProvider = AuthProvider();
 
   @override
   void initState() {
-    userProvider = context.read<UserProvider>();
+    duaryContext = context.read<DuaryContext>();
 
     _controller = AnimationController(
         duration: const Duration(milliseconds: 800), vsync: this);
@@ -48,13 +51,17 @@ class _SplashScreenState extends State<SplashScreen>
       if (status == AnimationStatus.completed) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) {
-              if (userProvider.myCouple != null) {
-                // Couple 연결 완료 상태면 HomeScreen 으로 route
-                return const HomeScreen();
+              if (authProvider.me != null) {
+                if (duaryContext.myCouple != null) {
+                  // Couple 연결 완료 상태면 HomeScreen 으로 route
+                  return const HomeScreen();
 
+                } else {
+                  // Couple 연결이 되어있지 않은 경우 ConnectCoupleScreen 으로 route
+                  return const ConnectCoupleScreen();
+                }
               } else {
-                // Couple 연결이 되어있지 않은 경우 ConnectCoupleScreen 으로 route
-                return const ConnectCoupleScreen();
+                return const LoginScreen();
               }
             }));
       }
@@ -70,7 +77,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final Couple? couple = userProvider.myCouple;
     precacheImage(Image.asset(AssetPath.blue).image, context);
     precacheImage(Image.asset(AssetPath.yellow).image, context);
     return Scaffold(

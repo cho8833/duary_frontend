@@ -194,3 +194,38 @@ class RightBottomRoundedClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
+
+class SquareBubblePainter extends CustomPainter {
+
+  final Character character;
+
+
+  SquareBubblePainter(this.character);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = character.bubbleColor
+      ..style = PaintingStyle.fill;
+    final Paint strokePaint = Paint()
+      ..color = character.strokeColor
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+
+    final RRect roundedRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(
+          0, 0, size.width, size.height),
+      const Radius.circular(20),
+    );
+
+    canvas.drawRRect(roundedRect, paint);
+    
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+
+}
