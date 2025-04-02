@@ -68,10 +68,7 @@ class DuaryContext {
     final Future<List<Event>> future =
         _eventRepository.getEvent(startDate, endDate).then((events) {
       // 멤버 정보를 이벤트 데이터에 넣어줌
-      for (Event event in events) {
-        event.member = myCouple!.members
-            .firstWhere((member) => member.socialId == event.memberSocialId);
-      }
+      _initMemberInEvents(events);
 
       _event[date] = events; // 이벤트 캐싱
       return events;
@@ -91,7 +88,11 @@ class DuaryContext {
     DateTime startDate = DateTime(month.year, month.month);
     DateTime endDate = DateTime(month.year, month.month + 1);
 
-    return _eventRepository.getEvent(startDate, endDate);
+
+    List<Event> events = await _eventRepository.getEvent(startDate, endDate);
+
+    _initMemberInEvents(events);
+    return events;
   }
 
   Future<List<Event>> getComingEvent() async {
@@ -116,5 +117,12 @@ class DuaryContext {
     }
 
     return afterNow;
+  }
+
+  void _initMemberInEvents(List<Event> events) {
+    for (Event event in events) {
+      event.member = myCouple!.members
+          .firstWhere((member) => member.socialId == event.memberSocialId);
+    }
   }
 }
