@@ -1,6 +1,4 @@
-import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
-import 'package:duary/model/member.dart';
 import 'package:duary/repository/event_repository.dart';
 
 class EventRepositoryMock implements EventRepository {
@@ -78,7 +76,10 @@ class EventRepositoryMock implements EventRepository {
         DateTime(startDate.year, startDate.month, startDate.day);
     Future.delayed(const Duration(seconds: 1));
     return [
-      dummy1(date), dummy2(date), dummy3(date), dummy4(date)
+      // dummy1(date),
+      dummy2(date),
+      dummy3(date),
+      // dummy4(date)
     ];
   }
 }

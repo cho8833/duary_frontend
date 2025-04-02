@@ -1,5 +1,7 @@
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
+import 'package:duary/screen/edit_event_screen.dart';
+import 'package:duary/support/custom_page_route.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -135,7 +137,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
             GestureDetector(
               onTap: () {
-                // TODO: 일정 수정하기
+                Navigator.of(context)
+                    .push(SlideDownRoute(page: EditEventScreen(event: event,)));
               },
               child: Container(
                 width: double.infinity,

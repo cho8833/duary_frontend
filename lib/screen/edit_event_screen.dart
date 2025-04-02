@@ -1,6 +1,7 @@
 import 'package:duary/model/event.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class EditEventScreen extends StatefulWidget {
   const EditEventScreen({super.key, this.event});
@@ -21,6 +22,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
   bool isTogether = false;
   bool allDay = false;
   Repeat? repeat;
+  late DateTime startDateTime;
+  late DateTime endDateTime;
 
   @override
   void initState() {
@@ -37,6 +40,9 @@ class _EditEventScreenState extends State<EditEventScreen> {
       allDay = event.isAllDay;
       repeat = event.repeat;
     }
+    startDateTime = widget.event?.startDateTime ?? DateTime.now();
+    endDateTime = widget.event?.endDateTime ??
+        DateTime.now().add(const Duration(days: 1));
   }
 
   @override
@@ -171,11 +177,17 @@ class _EditEventScreenState extends State<EditEventScreen> {
                         ),
                         Row(
                           children: [
-                            _timeBox(text: "2024. 9. 11. 수", onTap: () {}),
+                            _timeBox(
+                                text: _formatDate(startDateTime),
+                                onTap: () {},
+                                isEnabled: !allDay),
                             const SizedBox(
                               width: 5,
                             ),
-                            _timeBox(text: "오후 10:00", onTap: () {})
+                            _timeBox(
+                                text: _formatTime(startDateTime),
+                                onTap: () {},
+                                isEnabled: !allDay)
                           ],
                         )
                       ],
@@ -195,11 +207,17 @@ class _EditEventScreenState extends State<EditEventScreen> {
                         ),
                         Row(
                           children: [
-                            _timeBox(text: "2024. 9. 11. 수", onTap: () {}),
+                            _timeBox(
+                                text: _formatDate(endDateTime),
+                                onTap: () {},
+                                isEnabled: !allDay),
                             const SizedBox(
                               width: 5,
                             ),
-                            _timeBox(text: "오후 11:00", onTap: () {})
+                            _timeBox(
+                                text: _formatTime(endDateTime),
+                                onTap: () {},
+                                isEnabled: !allDay)
                           ],
                         )
                       ],
@@ -314,7 +332,10 @@ class _EditEventScreenState extends State<EditEventScreen> {
     );
   }
 
-  Widget _timeBox({required String text, required void Function() onTap}) {
+  Widget _timeBox(
+      {required String text,
+      required void Function() onTap,
+      required bool isEnabled}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -325,10 +346,12 @@ class _EditEventScreenState extends State<EditEventScreen> {
         ),
         child: Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF333333)),
+              color: isEnabled
+                  ? const Color(0xFF333333)
+                  : const Color(0xFFD9D9D9)),
         ),
       ),
     );
@@ -357,5 +380,13 @@ class _EditEventScreenState extends State<EditEventScreen> {
               borderSide: const BorderSide(width: 0, style: BorderStyle.none),
               borderRadius: BorderRadius.circular(10))),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return "${DateFormat("yyyy. M. d.").format(date)} ${DateFormat.E("ko_KR").format(date)}요일";
+  }
+
+  String _formatTime(DateTime time) {
+    return DateFormat("aa hh:mm", "ko").format(time);
   }
 }

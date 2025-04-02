@@ -136,12 +136,20 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     }
   }
 
-  List<List<Event>> groupOverlappingEvents(List<Event> events) {
+  List<List<Event>> groupOverlappingEvents(List<Event> events,{required bool isMine}) {
     const int maxTime = 1440;
     final List<List<Event>> startEvents = List.generate(maxTime + 2, (_) => []);
     final List<List<Event>> endEvents = List.generate(maxTime + 2, (_) => []);
 
-    for (final event in events) {
+    List<Event> filtered = events.where((event) {
+      if (isMine) {
+        return _authProvider.me!.socialId == event.member.socialId || event.isTogether;
+      } else {
+        return _authProvider.me!.socialId != event.member.socialId || event.isTogether;
+      }
+    }).toList();
+
+    for (final event in filtered) {
       int start = event.startDateTime.hour * 60 + event.startDateTime.minute;
       int end = event.endDateTime.hour * 60 + event.endDateTime.minute;
 
@@ -149,9 +157,9 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
       endEvents[end].add(event);
     }
 
-    final activeEvents = <Event>{};
-    final overlaps = <int, Set<int>>{
-      for (var event in events) event.id: <int>{},
+    final Set<Event> activeEvents = <Event>{};
+    final Map<int, Set<int>> overlaps = {
+      for (var event in filtered) event.id: <int>{},
     };
 
     for (int minute = 0; minute <= maxTime; minute++) {
@@ -168,17 +176,17 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
       }
     }
 
-    final visited = <int>{};
-    final result = <List<Event>>[];
-    final eventById = {for (var event in events) event.id: event};
+    final Set<int> visited = <int>{};
+    final List<List<Event>> result = [];
+    final Map<int, Event> eventById = {for (Event event in filtered) event.id: event};
 
-    for (final event in events) {
+    for (final event in filtered) {
       if (!visited.contains(event.id)) {
-        final queue = [event.id];
-        final group = <Event>[];
+        final List<int> queue = [event.id];
+        final List<Event> group = <Event>[];
 
         while (queue.isNotEmpty) {
-          final current = queue.removeLast();
+          final int current = queue.removeLast();
           if (visited.contains(current)) continue;
 
           visited.add(current);
@@ -241,8 +249,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                                             Stack(
                                           children: _buildBubbles(
                                               constraints.maxWidth,
-                                              items,
-                                              true),
+                                              items,true),
                                         ),
                                       ),
                                     ),
@@ -287,8 +294,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                                         return Stack(
                                           children: _buildBubbles(
                                               constraints.maxWidth,
-                                              items,
-                                              true),
+                                              items, true),
                                         );
                                       }),
                                     ),
@@ -414,18 +420,21 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
 
   List<Widget> _buildBubbles(double maxWidth, List<Event> events, bool isLeft) {
     List<Widget> widgets = [];
-    List<_BubblePosition> positions = [];
 
-    List<List<Event>> overlapGrouped = groupOverlappingEvents(events);
+    List<List<Event>> overlapGrouped = groupOverlappingEvents(events, isMine: isLeft);
 
     for (final List<Event> overlapEvents in overlapGrouped) {
-      int overlapCount = overlapEvents.length;
-      int visitNumber = 0;
-      for (final Event event in overlapEvents) {
+      int overlapCount = overlapEvents.length;;
+
+      for (int i = 0 ; i < overlapCount ; i++) {
+        Event event = overlapEvents[i];
         // 이벤트 위치 계산
         double yPosition =
             event.startDateTime.hour * hourHeight + event.startDateTime.minute;
-        double xPosition = maxWidth / 3 * visitNumber;
+        double xPosition = maxWidth * (i + 1) / overlapCount;
+        if (!isLeft) {
+          xPosition = maxWidth - xPosition;
+        }
         // 이벤트 높이 계산, 1분 = 1px
         double height =
             event.endDateTime.difference(event.startDateTime).inMinutes *
@@ -434,13 +443,11 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
         // 이벤트 너비 계산
         double width = maxWidth / overlapCount;
 
-        positions.add(_BubblePosition(xPosition, yPosition, width, height));
-
         Widget? bubble = _buildBubble(event, isLeft, width, height);
         if (bubble != null) {
+          double left = isLeft ? maxWidth - xPosition : xPosition;
           widgets.add(Positioned(
-            left: xPosition,
-            right: width,
+            left: left,
             top: yPosition,
             child: GestureDetector(
                 onTap: () {
@@ -458,8 +465,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
 
     return widgets;
   }
-
-  Widget? _buildLeftBubble(Event event, double width, double height) {}
 
   Widget? _buildBubble(Event event, bool isLeft, double width, double height) {
     // 일정 내용
@@ -625,59 +630,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     return bubble;
   }
 
-  Widget _drawCharacterImage(Character character, bool isLeft) {
-    late Widget characterImage;
-    switch (character) {
-      case Character.together:
-        if (isLeft) {
-          characterImage = const Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Yellow(
-                width: 39,
-                height: 39,
-                opacity: 0.2,
-              ),
-              Blue(
-                width: 39,
-                height: 67,
-                opacity: 0.2,
-              ),
-            ],
-          );
-        } else {
-          characterImage = const Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Blue(
-                width: 39,
-                height: 67,
-                opacity: 0.2,
-              ),
-              Yellow(
-                width: 39,
-                height: 39,
-                opacity: 0.2,
-              ),
-            ],
-          );
-        }
-      case Character.blue:
-        characterImage = const Blue(
-          width: 39,
-          height: 67,
-          opacity: 0.2,
-        );
-      case Character.yellow:
-        characterImage = const Yellow(
-          width: 39,
-          height: 39,
-          opacity: 0.2,
-        );
-    }
-    return characterImage;
-  }
-
   Widget _buildTimeLines() {
     return Column(
       children: List.generate(24, (index) {
@@ -706,13 +658,4 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     _pagingDownController.dispose();
     _pagingUpController.dispose();
   }
-}
-
-class _BubblePosition {
-  final double xPosStart;
-  final double yPosStart;
-  final double width;
-  final double height;
-
-  _BubblePosition(this.xPosStart, this.yPosStart, this.width, this.height);
 }
