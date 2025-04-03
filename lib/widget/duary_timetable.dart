@@ -2,6 +2,7 @@ import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/edit_event_screen.dart';
 import 'package:duary/screen/event_details_screen.dart';
 import 'package:duary/support/custom_page_route.dart';
@@ -35,6 +36,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
   late final PagingController<DateTime, List<Event>> _pagingDownController;
   late ScrollController _scrollController;
   late final DuaryContext _duaryContext;
+  late final EventProvider _eventProvider;
   final AuthProvider _authProvider = AuthProvider();
 
   // 중복 fetch 를 방지하기 위한 flag
@@ -57,6 +59,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     dayIndex = initialDayIndex;
 
     _duaryContext = context.read<DuaryContext>();
+    _eventProvider = context.read<EventProvider>();
 
     _pagingUpController = PagingController(
         firstPageKey: dayFocus.subtract(const Duration(days: 1)));
@@ -112,7 +115,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     try {
       // 하루동안의 event 불러옴
       DateTime startDate = DateTime(pageKey.year, pageKey.month, pageKey.day);
-      final newItems = await _duaryContext.getEventByDay(startDate);
+      final newItems = await _eventProvider.getEventByDay(startDate);
 
       final DateTime nextPageKey = pageKey.add(const Duration(days: 1));
 
@@ -126,7 +129,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     try {
       // 하루동안의 event 불러옴
       DateTime startDate = DateTime(pageKey.year, pageKey.month, pageKey.day);
-      final newItems = await _duaryContext.getEventByDay(startDate);
+      final newItems = await _eventProvider.getEventByDay(startDate);
 
       final DateTime nextPageKey = pageKey.subtract(const Duration(days: 1));
 

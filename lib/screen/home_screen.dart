@@ -5,6 +5,8 @@ import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/provider/event_provider.dart';
+import 'package:duary/screen/event_details_screen.dart';
 import 'package:duary/screen/schedule_screen.dart';
 import 'package:duary/support/button_base.dart';
 import 'package:duary/widget/characters.dart';
@@ -22,7 +24,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late DuaryContext duaryContext;
+  late final EventProvider _eventProvider;
 
   static const String _noOngoingEventMent = "쉬는 중이야";
 
@@ -37,12 +39,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    duaryContext = context.read<DuaryContext>();
+    _eventProvider = context.read<EventProvider>();
 
-    me = duaryContext.myCouple!.me;
-    lover = duaryContext.myCouple!.lover;
+    me = _eventProvider.myCouple!.me;
+    lover = _eventProvider.myCouple!.lover;
 
-    getOngoingEventRequest = duaryContext.getOngoingEvent();
+    getOngoingEventRequest = _eventProvider.getOngoingEvent();
   }
 
   @override
@@ -69,9 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 41,
                         width: 41,
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(99),
-                          child: Character.characterWidget(me.character, width: 41, height: 63, opacity: 1)
-                        ),
+                            borderRadius: BorderRadius.circular(99),
+                            child: Character.characterWidget(me.character,
+                                width: 41, height: 63, opacity: 1)),
                       ),
                       const SizedBox(
                         width: 10,
@@ -109,20 +111,22 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(
                               width: 5,
                             ),
-
-                            FutureBuilder(future: getOngoingEventRequest, builder: (context, snapshot) {
-                              String title = _noOngoingEventMent;
-                              if (snapshot.hasData) {
-                                title = snapshot.data![me]?.title ?? _noOngoingEventMent;
-                              }
-                              return Text(
-                                title,
-                                style: TextStyle(
-                                    color: me.character.fontBlackColor,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 15),
-                              );
-                            })
+                            FutureBuilder(
+                                future: getOngoingEventRequest,
+                                builder: (context, snapshot) {
+                                  String title = _noOngoingEventMent;
+                                  if (snapshot.hasData) {
+                                    title = snapshot.data![me]?.title ??
+                                        _noOngoingEventMent;
+                                  }
+                                  return Text(
+                                    title,
+                                    style: TextStyle(
+                                        color: me.character.fontBlackColor,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15),
+                                  );
+                                })
                           ],
                         ),
                       ),
@@ -149,20 +153,23 @@ class _HomeScreenState extends State<HomeScreen> {
                             ]),
                         child: Row(
                           children: [
-                            FutureBuilder(future: getOngoingEventRequest, builder: (context, snapshot) {
-                              String title = _noOngoingEventMent;
-                              if (snapshot.hasData) {
-                                title = snapshot.data![lover]?.title ?? _noOngoingEventMent;
-                              }
-                              return Text(
-                                title,
-                                textAlign: TextAlign.end,
-                                style: TextStyle(
-                                    color: lover.character.fontBlackColor,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 15),
-                              );
-                            }),
+                            FutureBuilder(
+                                future: getOngoingEventRequest,
+                                builder: (context, snapshot) {
+                                  String title = _noOngoingEventMent;
+                                  if (snapshot.hasData) {
+                                    title = snapshot.data![lover]?.title ??
+                                        _noOngoingEventMent;
+                                  }
+                                  return Text(
+                                    title,
+                                    textAlign: TextAlign.end,
+                                    style: TextStyle(
+                                        color: lover.character.fontBlackColor,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15),
+                                  );
+                                }),
                             const SizedBox(
                               width: 5,
                             ),
@@ -203,36 +210,36 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(
                     height: 24,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ButtonBase(
-                          onTap: () {},
-                          child: const Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                "오늘 일정 보기",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 11,
-                                    color: Color(0xFF939393)),
-                              ),
-                              Icon(
-                                Icons.chevron_right,
-                                color: Color(0xFF939393),
-                                size: 14,
-                              )
-                            ],
-                          )),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.end,
+                  //   children: [
+                  //     ButtonBase(
+                  //         onTap: () {},
+                  //         child: const Row(
+                  //           crossAxisAlignment: CrossAxisAlignment.center,
+                  //           children: [
+                  //             Text(
+                  //               "오늘 일정 보기",
+                  //               style: TextStyle(
+                  //                   fontWeight: FontWeight.w400,
+                  //                   fontSize: 11,
+                  //                   color: Color(0xFF939393)),
+                  //             ),
+                  //             Icon(
+                  //               Icons.chevron_right,
+                  //               color: Color(0xFF939393),
+                  //               size: 14,
+                  //             )
+                  //           ],
+                  //         )),
+                  //   ],
+                  // ),
+                  // const SizedBox(
+                  //   height: 10,
+                  // ),
 
                   FutureBuilder(
-                      future: duaryContext.getComingEvent(),
+                      future: _eventProvider.getComingEvent(),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           List<Event> comingEvents = snapshot.data!;
@@ -338,100 +345,111 @@ class ComingEventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color color = event.member.character.strokeColor;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        width: double.infinity,
-        height: 136,
-        decoration: BoxDecoration(
-          color: (event.isTogether ? const Color(0xFFFF488A) : color)
-              .withValues(alpha: 0.2),
-        ),
-        child: Stack(
-          children: [
-            drawCharacter(event, color),
-            Positioned(
-              top: 20,
-              left: 0,
-              child: Container(
-                width: 80,
-                height: 45,
-                alignment: Alignment.centerLeft,
-                decoration: BoxDecoration(
-                    color: event.isTogether ? const Color(0xFFFF488A) : color,
-                    borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(10),
-                        bottomRight: Radius.circular(10))),
-                child: Row(
-                  children: [
-                    const SizedBox(
-                      width: 8,
-                    ),
-                    RichText(
-                      text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: DateFormat("a").format(event.startDateTime),
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 11,
-                                  color: Colors.white),
-                            ),
-                            TextSpan(
-                              text:
-                                  " ${DateFormat("h:mm").format(event.startDateTime)}",
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 16,
-                                  color: Colors.white),
-                            )
-                          ],
-                          style:
-                              const TextStyle(fontFamily: "NanumSquareRound")),
-                    ),
-                  ],
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => EventDetailsScreen(event: event)));
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          width: double.infinity,
+          height: 136,
+          decoration: BoxDecoration(
+            color: (event.isTogether ? const Color(0xFFFF488A) : color)
+                .withValues(alpha: 0.2),
+          ),
+          child: Stack(
+            children: [
+              drawCharacter(event, color),
+              Positioned(
+                top: 20,
+                left: 0,
+                child: Container(
+                  width: 80,
+                  height: 45,
+                  alignment: Alignment.centerLeft,
+                  decoration: BoxDecoration(
+                      color: event.isTogether ? const Color(0xFFFF488A) : color,
+                      borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(10),
+                          bottomRight: Radius.circular(10))),
+                  child: Row(
+                    children: [
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      RichText(
+                        text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text:
+                                    DateFormat("a").format(event.startDateTime),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 11,
+                                    color: Colors.white),
+                              ),
+                              TextSpan(
+                                text:
+                                    " ${DateFormat("h:mm").format(event.startDateTime)}",
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                    color: Colors.white),
+                              )
+                            ],
+                            style: const TextStyle(
+                                fontFamily: "NanumSquareRound")),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              top: 25,
-              left: 110,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const Text(
-                    "다가오는 일정",
-                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
-                  ),
-                  Text(
-                    event.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        color: Color(0xFF2E1A00),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  const Text(
-                    "장소 및 메모",
-                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
-                  ),
-                  Text(
-                    event.content ?? "",
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        color: Color(0xFF2E1A00),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15),
-                  )
-                ],
-              ),
-            )
-          ],
+              Positioned(
+                top: 25,
+                left: 110,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Text(
+                      "다가오는 일정",
+                      style:
+                          TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
+                    ),
+                    Text(
+                      event.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: Color(0xFF2E1A00),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    const Text(
+                      "장소 및 메모",
+                      style:
+                          TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
+                    ),
+                    Text(
+                      event.content ?? "",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: Color(0xFF2E1A00),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15),
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

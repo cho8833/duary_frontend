@@ -1,5 +1,6 @@
 import 'package:duary/firebase_options.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/splash_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -50,24 +51,30 @@ void main() async {
   // initialize auth provider
   AuthProvider authProvider = AuthProvider();
   authProvider.init(rc.authRepository);
-  DuaryContext duaryContext = DuaryContext(rc.eventRepository, rc.coupleRepository);
+
+  EventProvider eventProvider = EventProvider(rc.eventRepository);
+  DuaryContext duaryContext = DuaryContext(rc.coupleRepository);
 
   // check signIn
   await authProvider.checkSignIn().then((_) async {
     if (authProvider.me != null) {
-      await duaryContext.getMyCouple(authProvider.me!);
+      await duaryContext.getMyCouple(authProvider.me!, onSuccess: (couple) {
+        eventProvider.myCouple = couple;
+      });
     }
   });
 
   runApp(Main(
     duaryContext: duaryContext,
+    eventProvider: eventProvider
   ));
 }
 
 class Main extends StatelessWidget {
   const Main(
-      {super.key, required this.duaryContext});
+      {super.key, required this.duaryContext, required this.eventProvider});
   final DuaryContext duaryContext;
+  final  EventProvider eventProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +82,7 @@ class Main extends StatelessWidget {
       providers: [
         Provider.value(value: duaryContext),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        Provider.value(value: eventProvider)
       ],
       builder: (context, _) =>
           Consumer<ThemeProvider>(builder: (context, provider, _) {

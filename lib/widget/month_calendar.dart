@@ -2,6 +2,7 @@ import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/provider/event_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
@@ -130,14 +131,14 @@ class _CalendarMonthWidget extends StatefulWidget {
 }
 
 class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
-  late DuaryContext _eventProvider;
+  late EventProvider _eventProvider;
   final AuthProvider _authProvider = AuthProvider();
 
   @override
   void initState() {
     super.initState();
 
-    _eventProvider = context.read<DuaryContext>();
+    _eventProvider = context.read<EventProvider>();
   }
 
   @override
