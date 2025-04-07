@@ -28,8 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (member.coupleId == null) {
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(
-              builder: (context) => const InputCoupleInfoScreen()),
+          MaterialPageRoute(builder: (context) => InputCoupleInfoScreen()),
           (p) => false);
     }
     // 회원가입된 회원이면 홈화면으로 이동

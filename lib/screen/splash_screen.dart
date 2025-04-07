@@ -3,9 +3,12 @@ import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
+import 'package:duary/screen/input_couple_info_screen.dart'
+    show InputCoupleInfoScreen;
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/widget/characters.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -49,21 +52,22 @@ class _SplashScreenState extends State<SplashScreen>
     // route screen when animation end
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) {
-              if (authProvider.me != null) {
-                if (duaryContext.myCouple != null) {
-                  // Couple 연결 완료 상태면 HomeScreen 으로 route
-                  return const HomeScreen();
+        Navigator.of(context)
+            .pushReplacement(MaterialPageRoute(builder: (context) {
+          return InputCoupleInfoScreen();
+          // if (authProvider.me != null) {
+          //   if (duaryContext.myCouple != null) {
+          //     // Couple 연결 완료 상태면 HomeScreen 으로 route
+          //     return const HomeScreen();
 
-                } else {
-                  // Couple 연결이 되어있지 않은 경우 ConnectCoupleScreen 으로 route
-                  return const ConnectCoupleScreen();
-                }
-              } else {
-                return const LoginScreen();
-              }
-            }));
+          //   } else {
+          //     // Couple 연결이 되어있지 않은 경우 ConnectCoupleScreen 으로 route
+          //     return const ConnectCoupleScreen();
+          //   }
+          // } else {
+          //   return const LoginScreen();
+          // }
+        }));
       }
     });
     super.initState();
@@ -91,8 +95,7 @@ class _SplashScreenState extends State<SplashScreen>
                   alignment: Alignment(_yellowBounceXAnimation.value,
                       _yellowBounceYAnimation.value),
                   child: const Yellow(
-                    color:
-                        null,
+                    color: null,
                     width: 190,
                     height: 190,
                   ),
