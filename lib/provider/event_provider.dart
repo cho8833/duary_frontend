@@ -25,7 +25,7 @@ class EventProvider {
     Event? myEvent;
     try {
       myEvent = todayEvents.firstWhere((e) =>
-      e.memberSocialId == myCouple!.me.socialId &&
+      e.createdBy == myCouple!.me.socialId &&
           e.startDateTime.isBefore(now) &&
           e.endDateTime.isAfter(now));
     } catch (_) {}
@@ -33,7 +33,7 @@ class EventProvider {
     Event? loverEvent;
     try {
       loverEvent = todayEvents.firstWhere((e) =>
-      e.memberSocialId == myCouple!.lover.socialId &&
+      e.createdBy == myCouple!.lover.socialId &&
           e.startDateTime.isBefore(now) &&
           e.endDateTime.isAfter(now));
     } catch (_) {}
@@ -112,7 +112,7 @@ class EventProvider {
   void _initMemberInEvents(List<Event> events) {
     for (Event event in events) {
       event.member = myCouple!.members
-          .firstWhere((member) => member.socialId == event.memberSocialId);
+          .firstWhere((member) => member.socialId == event.createdBy);
     }
   }
 }

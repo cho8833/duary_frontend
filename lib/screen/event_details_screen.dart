@@ -121,7 +121,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                     const SizedBox(
                       height: 10,
                     ),
-                    _content(event.meetWith ?? ""),
+                    _content(event.hangOutWith ?? ""),
                     const SizedBox(
                       height: 30,
                     ),

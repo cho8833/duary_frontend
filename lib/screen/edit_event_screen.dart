@@ -21,7 +21,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
   String? content;
   bool isTogether = false;
   bool allDay = false;
-  Repeat? repeat;
+  Recurrence? repeat;
   late DateTime startDateTime;
   late DateTime endDateTime;
 
@@ -34,11 +34,11 @@ class _EditEventScreenState extends State<EditEventScreen> {
       Event event = widget.event!;
       title = event.title;
       location = event.location;
-      meetWith = event.meetWith;
+      meetWith = event.hangOutWith;
       content = event.content;
       isTogether = event.isTogether;
       allDay = event.isAllDay;
-      repeat = event.repeat;
+      repeat = event.recurrence;
     }
     startDateTime = widget.event?.startDateTime ?? DateTime.now();
     endDateTime = widget.event?.endDateTime ??
