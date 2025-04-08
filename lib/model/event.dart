@@ -6,32 +6,49 @@ part 'event.g.dart';
 
 @JsonSerializable()
 class Event {
-  int id;
+  String id;
   DateTime startDateTime;
   DateTime endDateTime;
   String? content;
   String title;
-  int memberSocialId;
+  int createdBy;
   bool isTogether;
   bool isAllDay;
-  int coupleId;
+  String coupleId;
   String? location;
-  String? meetWith;
-  Repeat? repeat;
+  String? hangOutWith;
+  Recurrence? recurrence;
   late Member member;
 
-
-  Event(this.id, this.startDateTime, this.endDateTime, this.title,
-      this.memberSocialId, this.isTogether, this.coupleId, this.isAllDay, {this.location, this.meetWith, this.content, this.repeat});
+  Event(
+      this.id,
+    this.startDateTime,
+    this.endDateTime,
+    this.title,
+    this.createdBy,
+    this.isTogether,
+    this.isAllDay,
+    this.coupleId, {
+    this.content,
+    this.location,
+    this.hangOutWith,
+    this.recurrence,
+  });
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
 }
 
 @JsonSerializable()
-class Repeat {
+class Recurrence {
   RepeatFrequency frequency;
+  int interval;
+  DateTime repeatStartDate;
+  DateTime repeatEndDate;
 
-  Repeat(this.frequency);
 
-  factory Repeat.fromJson(Map<String, dynamic> json) => _$RepeatFromJson(json);
+  Recurrence(
+      this.frequency, this.interval, this.repeatStartDate, this.repeatEndDate);
+
+  factory Recurrence.fromJson(Map<String, dynamic> json) =>
+      _$RecurrenceFromJson(json);
 }

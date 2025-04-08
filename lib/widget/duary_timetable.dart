@@ -161,8 +161,8 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     }
 
     final Set<Event> activeEvents = <Event>{};
-    final Map<int, Set<int>> overlaps = {
-      for (var event in filtered) event.id: <int>{},
+    final Map<String, Set<String>> overlaps = {
+      for (var event in filtered) event.id: <String>{},
     };
 
     for (int minute = 0; minute <= maxTime; minute++) {
@@ -179,17 +179,17 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
       }
     }
 
-    final Set<int> visited = <int>{};
+    final Set<String> visited = <String>{};
     final List<List<Event>> result = [];
-    final Map<int, Event> eventById = {for (Event event in filtered) event.id: event};
+    final Map<String, Event> eventById = {for (Event event in filtered) event.id: event};
 
     for (final event in filtered) {
       if (!visited.contains(event.id)) {
-        final List<int> queue = [event.id];
+        final List<String> queue = [event.id];
         final List<Event> group = <Event>[];
 
         while (queue.isNotEmpty) {
-          final int current = queue.removeLast();
+          final String current = queue.removeLast();
           if (visited.contains(current)) continue;
 
           visited.add(current);
@@ -593,7 +593,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
           ),
         );
       }
-    } else if (isLeft && event.memberSocialId == _authProvider.me!.socialId) {
+    } else if (isLeft && event.createdBy == _authProvider.me!.socialId) {
       bubble = SizedBox(
         width: width,
         height: height,
@@ -610,7 +610,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
           ),
         ),
       );
-    } else if (!isLeft && event.memberSocialId != _authProvider.me!.socialId) {
+    } else if (!isLeft && event.createdBy != _authProvider.me!.socialId) {
       bubble = SizedBox(
         width: width,
         height: height,
