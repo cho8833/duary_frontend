@@ -7,7 +7,7 @@ import 'package:duary/repository/couple_repository.dart';
 class CoupleRepositoryMock implements CoupleRepository {
   @override
   Future<Couple> getMyCouple() async {
-    return Future.value(Couple(DateTime(2023, 07, 20), [
+    return Future.value(Couple("84ad69ea-1937-4aa0-872a-9dccc2274c9e", DateTime(2023, 07, 20), [
       Member("조현빈", Character.blue, 3428835809, "kakao",
           "84ad69ea-1937-4aa0-872a-9dccc2274c9e"),
       Member("이고은", Character.yellow, 1, "kakao",

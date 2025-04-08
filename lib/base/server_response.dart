@@ -41,6 +41,23 @@ class ServerPagedResponse<T> extends ServerResponse<PagedData<T>> {
   }
 }
 
+class ServerListResponse<T> extends ServerResponse<List<T>> {
+  ServerListResponse(
+      {required super.message,
+        required super.status,
+        required super.data,
+      });
+
+  factory ServerListResponse.fromResponse(
+      Map<String ,dynamic> json, T Function(Map<String, dynamic>) fromJson) {
+    List<T> listData = (json['data'] as List<dynamic>).map((p0) => fromJson(p0 as Map<String, dynamic>)).toList();
+    return ServerListResponse(
+        message: json['message'] as String?,
+        status: json['status'] as int,
+        data: listData);
+  }
+}
+
 @JsonSerializable(createToJson: false, genericArgumentFactories: true)
 class PagedData<T> {
   List<T> content;
