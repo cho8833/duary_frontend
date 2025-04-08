@@ -9,9 +9,11 @@ class Couple {
 
   List<Member> members;
 
+  String id;
+
   late Member me;
 
   late Member lover;
 
-  Couple(this.relationDate, this.members);
+  Couple(this.id, this.relationDate, this.members);
 }

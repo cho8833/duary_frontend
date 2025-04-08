@@ -56,7 +56,7 @@ class EventProvider {
     DateTime startDate = DateTime(date.year, date.month, date.day);
     DateTime endDate = DateTime(date.year, date.month, date.day + 1);
     final Future<List<Event>> future =
-    _eventRepository.getEvent(startDate, endDate).then((events) {
+    _eventRepository.getEvent(myCouple!.id, startDate, endDate).then((events) {
       // 멤버 정보를 이벤트 데이터에 넣어줌
       _initMemberInEvents(events);
 
@@ -79,7 +79,7 @@ class EventProvider {
     DateTime endDate = DateTime(month.year, month.month + 1);
 
 
-    List<Event> events = await _eventRepository.getEvent(startDate, endDate);
+    List<Event> events = await _eventRepository.getEvent(myCouple!.id, startDate, endDate);
 
     _initMemberInEvents(events);
     return events;

@@ -36,6 +36,12 @@ mixin HttpResponseHandler {
     return ServerResponse.fromResponse(data, fromJson);
   }
 
+  ServerResponse<List<T>> getListData<T>(
+      Response response, T Function(Map<String, dynamic> fromJson) fromJson) {
+    Map<String ,dynamic> data = checkResponse(response);
+    return ServerListResponse.fromResponse(data, fromJson);
+  }
+
   ServerResponse<PagedData<T>> getPagedData<T>(
       Response response, T Function(Map<String, dynamic>) fromJson) {
     Map<String, dynamic> data = checkResponse(response);

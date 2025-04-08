@@ -61,17 +61,7 @@ class EventRepositoryMock implements EventRepository {
   }
 
   @override
-  Future<List<Event>> getComingEvents() async {
-    Future.delayed(const Duration(seconds: 1));
-    return [
-      dummy1(now),
-      dummy2(now),
-      dummy3(now)
-    ];
-  }
-
-  @override
-  Future<List<Event>> getEvent(DateTime startDate, DateTime endDate) async {
+  Future<List<Event>> getEvent(String coupleId, DateTime startDate, DateTime endDate) async {
     final DateTime date =
         DateTime(startDate.year, startDate.month, startDate.day);
     Future.delayed(const Duration(seconds: 1));

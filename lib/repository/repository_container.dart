@@ -31,7 +31,7 @@ class RepositoryContainer {
     authRepository = AuthRepositoryImpl(client, interceptedClient);
     memberRepository = MemberRepositoryImpl(interceptedClient);
     coupleRepository = CoupleRepositoryMock();
-    eventRepository = EventRepositoryMock();
+    eventRepository = EventRepositoryImpl(interceptedClient);
     interceptor.authRepository = authRepository;
   }
 
