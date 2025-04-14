@@ -33,8 +33,10 @@ class TokenInterceptor implements InterceptorContract {
       AuthorizationTokenRes res =
           await _authRepository.reissue(accessToken ?? "", refreshToken);
       accessToken = res.accessToken;
-      await tokenProvider.storeAccessToken(accessToken);
-      await tokenProvider.storeRefreshToken(res.refreshToken);
+
+      // application jwt 는 interceptResponse 에서 로컬 저장소에 저장 -> 따로 저장할 필요 없음
+      // await tokenProvider.storeAccessToken(accessToken);
+      // await tokenProvider.storeRefreshToken(res.refreshToken);
     }
     data.headers['Content-Type'] = 'application/json';
     data.headers['Authorization'] = 'Bearer $accessToken';
@@ -53,6 +55,7 @@ class TokenInterceptor implements InterceptorContract {
     return false;
   }
 
+  // token 이 발행되면 response body 에도 token 이 오지만, header 에도 token 을 넣어줌
   @override
   Future<ResponseData> interceptResponse({required ResponseData data}) async {
     return data;
@@ -60,6 +63,9 @@ class TokenInterceptor implements InterceptorContract {
 }
 
 class ContentTypeInterceptor implements InterceptorContract {
+
+  final TokenProvider tokenProvider = TokenProvider();
+
   @override
   Future<RequestData> interceptRequest({required RequestData data}) async {
     data.headers['Content-Type'] = 'application/json';
@@ -68,6 +74,17 @@ class ContentTypeInterceptor implements InterceptorContract {
 
   @override
   Future<ResponseData> interceptResponse({required ResponseData data}) async {
+
+    String? accessToken = data.headers?["access_token"];
+    String? refreshToken = data.headers?["refresh_token"];
+
+    if (accessToken == null || refreshToken == null) {
+      return data;
+    }
+
+    await tokenProvider.storeAccessToken(accessToken);
+    await tokenProvider.storeRefreshToken(refreshToken);
+
     return data;
   }
 }
