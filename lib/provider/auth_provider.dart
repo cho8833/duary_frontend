@@ -34,8 +34,9 @@ class AuthProvider {
 
   Future<Member> signInWithKakaoTalk() async {
     return await _repository.signInWithKakaoTalk().then((res) async {
-      await tokenProvider.storeAccessToken(res.accessToken);
-      await tokenProvider.storeRefreshToken(res.refreshToken);
+      // http intercepter 에서 token 관련 처리해줌
+      // await tokenProvider.storeAccessToken(res.accessToken);
+      // await tokenProvider.storeRefreshToken(res.refreshToken);
       await _repository.getUserInfo().then((user) {
         me = user;
       });
@@ -54,8 +55,9 @@ class AuthProvider {
   Future<void> signInIdPw(String username, String password) async {
     SignInReq req = SignInReq(username, password);
     await _repository.signInWithIdPw(req: req).then((res) async {
-      await tokenProvider.storeAccessToken(res.accessToken);
-      await tokenProvider.storeRefreshToken(res.refreshToken);
+      // http intercepter 에서 token 관련 처리해줌
+      // await tokenProvider.storeAccessToken(res.accessToken);
+      // await tokenProvider.storeRefreshToken(res.refreshToken);
       await _repository.getUserInfo().then((user) {
         me = user;
       });
@@ -72,8 +74,9 @@ class AuthProvider {
     }
     SignUpReq req = SignUpReq(username, password);
     await _repository.signUp(req).then((token) async {
-      await tokenProvider.storeAccessToken(token.accessToken);
-      await tokenProvider.storeRefreshToken(token.refreshToken);
+      // http intercepter 에서 token 관련 처리해줌
+      // await tokenProvider.storeAccessToken(token.accessToken);
+      // await tokenProvider.storeRefreshToken(token.refreshToken);
       await _repository.getUserInfo().then((user) {
         me = user;
       });
