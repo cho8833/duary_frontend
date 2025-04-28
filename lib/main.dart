@@ -11,7 +11,7 @@ import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/theme_provider.dart';
 import 'package:duary/provider/token_provider.dart';
 import 'package:duary/repository/impl/secure_storage_impl.dart';
-import 'package:duary/repository/repository_container.dart';
+import 'package:duary/support/repository_container.dart';
 import 'package:duary/repository/secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
