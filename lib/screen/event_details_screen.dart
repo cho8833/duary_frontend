@@ -61,10 +61,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                     borderRadius: BorderRadius.circular(10),
                     color: event.isTogether
                         ? Character.together.characterColor
-                        : event.member.character.characterColor,
+                        : event.member.character!.characterColor,
                   ),
                   child: Text(
-                    event.isTogether ? "같이" : event.member.name,
+                    event.isTogether ? "같이" : event.member.name!,
                     style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,

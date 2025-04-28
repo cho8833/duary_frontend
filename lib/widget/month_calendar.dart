@@ -240,7 +240,7 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
                             color: Character.together.characterColor);
                       }
                       return _CalendarDot(
-                          color: event.member.character.characterColor);
+                          color: event.member.character!.characterColor);
                     },
                     separatorBuilder: (BuildContext context, int index) =>
                         const SizedBox(
