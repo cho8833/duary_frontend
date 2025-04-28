@@ -14,8 +14,11 @@ class DuaryContext {
     await _coupleRepository.getMyCouple().then((couple) {
       myCouple = couple;
       myCouple!.me = me;
-      myCouple!.lover =
-          myCouple!.members.firstWhere((m) => m.socialId != me.socialId);
+
+      if (myCouple!.members.length > 1) {
+        myCouple!.lover =
+            myCouple!.members.firstWhere((m) => m.socialId != me.socialId);
+      }
       onSuccess?.call(myCouple!);
     }).catchError((e) {});
   }
