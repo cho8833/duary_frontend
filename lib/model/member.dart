@@ -5,14 +5,16 @@ part 'member.g.dart';
 
 @JsonSerializable()
 class Member {
-  String name;
-  Character character;
+  String? name;
+  Character? character;
   String? coupleId;
+  DateTime? birthday;
   int socialId;
   String provider;
 
 
-  Member(this.name, this.character, this.socialId, this.provider, this.coupleId);
+  Member(this.name, this.character, this.coupleId, this.birthday, this.socialId,
+      this.provider);
 
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
 }

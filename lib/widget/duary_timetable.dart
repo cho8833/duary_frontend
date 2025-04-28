@@ -474,7 +474,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     String time =
         "${DateFormat("hh:mm").format(event.startDateTime)} - ${DateFormat("hh:mm").format(event.endDateTime)}";
     Character character =
-        event.isTogether ? Character.together : event.member.character;
+        event.isTogether ? Character.together : event.member.character!;
     Widget content = Padding(
       padding: isLeft
           ? const EdgeInsets.fromLTRB(16, 8, 29, 8)

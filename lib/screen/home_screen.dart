@@ -72,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         width: 41,
                         child: ClipRRect(
                             borderRadius: BorderRadius.circular(99),
-                            child: Character.characterWidget(me.character,
+                            child: Character.characterWidget(me.character!,
                                 width: 41, height: 63, opacity: 1)),
                       ),
                       const SizedBox(
@@ -94,9 +94,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Row(
                           children: [
                             Text(
-                              me.name,
+                              me.name!,
                               style: TextStyle(
-                                  color: me.character.characterColor,
+                                  color: me.character!.characterColor,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15),
                             ),
@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 5,
                             ),
                             Container(
-                              color: me.character.characterColor,
+                              color: me.character!.characterColor,
                               width: 1,
                               height: 19,
                             ),
@@ -122,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   return Text(
                                     title,
                                     style: TextStyle(
-                                        color: me.character.fontBlackColor,
+                                        color: me.character!.fontBlackColor,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15),
                                   );
@@ -165,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     title,
                                     textAlign: TextAlign.end,
                                     style: TextStyle(
-                                        color: lover.character.fontBlackColor,
+                                        color: lover.character!.fontBlackColor,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15),
                                   );
@@ -174,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 5,
                             ),
                             Container(
-                              color: lover.character.characterColor,
+                              color: lover.character!.characterColor,
                               width: 1,
                               height: 19,
                             ),
@@ -182,9 +182,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 5,
                             ),
                             Text(
-                              lover.name,
+                              lover.name!,
                               style: TextStyle(
-                                  color: lover.character.characterColor,
+                                  color: lover.character!.characterColor,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15),
                             ),
@@ -344,7 +344,7 @@ class ComingEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color color = event.member.character.strokeColor;
+    Color color = event.member.character!.strokeColor;
     return GestureDetector(
       onTap: () {
         Navigator.push(
