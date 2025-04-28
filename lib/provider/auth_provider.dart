@@ -1,8 +1,6 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:duary/data/sign_in_req.dart';
-import 'package:duary/data/sign_up_req.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/token_provider.dart';
 import 'package:duary/repository/auth_repository.dart';
@@ -32,15 +30,19 @@ class AuthProvider {
     await _repository.signInWithApple();
   }
 
+  void onSignInSuccess() async {
+    await _repository.getUserInfo().then((user) {
+      me = user;
+    });
+    isLoggedIn.value = true;
+  }
+
   Future<Member> signInWithKakaoTalk() async {
     return await _repository.signInWithKakaoTalk().then((res) async {
       // http intercepter 에서 token 관련 처리해줌
       // await tokenProvider.storeAccessToken(res.accessToken);
       // await tokenProvider.storeRefreshToken(res.refreshToken);
-      await _repository.getUserInfo().then((user) {
-        me = user;
-      });
-      isLoggedIn.value = true;
+      onSignInSuccess();
       return me!;
     }).catchError((e) {
       if (e is PlatformException) {
@@ -48,40 +50,6 @@ class AuthProvider {
           throw CustomException("취소되었습니다");
         }
       }
-      throw ServerResponseException(e.toString());
-    });
-  }
-
-  Future<void> signInIdPw(String username, String password) async {
-    SignInReq req = SignInReq(username, password);
-    await _repository.signInWithIdPw(req: req).then((res) async {
-      // http intercepter 에서 token 관련 처리해줌
-      // await tokenProvider.storeAccessToken(res.accessToken);
-      // await tokenProvider.storeRefreshToken(res.refreshToken);
-      await _repository.getUserInfo().then((user) {
-        me = user;
-      });
-      isLoggedIn.value = true;
-    }).catchError((e) {
-      throw ServerResponseException(e.toString());
-    });
-  }
-
-  Future<void> signUp(String username, String password) async {
-    String? validate = validateSignUp(username, password);
-    if (validate != null) {
-      throw ServerResponseException(validate);
-    }
-    SignUpReq req = SignUpReq(username, password);
-    await _repository.signUp(req).then((token) async {
-      // http intercepter 에서 token 관련 처리해줌
-      // await tokenProvider.storeAccessToken(token.accessToken);
-      // await tokenProvider.storeRefreshToken(token.refreshToken);
-      await _repository.getUserInfo().then((user) {
-        me = user;
-      });
-      isLoggedIn.value = true;
-    }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
   }

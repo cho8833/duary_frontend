@@ -21,8 +21,6 @@ class EventRepositoryImpl with UriProvider, HttpResponseHandler implements Event
     Response response = await interceptedClient.get(uri);
 
     return getListData(response, (p0) => Event.fromJson(p0)).data;
-
   }
-
 
 }
