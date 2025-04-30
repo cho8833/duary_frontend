@@ -7,14 +7,14 @@ import 'package:flutter/services.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:intl/intl.dart';
 
-class InputCoupleInfoScreen extends StatefulWidget {
-  const InputCoupleInfoScreen({super.key});
+class StartDuaryScreen extends StatefulWidget {
+  const StartDuaryScreen({super.key});
 
   @override
-  State<InputCoupleInfoScreen> createState() => _InputCoupleInfoScreenState();
+  State<StartDuaryScreen> createState() => _StartDuaryScreenState();
 }
 
-class _InputCoupleInfoScreenState extends State<InputCoupleInfoScreen> {
+class _StartDuaryScreenState extends State<StartDuaryScreen> {
   String name = '';
   bool isName = false;
 

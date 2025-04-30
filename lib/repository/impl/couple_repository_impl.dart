@@ -13,7 +13,7 @@ class CoupleRepositoryImpl with UriProvider, HttpResponseHandler implements Coup
 
   @override
   Future<Couple> getMyCouple() async {
-    Uri uri = getUri("/event/check");
+    Uri uri = getUri("/couple/check");
 
     Response response = await client.get(uri);
 

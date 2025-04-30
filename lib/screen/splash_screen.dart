@@ -2,9 +2,8 @@ import 'package:duary/model/couple.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
-import 'package:duary/screen/input_couple_info_screen.dart'
-    show InputCoupleInfoScreen;
 import 'package:duary/screen/login_screen.dart';
+import 'package:duary/screen/start_duary_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/widget/characters.dart';
 
@@ -52,19 +51,23 @@ class _SplashScreenState extends State<SplashScreen>
       if (status == AnimationStatus.completed) {
         Navigator.of(context)
             .pushReplacement(MaterialPageRoute(builder: (context) {
+          // 로그인되어 있으면
           if (duaryContext.me.value != null) {
-
+            // 커플이 생성되어 있는지 확인
             if (duaryContext.me.value!.coupleId != null) {
-              if (duaryContext.myCouple != null) {
+              // 커플이 생성되어 있는 경우 커플이 연결되어 있는지 확인
+              if (duaryContext.lover.value != null) {
                 // Couple 연결 완료 상태면 HomeScreen 으로 route
                 return const HomeScreen();
               } else {
                 // Couple 연결이 되어있지 않은 경우 ConnectCoupleScreen 으로 route
                 return const ConnectCoupleScreen();
               }
+              // 커플이 생성되어 있지 않은 경우 StartDuaryScreen 으로 route
             } else {
-              return const InputCoupleInfoScreen();
+              return const StartDuaryScreen();
             }
+            // 로그인되어 있지 않으면 LoginScreen 으로 route
           } else {
             return const LoginScreen();
           }

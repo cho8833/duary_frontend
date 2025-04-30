@@ -1,3 +1,5 @@
+import 'package:duary/provider/duary_context.dart';
+import 'package:duary/screen/login_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/support/button_base.dart';
 import 'package:duary/widget/main_app_bar.dart';
@@ -11,12 +13,26 @@ class ConnectCoupleScreen extends StatefulWidget {
 }
 
 class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
+  final DuaryContext duaryContext = DuaryContext();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: MainAppBar(
         appBarObj: AppBar(),
-        trailingBuilder: (context) => const Icon(Icons.close),
+        trailingBuilder: (context) => ButtonBase(
+            onTap: () {
+              duaryContext.signOut().then((_) {
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    (p) => false);
+              });
+            },
+            child: const Text(
+              "다른 계정으로 로그인",
+              style: TextStyle(fontSize: 12),
+            )),
       ),
       body: SafeArea(
         child: SizedBox(

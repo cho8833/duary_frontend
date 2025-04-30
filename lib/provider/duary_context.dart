@@ -42,12 +42,9 @@ class DuaryContext {
     await _authRepository.signInWithApple();
   }
 
-  Future<Member> signInWithKakaoTalk() async {
-    return await _authRepository.signInWithKakaoTalk().then((res) async {
-      // http intercepter 에서 token 관련 처리해줌
-      // await tokenProvider.storeAccessToken(res.accessToken);
-      // await tokenProvider.storeRefreshToken(res.refreshToken);
-      return onSignInSuccess(res);
+  Future<void> signInWithKakaoTalk() async {
+    await _authRepository.signInWithKakaoTalk().then((res) async {
+      onSignInSuccess(res);
     }).catchError((e) {
       if (e is PlatformException) {
         if (e.code == "CANCELED") {
@@ -66,13 +63,10 @@ class DuaryContext {
     });
   }
 
-  Future<Member> dummySignIn(int username) async {
+  Future<void> dummySignIn(int username) async {
     DummySignInReq req = DummySignInReq(username);
-    return await _authRepository.dummySignIn(req).then((res) async {
-      // http intercepter 에서 token 관련 처리해줌
-      // await tokenProvider.storeAccessToken(res.accessToken);
-      // await tokenProvider.storeRefreshToken(res.refreshToken);
-      return onSignInSuccess(res);
+    await _authRepository.dummySignIn(req).then((res) async {
+      onSignInSuccess(res);
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
@@ -83,17 +77,14 @@ class DuaryContext {
     me.value = null;
   }
 
-  Future<Couple> getMyCouple() async {
-    return _coupleRepository.getMyCouple().then((couple) {
+  Future<void> getMyCouple() async {
+    _coupleRepository.getMyCouple().then((couple) {
       myCouple.value = couple;
 
       if (myCouple.value!.members.length > 1) {
         lover.value =
             myCouple.value!.members.firstWhere((m) => m.socialId != me.value!.socialId);
       }
-      return couple;
-    }).catchError((e) {
-      throw Exception();
     });
   }
 

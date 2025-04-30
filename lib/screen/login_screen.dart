@@ -1,8 +1,8 @@
-
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/screen/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
-import 'package:duary/screen/input_couple_info_screen.dart';
+import 'package:duary/screen/start_duary_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,18 +24,35 @@ class _LoginScreenState extends State<LoginScreen> {
   int? username;
 
   void onSignInComplete(Member member) {
-    // 회원가입 성공 시 커플 정보 입력화면으로 이동
-    if (member.coupleId == null) {
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => InputCoupleInfoScreen()),
-          (p) => false);
+    // Sign In 성공 시 member 에 coupleId 검사. coupleId != null 이면 커플이 이미 생성된 것임
+    if (member.coupleId != null) {
+      // 커플 정보 불러오기
+      duaryContext.getMyCouple().then((couple) {
+        // lover != null 이면, 커플 연결 완료된 것 => HomeScreen 으로 route
+        if (duaryContext.lover.value != null) {
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+              (p) => false);
+        }
+        // lover == null 이면, 커플 연결되지 않은 것 => ConnectCoupleScreen 으로 route
+        else {
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const ConnectCoupleScreen()),
+              (p) => false);
+        }
+      }).catchError((e) {
+        // 커플 정보 불러오기 실패 시 개발 오류!!!
+        Fluttertoast.showToast(msg: e.toString());
+      });
     }
-    // 회원가입된 회원이면 홈화면으로 이동
+    // 커플이 생성되어 있지 않으면 StartDuaryScreen 으로 route
     else {
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => const StartDuaryScreen()),
           (p) => false);
     }
   }
@@ -61,13 +78,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                   ),
                   onClick: () async {
-                    Member member = await duaryContext
-                        .signInWithKakaoTalk()
-                        .catchError((e) {
+                    await duaryContext.signInWithKakaoTalk().then((_) {
+                      onSignInComplete(duaryContext.me.value!);
+                    }).catchError((e) {
                       Fluttertoast.showToast(msg: e.toString());
-                      return null;
                     });
-                    onSignInComplete(member);
                   },
                 ),
                 const SizedBox(
@@ -117,14 +132,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (username == null) {
                           Fluttertoast.showToast(msg: 'id를 입력해주세요');
                         } else {
-
-                          Member member = await duaryContext
-                              .dummySignIn(username!)
-                              .catchError((e) {
+                          await duaryContext.dummySignIn(username!).then((_) {
+                            onSignInComplete(duaryContext.me.value!);
+                          }).catchError((e) {
                             Fluttertoast.showToast(msg: e.toString());
-                            return null;
                           });
-                          onSignInComplete(member);
                         }
                       },
                       child: Container(
