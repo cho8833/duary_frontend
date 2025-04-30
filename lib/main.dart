@@ -29,9 +29,7 @@ void main() async {
   FlutterSecureStorage ss = const FlutterSecureStorage();
   final SecureStorage secureStorage = SecureStorageImpl(ss);
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // final fcmToken = await FirebaseMessaging.instance.getToken();
 
   // pre cache splash logo
@@ -56,25 +54,22 @@ void main() async {
   DuaryContext duaryContext = DuaryContext(rc.coupleRepository);
 
   // check signIn
-  await authProvider.checkSignIn().then((_) async {
-    if (authProvider.me != null) {
-      await duaryContext.getMyCouple(authProvider.me!, onSuccess: (couple) {
-        eventProvider.myCouple = couple;
-      });
-    }
-  });
+  // await authProvider.checkSignIn().then((_) async {
+  //   if (authProvider.me != null) {
+  //     await duaryContext.getMyCouple(authProvider.me!).then((_) {
+  //       eventProvider.myCouple = duaryContext.myCouple;
+  //     });
+  //   }
+  // });
 
-  runApp(Main(
-    duaryContext: duaryContext,
-    eventProvider: eventProvider
-  ));
+  runApp(Main(duaryContext: duaryContext, eventProvider: eventProvider));
 }
 
 class Main extends StatelessWidget {
   const Main(
       {super.key, required this.duaryContext, required this.eventProvider});
   final DuaryContext duaryContext;
-  final  EventProvider eventProvider;
+  final EventProvider eventProvider;
 
   @override
   Widget build(BuildContext context) {

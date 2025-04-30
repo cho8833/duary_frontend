@@ -54,19 +54,22 @@ class _SplashScreenState extends State<SplashScreen>
       if (status == AnimationStatus.completed) {
         Navigator.of(context)
             .pushReplacement(MaterialPageRoute(builder: (context) {
-          return InputCoupleInfoScreen();
-          // if (authProvider.me != null) {
-          //   if (duaryContext.myCouple != null) {
-          //     // Couple 연결 완료 상태면 HomeScreen 으로 route
-          //     return const HomeScreen();
+          if (authProvider.me != null) {
 
-          //   } else {
-          //     // Couple 연결이 되어있지 않은 경우 ConnectCoupleScreen 으로 route
-          //     return const ConnectCoupleScreen();
-          //   }
-          // } else {
-          //   return const LoginScreen();
-          // }
+            if (authProvider.me!.coupleId != null) {
+              if (duaryContext.myCouple != null) {
+                // Couple 연결 완료 상태면 HomeScreen 으로 route
+                return const HomeScreen();
+              } else {
+                // Couple 연결이 되어있지 않은 경우 ConnectCoupleScreen 으로 route
+                return const ConnectCoupleScreen();
+              }
+            } else {
+              return const InputCoupleInfoScreen();
+            }
+          } else {
+            return const LoginScreen();
+          }
         }));
       }
     });

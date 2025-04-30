@@ -1,3 +1,6 @@
+import 'package:duary/repository/couple_repository.dart';
+
+import 'package:duary/support/repository_container.dart';
 import 'package:duary/widget/main_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +17,8 @@ class InputCoupleInfoScreen extends StatefulWidget {
 class _InputCoupleInfoScreenState extends State<InputCoupleInfoScreen> {
   String name = '';
   bool isName = false;
+
+  CoupleRepository coupleRepository = RepositoryContainer().coupleRepository;
 
   Text nameErrorMssg = const Text('');
   List<DateTime?> _dialogCalendarPickerValue = [
@@ -142,7 +147,7 @@ class _InputCoupleInfoScreenState extends State<InputCoupleInfoScreen> {
           if (isName == false) {
             setState(
               () {
-                nameErrorMssg = _nameErrorMssg();
+                nameErrorMssg = _nameErrorMssg("이름을 입력해주세요");
               },
             );
           }
@@ -230,7 +235,6 @@ class _InputCoupleInfoScreenState extends State<InputCoupleInfoScreen> {
                         child: TextField(
                           onChanged: (value) {
                             name = value;
-                            print(name); //저장된 텍스트 확인
                             setState(() {
                               validateName();
                             });
@@ -451,18 +455,18 @@ class _InputCoupleInfoScreenState extends State<InputCoupleInfoScreen> {
       isName = false;
     } else {
       isName = true;
-      nameErrorMssg = _nameErrorMssg();
+      nameErrorMssg = _nameErrorMssg("이름을 입력해주세요");
     }
   }
 
-  Text _nameErrorMssg() {
+  Text _nameErrorMssg(String errMeg) {
     if (isName) {
       return const Text('');
     } else {
-      return const Text(
-        '이름을 입력해주세요',
+      return Text(
+        errMeg,
         textAlign: TextAlign.start,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.redAccent,
           fontFamily: 'NanumSquareRound',
           fontSize: 13,

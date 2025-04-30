@@ -1,4 +1,6 @@
 
+import 'package:duary/data/dummy_sign_in_req.dart';
+import 'package:duary/data/sign_in_res.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:duary/model/member.dart';
@@ -30,11 +32,9 @@ class AuthProvider {
     await _repository.signInWithApple();
   }
 
-  void onSignInSuccess() async {
-    await _repository.getUserInfo().then((user) {
-      me = user;
-    });
-    isLoggedIn.value = true;
+  Member onSignInSuccess(SignInRes res)  {
+     me = res.member;
+     return me!;
   }
 
   Future<Member> signInWithKakaoTalk() async {
@@ -42,8 +42,7 @@ class AuthProvider {
       // http intercepter 에서 token 관련 처리해줌
       // await tokenProvider.storeAccessToken(res.accessToken);
       // await tokenProvider.storeRefreshToken(res.refreshToken);
-      onSignInSuccess();
-      return me!;
+      return onSignInSuccess(res);
     }).catchError((e) {
       if (e is PlatformException) {
         if (e.code == "CANCELED") {
@@ -79,4 +78,21 @@ class AuthProvider {
     return null;
   }
 
+  Future<Member> dummySignIn(int username) async {
+    DummySignInReq req = DummySignInReq(username);
+
+    return await _repository.dummySignIn(req).then((res) async {
+      // http intercepter 에서 token 관련 처리해줌
+      // await tokenProvider.storeAccessToken(res.accessToken);
+      // await tokenProvider.storeRefreshToken(res.refreshToken);
+      return onSignInSuccess(res);
+    }).catchError((e) {
+      if (e is PlatformException) {
+        if (e.code == "CANCELED") {
+          throw CustomException("취소되었습니다");
+        }
+      }
+      throw ServerResponseException(e.toString());
+    });
+  }
 }

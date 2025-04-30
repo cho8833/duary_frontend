@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:duary/data/dummy_sign_in_req.dart';
+import 'package:duary/data/sign_in_res.dart';
 import 'package:http/http.dart';
 import 'package:duary/data/authorization_token_res.dart';
 import 'package:duary/data/sign_in_req.dart';
@@ -23,7 +25,7 @@ final class AuthRepositoryImpl
       "gOlSrRa9l2xnpkeGFuKHVs6yMWfot6eODIDKrLGC3fMCUVZDbW";
 
   @override
-  Future<AuthorizationTokenRes> signInWithKakaoTalk() async {
+  Future<SignInRes> signInWithKakaoTalk() async {
     late OAuthToken token;
     if (await isKakaoTalkInstalled()) {
       token = await UserApi.instance.loginWithKakaoTalk(nonce: nonce);
@@ -36,7 +38,7 @@ final class AuthRepositoryImpl
     Response response =
         await client.post(uri, body: jsonEncode(token.toJson()));
 
-    return getData(response, (p0) => AuthorizationTokenRes.fromJson(p0['token'])).data;
+    return getData(response, (p0) => SignInRes.fromJson(p0)).data;
   }
 
   @override
@@ -90,5 +92,14 @@ final class AuthRepositoryImpl
 
     Response response = await client.post(uri, body: jsonEncode(req.toJson()));
     return getData(response, (p0) => AuthorizationTokenRes.fromJson(p0)).data;
+  }
+
+  @override
+  Future<SignInRes> dummySignIn(DummySignInReq req) async {
+    Uri uri = getUri("/auth/signin/dummy");
+
+    Response response = await client.post(uri, body: jsonEncode(req.toJson()));
+
+    return getData(response, (p0) => SignInRes.fromJson(p0)).data;
   }
 }

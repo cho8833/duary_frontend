@@ -4,5 +4,5 @@ import 'package:duary/model/couple.dart';
 abstract interface class CoupleRepository {
   Future<Couple> getMyCouple();
 
-  Future<Couple> startDuary(StartDuaryReq req);
+
 }
