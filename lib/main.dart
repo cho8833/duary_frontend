@@ -7,7 +7,6 @@ import 'package:firebase_core/firebase_core.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/theme_provider.dart';
 import 'package:duary/provider/token_provider.dart';
 import 'package:duary/repository/impl/secure_storage_impl.dart';
@@ -46,12 +45,9 @@ void main() async {
   RepositoryContainer rc = RepositoryContainer();
   rc.initialize(secureStorage);
 
-  // initialize auth provider
-  AuthProvider authProvider = AuthProvider();
-  authProvider.init(rc.authRepository);
-
   EventProvider eventProvider = EventProvider(rc.eventRepository);
-  DuaryContext duaryContext = DuaryContext(rc.coupleRepository);
+  DuaryContext duaryContext = DuaryContext();
+  duaryContext.init(rc.coupleRepository, rc.authRepository);
 
   // check signIn
   // await authProvider.checkSignIn().then((_) async {

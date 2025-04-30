@@ -1,6 +1,5 @@
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
-import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:flutter/material.dart';
@@ -132,7 +131,7 @@ class _CalendarMonthWidget extends StatefulWidget {
 
 class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
   late EventProvider _eventProvider;
-  final AuthProvider _authProvider = AuthProvider();
+  final DuaryContext _duaryContext = DuaryContext();
 
   @override
   void initState() {
@@ -218,11 +217,11 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
                   List<int> dotIndex = [-1, -1, -1];
                   // 해당 날짜에 함께하는 일정이 아니고, 내 일정이 있는 경우 내 점 찍기
                   dotIndex[0] = dayEvents.indexWhere((event) =>
-                      event.createdBy == _authProvider.me!.socialId &&
+                      event.createdBy == _duaryContext.me.value!.socialId &&
                       !event.isTogether);
                   // 해당 날짜에 함께하는 일정이 아니고, 상대방 일정이 있는 경우 상대방 점 찍기
                   dotIndex[1] = dayEvents.indexWhere((event) =>
-                      event.createdBy != _authProvider.me!.socialId &&
+                      event.createdBy != _duaryContext.me.value!.socialId &&
                       !event.isTogether);
                   // 해당 날짜에 함께하는 일정이 있으면 분홍색 점 찍기
                   dotIndex[2] =

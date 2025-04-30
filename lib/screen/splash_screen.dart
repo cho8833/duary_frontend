@@ -1,5 +1,4 @@
 import 'package:duary/model/couple.dart';
-import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
@@ -27,11 +26,10 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _yellowBounceYAnimation;
   late Animation<double> _yellowBounceXAnimation;
   late DuaryContext duaryContext;
-  AuthProvider authProvider = AuthProvider();
 
   @override
   void initState() {
-    duaryContext = context.read<DuaryContext>();
+    duaryContext = DuaryContext();
 
     _controller = AnimationController(
         duration: const Duration(milliseconds: 800), vsync: this);
@@ -54,9 +52,9 @@ class _SplashScreenState extends State<SplashScreen>
       if (status == AnimationStatus.completed) {
         Navigator.of(context)
             .pushReplacement(MaterialPageRoute(builder: (context) {
-          if (authProvider.me != null) {
+          if (duaryContext.me.value != null) {
 
-            if (authProvider.me!.coupleId != null) {
+            if (duaryContext.me.value!.coupleId != null) {
               if (duaryContext.myCouple != null) {
                 // Couple 연결 완료 상태면 HomeScreen 으로 route
                 return const HomeScreen();

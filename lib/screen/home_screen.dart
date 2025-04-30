@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
-import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/event_details_screen.dart';
@@ -41,8 +40,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _eventProvider = context.read<EventProvider>();
 
-    me = _eventProvider.myCouple!.me;
-    lover = _eventProvider.myCouple!.lover;
+    me = _eventProvider.me!;
+    lover = _eventProvider.lover!;
 
     getOngoingEventRequest = _eventProvider.getOngoingEvent();
   }

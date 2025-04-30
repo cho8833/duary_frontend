@@ -1,6 +1,5 @@
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
-import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/edit_event_screen.dart';
@@ -35,9 +34,8 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
   late final PagingController<DateTime, List<Event>> _pagingUpController;
   late final PagingController<DateTime, List<Event>> _pagingDownController;
   late ScrollController _scrollController;
-  late final DuaryContext _duaryContext;
+  final DuaryContext _duaryContext = DuaryContext();
   late final EventProvider _eventProvider;
-  final AuthProvider _authProvider = AuthProvider();
 
   // 중복 fetch 를 방지하기 위한 flag
   // 오늘 날짜 index 를 0으로, 내일 index 는 1, 어제 index 는 0
@@ -58,7 +56,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     initialDayIndex = (dayFocus.difference(DateTime.now()).inHours / 24).ceil();
     dayIndex = initialDayIndex;
 
-    _duaryContext = context.read<DuaryContext>();
     _eventProvider = context.read<EventProvider>();
 
     _pagingUpController = PagingController(
@@ -146,9 +143,9 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
 
     List<Event> filtered = events.where((event) {
       if (isMine) {
-        return _authProvider.me!.socialId == event.member.socialId || event.isTogether;
+        return _duaryContext.me.value!.socialId == event.member.socialId || event.isTogether;
       } else {
-        return _authProvider.me!.socialId != event.member.socialId || event.isTogether;
+        return _duaryContext.me.value!.socialId != event.member.socialId || event.isTogether;
       }
     }).toList();
 
@@ -593,7 +590,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
           ),
         );
       }
-    } else if (isLeft && event.createdBy == _authProvider.me!.socialId) {
+    } else if (isLeft && event.createdBy == _duaryContext.me.value!.socialId) {
       bubble = SizedBox(
         width: width,
         height: height,
@@ -610,7 +607,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
           ),
         ),
       );
-    } else if (!isLeft && event.createdBy != _authProvider.me!.socialId) {
+    } else if (!isLeft && event.createdBy != _duaryContext.me.value!.socialId) {
       bubble = SizedBox(
         width: width,
         height: height,

@@ -1,6 +1,7 @@
 import 'package:duary/model/couple.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
+import 'package:duary/provider/duary_context.dart';
 import 'package:duary/repository/event_repository.dart';
 
 class EventProvider {
@@ -13,8 +14,22 @@ class EventProvider {
   // Future caching : 같은 인자로 호출된 비동기 작업이 진행 중이면, 그 작업의 결과를 기다렸다가 반환
   final Map<DateTime, Future<List<Event>>> _eventRequest = {};
 
-  EventProvider(this._eventRepository);
+  EventProvider(this._eventRepository) {
+    DuaryContext duaryContext = DuaryContext();
+    duaryContext.me.addListener(() {
+      me = duaryContext.me.value;
+    });
+    duaryContext.lover.addListener(() {
+      lover = duaryContext.lover.value;
+    });
+    duaryContext.myCouple.addListener(() {
+      myCouple = duaryContext.myCouple.value;
+    });
+  }
 
+
+  Member? me;
+  Member? lover;
   Couple? myCouple;
 
   Future<Map<Member, Event?>> getOngoingEvent() async {
@@ -23,9 +38,10 @@ class EventProvider {
     List<Event> todayEvents = await getEventByDay(today);
 
     Event? myEvent;
+
     try {
       myEvent = todayEvents.firstWhere((e) =>
-      e.createdBy == myCouple!.me.socialId &&
+      e.createdBy == me!.socialId &&
           e.startDateTime.isBefore(now) &&
           e.endDateTime.isAfter(now));
     } catch (_) {}
@@ -33,12 +49,12 @@ class EventProvider {
     Event? loverEvent;
     try {
       loverEvent = todayEvents.firstWhere((e) =>
-      e.createdBy == myCouple!.lover.socialId &&
+      e.createdBy == lover!.socialId &&
           e.startDateTime.isBefore(now) &&
           e.endDateTime.isAfter(now));
     } catch (_) {}
 
-    return {myCouple!.me: myEvent, myCouple!.lover: loverEvent};
+    return {me!: myEvent, lover!: loverEvent};
   }
 
   Future<List<Event>> getEventByDay(DateTime date) async {

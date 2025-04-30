@@ -11,10 +11,6 @@ class Couple {
 
   String id;
 
-  late Member me;
-
-  late Member lover;
-
   Couple(this.id, this.relationDate, this.members);
 
   factory Couple.fromJson(Map<String, dynamic> json) => _$CoupleFromJson(json);

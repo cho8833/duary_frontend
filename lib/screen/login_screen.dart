@@ -1,8 +1,6 @@
-import 'dart:ffi';
 
-import 'package:duary/data/sign_in_res.dart';
 import 'package:duary/model/member.dart';
-import 'package:duary/provider/auth_provider.dart';
+import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/home_screen.dart';
 import 'package:duary/screen/input_couple_info_screen.dart';
 import 'package:duary/support/asset_path.dart';
@@ -10,13 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:duary/support/uri_provider.dart';
-import 'package:http/http.dart';
-import 'package:duary/support/http_response_handler.dart';
-import 'package:duary/support/custom_exception.dart';
-import 'dart:convert';
-import 'package:duary/support/http_request_interceptor.dart';
-import 'package:http_interceptor/http_interceptor.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -26,17 +18,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  late final AuthProvider authProvider;
+  final DuaryContext duaryContext = DuaryContext();
 
   //test var
-  int? username = null;
-
-
-  @override
-  void initState() {
-    authProvider = AuthProvider();
-    super.initState();
-  }
+  int? username;
 
   void onSignInComplete(Member member) {
     // 회원가입 성공 시 커플 정보 입력화면으로 이동
@@ -76,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                   ),
                   onClick: () async {
-                    Member member = await authProvider
+                    Member member = await duaryContext
                         .signInWithKakaoTalk()
                         .catchError((e) {
                       Fluttertoast.showToast(msg: e.toString());
@@ -94,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                   ),
                   onClick: () {
-                    authProvider.signInWithApple();
+                    duaryContext.signInWithApple();
                   },
                 ),
                 const SizedBox(
@@ -133,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Fluttertoast.showToast(msg: 'id를 입력해주세요');
                         } else {
 
-                          Member member = await authProvider
+                          Member member = await duaryContext
                               .dummySignIn(username!)
                               .catchError((e) {
                             Fluttertoast.showToast(msg: e.toString());
