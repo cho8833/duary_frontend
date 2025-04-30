@@ -87,11 +87,6 @@ class AuthProvider {
       // await tokenProvider.storeRefreshToken(res.refreshToken);
       return onSignInSuccess(res);
     }).catchError((e) {
-      if (e is PlatformException) {
-        if (e.code == "CANCELED") {
-          throw CustomException("취소되었습니다");
-        }
-      }
       throw ServerResponseException(e.toString());
     });
   }
