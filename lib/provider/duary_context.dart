@@ -78,7 +78,7 @@ class DuaryContext {
   }
 
   Future<void> getMyCouple() async {
-    _coupleRepository.getMyCouple().then((couple) {
+    await _coupleRepository.getMyCouple().then((couple) {
       myCouple.value = couple;
 
       if (myCouple.value!.members.length > 1) {

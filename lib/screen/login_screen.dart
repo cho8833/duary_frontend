@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
               (p) => false);
         }
       }).catchError((e) {
-        // 커플 정보 불러오기 실패 시 개발 오류!!!
+        // 커플 정보 불러오기 실패 시 개발 오류 가능성이 큼
         Fluttertoast.showToast(msg: e.toString());
       });
     }
