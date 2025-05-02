@@ -11,7 +11,9 @@ class Couple {
 
   String id;
 
-  Couple(this.id, this.relationDate, this.members);
+  String code;
+
+  Couple(this.id, this.relationDate, this.members, this.code);
 
   factory Couple.fromJson(Map<String, dynamic> json) => _$CoupleFromJson(json);
 

@@ -12,10 +12,12 @@ Couple _$CoupleFromJson(Map<String, dynamic> json) => Couple(
       (json['members'] as List<dynamic>)
           .map((e) => Member.fromJson(e as Map<String, dynamic>))
           .toList(),
+      json['code'] as String,
     );
 
 Map<String, dynamic> _$CoupleToJson(Couple instance) => <String, dynamic>{
       'relationDate': instance.relationDate.toIso8601String(),
       'members': instance.members,
       'id': instance.id,
+      'code': instance.code,
     };
