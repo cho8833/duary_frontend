@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:duary/data/dummy_sign_in_req.dart';
 import 'package:duary/data/sign_in_res.dart';
+import 'package:duary/support/secret_key.dart';
 import 'package:http/http.dart';
 import 'package:duary/data/authorization_token_res.dart';
 import 'package:duary/data/sign_in_req.dart';
@@ -22,7 +23,7 @@ final class AuthRepositoryImpl
   final Client client;
 
   static const String nonce =
-      "gOlSrRa9l2xnpkeGFuKHVs6yMWfot6eODIDKrLGC3fMCUVZDbW";
+      SecretKey.oidcNonce;
 
   @override
   Future<SignInRes> signInWithKakaoTalk() async {
@@ -43,9 +44,10 @@ final class AuthRepositoryImpl
 
   @override
   Future<AuthorizationTokenRes> signInWithApple() async {
-    final credential = await SignInWithApple.getAppleIDCredential(scopes: [
+    final AuthorizationCredentialAppleID credential =
+        await SignInWithApple.getAppleIDCredential(scopes: [
       AppleIDAuthorizationScopes.email,
-    ]);
+    ], nonce: nonce);
 
     throw Exception();
   }
