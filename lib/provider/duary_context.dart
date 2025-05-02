@@ -8,6 +8,7 @@ import 'package:duary/repository/couple_repository.dart';
 import 'package:duary/support/custom_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class DuaryContext {
 
@@ -39,7 +40,16 @@ class DuaryContext {
   }
 
   Future<void> signInWithApple() async {
-    await _authRepository.signInWithApple();
+    await _authRepository.signInWithApple().then((res) async {
+      onSignInSuccess(res);
+    }).catchError((e) {
+      if (e is SignInWithAppleAuthorizationException) {
+        if (e.code == AuthorizationErrorCode.canceled) {
+          return;
+        }
+      }
+      throw ServerResponseException(e.toString());
+    });
   }
 
   Future<void> signInWithKakaoTalk() async {
@@ -48,7 +58,7 @@ class DuaryContext {
     }).catchError((e) {
       if (e is PlatformException) {
         if (e.code == "CANCELED") {
-          throw CustomException("취소되었습니다");
+          return;
         }
       }
       throw ServerResponseException(e.toString());

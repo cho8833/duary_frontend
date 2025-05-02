@@ -94,7 +94,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                   ),
                   onClick: () {
-                    duaryContext.signInWithApple();
+                    duaryContext.signInWithApple().then((_) {
+                      onSignInComplete();
+                    }).catchError((e) {
+                      Fluttertoast.showToast(msg: e.toString());
+                    });
                   },
                 ),
                 const SizedBox(
@@ -109,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 48,
                       child: TextField(
                         onSubmitted: (value) {
-                          if (value != null || value.isEmpty == false) {
+                          if (value.isEmpty == false) {
                             username = int.parse(value);
                           } else {
                             username = null;

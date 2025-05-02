@@ -17,7 +17,7 @@ abstract interface class AuthRepository {
 
   Future<SignInRes> signInWithKakaoTalk();
 
-  Future<AuthorizationTokenRes> signInWithApple();
+  Future<SignInRes> signInWithApple();
 
   Future<SignInRes> dummySignIn(DummySignInReq req);
 }

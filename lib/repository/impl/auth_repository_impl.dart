@@ -43,13 +43,17 @@ final class AuthRepositoryImpl
   }
 
   @override
-  Future<AuthorizationTokenRes> signInWithApple() async {
+  Future<SignInRes> signInWithApple() async {
     final AuthorizationCredentialAppleID credential =
         await SignInWithApple.getAppleIDCredential(scopes: [
       AppleIDAuthorizationScopes.email,
     ], nonce: nonce);
 
-    throw Exception();
+    Uri uri = getUri("/auth/signin/apple");
+    
+    Response response = await client.post(uri, body: jsonEncode(credential.toJson()));
+
+    return getData(response, (p) => SignInRes.fromJson(p)).data;
   }
 
   @override
@@ -103,5 +107,19 @@ final class AuthRepositoryImpl
     Response response = await client.post(uri, body: jsonEncode(req.toJson()));
 
     return getData(response, (p0) => SignInRes.fromJson(p0)).data;
+  }
+}
+
+extension ToJson on AuthorizationCredentialAppleID {
+  Map<String, dynamic> toJson() {
+    return {
+      "userIdentifier": userIdentifier,
+      "givenName": givenName,
+      "familyName": familyName,
+      "authorizationCode": authorizationCode,
+      "email": email,
+      "identityToken": identityToken,
+      "state": state
+    };
   }
 }
