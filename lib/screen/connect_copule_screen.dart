@@ -1,9 +1,11 @@
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/screen/home_screen.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/support/button_base.dart';
 import 'package:duary/widget/main_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:pulling_manager/pulling_manager.dart';
 
 class ConnectCoupleScreen extends StatefulWidget {
   const ConnectCoupleScreen({super.key});
@@ -15,6 +17,29 @@ class ConnectCoupleScreen extends StatefulWidget {
 class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
   final DuaryContext duaryContext = DuaryContext();
 
+  late final PullingManager<void> pullingManager;
+
+  @override
+  void initState() {
+    super.initState();
+    pullingManager = PullingManager(
+        fetchData: () async {
+          duaryContext.getMyCouple().then((_) {
+            if (duaryContext.isCoupleConnected()) {
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  (p) => false);
+            }
+          });
+        },
+        customDurations: [const Duration(seconds: 5)],
+        immediateFirstFetch: false,
+        attachToLifecycle: true);
+
+    pullingManager.dataStream.listen(null);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +50,8 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
               duaryContext.signOut().then((_) {
                 Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const LoginScreen()),
                     (p) => false);
               });
             },
@@ -70,9 +96,9 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                   color: Color(0xFF464646),
                 ),
               ),
-              const Text(
-                "hbge4frvr",
-                style: TextStyle(
+              Text(
+                duaryContext.myCouple.value!.code,
+                style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 18,
                     color: Color(0xFF464646),
@@ -157,5 +183,12 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    pullingManager.pause();
+    pullingManager.dispose();
+    super.dispose();
   }
 }
