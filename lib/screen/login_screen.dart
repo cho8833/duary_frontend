@@ -23,13 +23,13 @@ class _LoginScreenState extends State<LoginScreen> {
   //test var
   int? username;
 
-  void onSignInComplete(Member member) {
+  void onSignInComplete() {
     // Sign In 성공 시 member 에 coupleId 검사. coupleId != null 이면 커플이 이미 생성된 것임
-    if (member.coupleId != null) {
+    if (duaryContext.isCoupleCreated()) {
       // 커플 정보 불러오기
       duaryContext.getMyCouple().then((couple) {
         // lover != null 이면, 커플 연결 완료된 것 => HomeScreen 으로 route
-        if (duaryContext.lover.value != null) {
+        if (duaryContext.isCoupleConnected()) {
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -79,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   onClick: () async {
                     await duaryContext.signInWithKakaoTalk().then((_) {
-                      onSignInComplete(duaryContext.me.value!);
+                      onSignInComplete();
                     }).catchError((e) {
                       Fluttertoast.showToast(msg: e.toString());
                     });
@@ -133,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Fluttertoast.showToast(msg: 'id를 입력해주세요');
                         } else {
                           await duaryContext.dummySignIn(username!).then((_) {
-                            onSignInComplete(duaryContext.me.value!);
+                            onSignInComplete();
                           }).catchError((e) {
                             Fluttertoast.showToast(msg: e.toString());
                           });

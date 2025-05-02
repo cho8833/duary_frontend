@@ -88,6 +88,16 @@ class DuaryContext {
     });
   }
 
-  bool get isLoggedIn => me.value != null;
+  bool isLoggedIn() {
+    return me.value != null;
+  }
+
+  bool isCoupleCreated() {
+    return me.value != null && me.value!.coupleId != null;
+  }
+
+  bool isCoupleConnected() {
+    return lover.value != null;
+  }
 
 }

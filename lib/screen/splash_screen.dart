@@ -52,11 +52,11 @@ class _SplashScreenState extends State<SplashScreen>
         Navigator.of(context)
             .pushReplacement(MaterialPageRoute(builder: (context) {
           // 로그인되어 있으면
-          if (duaryContext.me.value != null) {
+          if (duaryContext.isLoggedIn()) {
             // 커플이 생성되어 있는지 확인
-            if (duaryContext.me.value!.coupleId != null) {
+            if (duaryContext.isCoupleCreated()) {
               // 커플이 생성되어 있는 경우 커플이 연결되어 있는지 확인
-              if (duaryContext.lover.value != null) {
+              if (duaryContext.isCoupleConnected()) {
                 // Couple 연결 완료 상태면 HomeScreen 으로 route
                 return const HomeScreen();
               } else {
