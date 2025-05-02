@@ -16,7 +16,7 @@ class CoupleRepositoryMock implements CoupleRepository {
             Character.blue,
             "84ad69ea-1937-4aa0-872a-9dccc2274c9e",
             DateTime(2000, 08, 13),
-            3428835809,
+            "3428835809",
             "kakao",
           ),
           Member(
@@ -24,7 +24,7 @@ class CoupleRepositoryMock implements CoupleRepository {
             Character.yellow,
             "84ad69ea-1937-4aa0-872a-9dccc2274c9e",
             DateTime(1999, 04, 19),
-            1,
+            "1",
             "kakao",
           )
         ],

@@ -15,7 +15,7 @@ Member _$MemberFromJson(Map<String, dynamic> json) => Member(
       json['birthday'] == null
           ? null
           : DateTime.parse(json['birthday'] as String),
-      (json['socialId'] as num).toInt(),
+      json['socialId'] as String,
       json['provider'] as String,
     );
 

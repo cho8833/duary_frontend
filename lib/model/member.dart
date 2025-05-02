@@ -9,7 +9,7 @@ class Member {
   Character? character;
   String? coupleId;
   DateTime? birthday;
-  int socialId;
+  String socialId;
   String provider;
 
 
