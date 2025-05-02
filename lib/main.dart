@@ -13,7 +13,6 @@ import 'package:duary/repository/impl/secure_storage_impl.dart';
 import 'package:duary/support/repository_container.dart';
 import 'package:duary/repository/secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
@@ -62,20 +61,18 @@ void main() async {
   //   }
   // });
 
-  runApp(Main(duaryContext: duaryContext, eventProvider: eventProvider));
+  runApp(Main(eventProvider: eventProvider));
 }
 
 class Main extends StatelessWidget {
   const Main(
-      {super.key, required this.duaryContext, required this.eventProvider});
-  final DuaryContext duaryContext;
+      {super.key, required this.eventProvider});
   final EventProvider eventProvider;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider.value(value: duaryContext),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         Provider.value(value: eventProvider)
       ],
