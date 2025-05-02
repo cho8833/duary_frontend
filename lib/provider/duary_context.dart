@@ -45,7 +45,7 @@ class DuaryContext {
     }).catchError((e) {
       if (e is SignInWithAppleAuthorizationException) {
         if (e.code == AuthorizationErrorCode.canceled) {
-          return;
+          throw CustomException("취소되었습니다");
         }
       }
       throw ServerResponseException(e.toString());
@@ -58,7 +58,7 @@ class DuaryContext {
     }).catchError((e) {
       if (e is PlatformException) {
         if (e.code == "CANCELED") {
-          return;
+          throw CustomException("취소되었습니다");
         }
       }
       throw ServerResponseException(e.toString());

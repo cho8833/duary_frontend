@@ -5,6 +5,8 @@ import 'package:duary/support/asset_path.dart';
 import 'package:duary/support/button_base.dart';
 import 'package:duary/widget/main_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pulling_manager/pulling_manager.dart';
 
 class ConnectCoupleScreen extends StatefulWidget {
@@ -96,13 +98,20 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                   color: Color(0xFF464646),
                 ),
               ),
-              Text(
-                duaryContext.myCouple.value!.code,
-                style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18,
-                    color: Color(0xFF464646),
-                    decoration: TextDecoration.underline),
+              ButtonBase(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: duaryContext.myCouple.value!.code)).then((_) {
+                    Fluttertoast.showToast(msg: "복사되었습니다");
+                  });
+                },
+                child: Text(
+                  duaryContext.myCouple.value!.code,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 18,
+                      color: Color(0xFF464646),
+                      decoration: TextDecoration.underline),
+                ),
               ),
               const SizedBox(
                 height: 80,
