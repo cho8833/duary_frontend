@@ -1,6 +1,8 @@
 import 'package:duary/data/dummy_sign_in_req.dart';
 import 'package:duary/data/sign_in_res.dart';
+import 'package:duary/data/start_duary_req.dart';
 import 'package:duary/model/couple.dart';
+import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/token_provider.dart';
 import 'package:duary/repository/auth_repository.dart';
@@ -11,10 +13,11 @@ import 'package:flutter/services.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class DuaryContext {
-
   // singleton
   static final DuaryContext _instance = DuaryContext._internal();
+
   factory DuaryContext() => _instance;
+
   DuaryContext._internal();
 
   late final CoupleRepository _coupleRepository;
@@ -34,7 +37,7 @@ class DuaryContext {
 
   ValueNotifier<Member?> lover = ValueNotifier(null);
 
-  Member onSignInSuccess(SignInRes res)  {
+  Member onSignInSuccess(SignInRes res) {
     me.value = res.member;
     return me.value!;
   }
@@ -73,7 +76,7 @@ class DuaryContext {
     });
   }
 
-  Future<void> dummySignIn(int username) async {
+  Future<void> dummySignIn(String username) async {
     DummySignInReq req = DummySignInReq(username);
     await _authRepository.dummySignIn(req).then((res) async {
       onSignInSuccess(res);
@@ -92,9 +95,24 @@ class DuaryContext {
       myCouple.value = couple;
 
       if (myCouple.value!.members.length > 1) {
-        lover.value =
-            myCouple.value!.members.firstWhere((m) => m.socialId != me.value!.socialId);
+        lover.value = myCouple.value!.members
+            .firstWhere((m) => m.socialId != me.value!.socialId);
       }
+    });
+  }
+
+  Future<void> startDuary(
+    String name,
+    DateTime birthday,
+    DateTime relationDate,
+    Character myCharacter,
+  ) async {
+    StartDuaryReq req = StartDuaryReq(name, birthday, relationDate, myCharacter);
+    await _authRepository.startDuary(req).then((res) {
+      me.value = res.member;
+      myCouple.value = res.couple;
+    }).catchError((e) {
+      throw ServerResponseException(e.toString());
     });
   }
 
@@ -109,5 +127,4 @@ class DuaryContext {
   bool isCoupleConnected() {
     return lover.value != null;
   }
-
 }

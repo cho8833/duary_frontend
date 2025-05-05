@@ -21,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final DuaryContext duaryContext = DuaryContext();
 
   //test var
-  int? username;
+  String? username;
 
   void onSignInComplete() {
     // Sign In 성공 시 member 에 coupleId 검사. coupleId != null 이면 커플이 이미 생성된 것임
@@ -94,11 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                   ),
                   onClick: () {
-                    duaryContext.signInWithApple().then((_) {
-                      onSignInComplete();
-                    }).catchError((e) {
-                      Fluttertoast.showToast(msg: e.toString());
-                    });
+                    duaryContext.signInWithApple();
                   },
                 ),
                 const SizedBox(
@@ -113,8 +109,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 48,
                       child: TextField(
                         onSubmitted: (value) {
-                          if (value.isEmpty == false) {
-                            username = int.parse(value);
+                          if (value != null || value.isEmpty == false) {
+                            username = value;
                           } else {
                             username = null;
                           }

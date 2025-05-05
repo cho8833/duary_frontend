@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:duary/data/dummy_sign_in_req.dart';
 import 'package:duary/data/sign_in_res.dart';
+import 'package:duary/data/start_duary_req.dart';
+import 'package:duary/data/start_duary_res.dart';
 import 'package:duary/support/secret_key.dart';
 import 'package:http/http.dart';
 import 'package:duary/data/authorization_token_res.dart';
@@ -107,6 +109,15 @@ final class AuthRepositoryImpl
     Response response = await client.post(uri, body: jsonEncode(req.toJson()));
 
     return getData(response, (p0) => SignInRes.fromJson(p0)).data;
+  }
+  
+  @override
+  Future<StartDuaryRes> startDuary(StartDuaryReq req) async {
+    Uri uri = getUri("/start");
+
+    Response response = await interceptedClient.post(uri, body: jsonEncode(req.toJson()));
+
+    return getData(response, (p0) => StartDuaryRes.fromJson(p0)).data;
   }
 }
 

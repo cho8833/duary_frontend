@@ -1,9 +1,9 @@
 class DummySignInReq {
-  int username;
+  String username;
 
   DummySignInReq(this.username);
 
-  Map<String, int> toJson() =>
+  Map<String, String> toJson() =>
       {
         "username": username,
       };

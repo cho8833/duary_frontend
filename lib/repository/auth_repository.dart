@@ -3,6 +3,8 @@ import 'package:duary/data/sign_in_req.dart';
 import 'package:duary/data/dummy_sign_in_req.dart';
 import 'package:duary/data/sign_in_res.dart';
 import 'package:duary/data/sign_up_req.dart';
+import 'package:duary/data/start_duary_req.dart';
+import 'package:duary/data/start_duary_res.dart';
 import 'package:duary/model/member.dart';
 
 abstract interface class AuthRepository {
@@ -20,4 +22,6 @@ abstract interface class AuthRepository {
   Future<SignInRes> signInWithApple();
 
   Future<SignInRes> dummySignIn(DummySignInReq req);
+
+  Future<StartDuaryRes> startDuary(StartDuaryReq req);
 }
