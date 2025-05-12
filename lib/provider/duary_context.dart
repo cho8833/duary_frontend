@@ -108,7 +108,7 @@ class DuaryContext {
     Character myCharacter,
   ) async {
     StartDuaryReq req = StartDuaryReq(name, birthday, relationDate, myCharacter);
-    await _authRepository.startDuary(req).then((res) {
+    await _coupleRepository.startDuary(req).then((res) {
       me.value = res.member;
       myCouple.value = res.couple;
     }).catchError((e) {
