@@ -1,8 +1,7 @@
 import 'package:duary/repository/couple_repository.dart';
 import 'package:duary/repository/event_repository.dart';
+import 'package:duary/repository/impl/couple_repository_impl.dart';
 import 'package:duary/repository/impl/event_repository_impl.dart';
-import 'package:duary/repository/mock/couple_repository_mock.dart';
-import 'package:duary/repository/mock/event_repository_mock.dart';
 import 'package:http/http.dart';
 import 'package:http_interceptor/http_interceptor.dart';
 import 'package:duary/repository/auth_repository.dart';
@@ -30,7 +29,7 @@ class RepositoryContainer {
         interceptors: [contentTypeInterceptor, interceptor], client: Client());
     authRepository = AuthRepositoryImpl(client, interceptedClient);
     memberRepository = MemberRepositoryImpl(interceptedClient);
-    coupleRepository = CoupleRepositoryMock();
+    coupleRepository = CoupleRepositoryImpl(interceptedClient);
     eventRepository = EventRepositoryImpl(interceptedClient);
     interceptor.authRepository = authRepository;
   }
