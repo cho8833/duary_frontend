@@ -50,3 +50,6 @@ lib/firebase_options.dart
 
 # asset
 asset/
+
+# secret key
+lib/support/secret_key.dart

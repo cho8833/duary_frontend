@@ -3,12 +3,9 @@ import 'dart:math';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
-import 'package:duary/provider/auth_provider.dart';
-import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/event_details_screen.dart';
 import 'package:duary/screen/schedule_screen.dart';
-import 'package:duary/support/button_base.dart';
 import 'package:duary/widget/characters.dart';
 import 'package:duary/widget/main_app_bar.dart';
 import 'package:duary/widget/set_character.dart';
@@ -41,8 +38,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _eventProvider = context.read<EventProvider>();
 
-    me = _eventProvider.myCouple!.me;
-    lover = _eventProvider.myCouple!.lover;
+    me = _eventProvider.me!;
+    lover = _eventProvider.lover!;
 
     getOngoingEventRequest = _eventProvider.getOngoingEvent();
   }
@@ -72,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         width: 41,
                         child: ClipRRect(
                             borderRadius: BorderRadius.circular(99),
-                            child: Character.characterWidget(me.character,
+                            child: Character.characterWidget(me.character!,
                                 width: 41, height: 63, opacity: 1)),
                       ),
                       const SizedBox(
@@ -94,9 +91,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Row(
                           children: [
                             Text(
-                              me.name,
+                              me.name!,
                               style: TextStyle(
-                                  color: me.character.characterColor,
+                                  color: me.character!.characterColor,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15),
                             ),
@@ -104,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 5,
                             ),
                             Container(
-                              color: me.character.characterColor,
+                              color: me.character!.characterColor,
                               width: 1,
                               height: 19,
                             ),
@@ -121,8 +118,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   }
                                   return Text(
                                     title,
-                                    style: TextStyle(
-                                        color: me.character.fontBlackColor,
+                                    style: const TextStyle(
+                                        color: Color(0xFF111111),
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15),
                                   );
@@ -164,8 +161,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   return Text(
                                     title,
                                     textAlign: TextAlign.end,
-                                    style: TextStyle(
-                                        color: lover.character.fontBlackColor,
+                                    style: const TextStyle(
+                                        color: Color(0xFF111111),
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15),
                                   );
@@ -174,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 5,
                             ),
                             Container(
-                              color: lover.character.characterColor,
+                              color: lover.character!.characterColor,
                               width: 1,
                               height: 19,
                             ),
@@ -182,9 +179,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 5,
                             ),
                             Text(
-                              lover.name,
+                              lover.name!,
                               style: TextStyle(
-                                  color: lover.character.characterColor,
+                                  color: lover.character!.characterColor,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15),
                             ),
@@ -344,7 +341,7 @@ class ComingEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color color = event.member.character.strokeColor;
+    Color color = event.member.character!.strokeColor;
     return GestureDetector(
       onTap: () {
         Navigator.push(

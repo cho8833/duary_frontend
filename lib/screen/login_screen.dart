@@ -1,11 +1,14 @@
 import 'package:duary/model/member.dart';
-import 'package:duary/provider/auth_provider.dart';
+import 'package:duary/provider/duary_context.dart';
+import 'package:duary/screen/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
-import 'package:duary/screen/input_couple_info_screen.dart';
+import 'package:duary/screen/start_duary_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,28 +18,41 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  late final AuthProvider authProvider;
+  final DuaryContext duaryContext = DuaryContext();
 
-  @override
-  void initState() {
-    authProvider = AuthProvider();
-    super.initState();
-  }
+  //test var
+  String? username;
 
-  void onSignInComplete(Member member) {
-    // 회원가입 성공 시 커플 정보 입력화면으로 이동
-    if (member.coupleId == null) {
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const InputCoupleInfoScreen()),
-          (p) => false);
+  void onSignInComplete() {
+    // Sign In 성공 시 member 에 coupleId 검사. coupleId != null 이면 커플이 이미 생성된 것임
+    if (duaryContext.isCoupleCreated()) {
+      // 커플 정보 불러오기
+      duaryContext.getMyCouple().then((couple) {
+        // lover != null 이면, 커플 연결 완료된 것 => HomeScreen 으로 route
+        if (duaryContext.isCoupleConnected()) {
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+              (p) => false);
+        }
+        // lover == null 이면, 커플 연결되지 않은 것 => ConnectCoupleScreen 으로 route
+        else {
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const ConnectCoupleScreen()),
+              (p) => false);
+        }
+      }).catchError((e) {
+        // 커플 정보 불러오기 실패 시 개발 오류 가능성이 큼
+        Fluttertoast.showToast(msg: e.toString());
+      });
     }
-    // 회원가입된 회원이면 홈화면으로 이동
+    // 커플이 생성되어 있지 않으면 StartDuaryScreen 으로 route
     else {
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => const StartDuaryScreen()),
           (p) => false);
     }
   }
@@ -62,13 +78,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                   ),
                   onClick: () async {
-                    Member member = await authProvider
-                        .signInWithKakaoTalk()
-                        .catchError((e) {
+                    await duaryContext.signInWithKakaoTalk().then((_) {
+                      onSignInComplete();
+                    }).catchError((e) {
                       Fluttertoast.showToast(msg: e.toString());
-                      return null;
                     });
-                    onSignInComplete(member);
                   },
                 ),
                 const SizedBox(
@@ -80,12 +94,71 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                   ),
                   onClick: () {
-                    authProvider.signInWithApple();
+                    duaryContext.signInWithApple().then((_) {
+                      onSignInComplete();
+                    }).catchError((e) {
+                      Fluttertoast.showToast(msg: e.toString());
+                    });
                   },
                 ),
                 const SizedBox(
                   height: 48,
+                ),
+                //test~
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: 240,
+                      height: 48,
+                      child: TextField(
+                        onSubmitted: (value) {
+                          if (value != null || value.isEmpty == false) {
+                            username = value;
+                          } else {
+                            username = null;
+                          }
+                        },
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        if (username == null) {
+                          Fluttertoast.showToast(msg: 'id를 입력해주세요');
+                        } else {
+                          await duaryContext.dummySignIn(username!).then((_) {
+                            onSignInComplete();
+                          }).catchError((e) {
+                            Fluttertoast.showToast(msg: e.toString());
+                          });
+                        }
+                      },
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          border: Border.all(width: 1),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+
+                const SizedBox(
+                  height: 48,
                 )
+                //~test
               ],
             ),
           ],

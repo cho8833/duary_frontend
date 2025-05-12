@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'package:duary/data/dummy_sign_in_req.dart';
+import 'package:duary/data/sign_in_res.dart';
+import 'package:duary/support/secret_key.dart';
 import 'package:http/http.dart';
 import 'package:duary/data/authorization_token_res.dart';
 import 'package:duary/data/sign_in_req.dart';
@@ -20,10 +23,10 @@ final class AuthRepositoryImpl
   final Client client;
 
   static const String nonce =
-      "gOlSrRa9l2xnpkeGFuKHVs6yMWfot6eODIDKrLGC3fMCUVZDbW";
+      SecretKey.oidcNonce;
 
   @override
-  Future<AuthorizationTokenRes> signInWithKakaoTalk() async {
+  Future<SignInRes> signInWithKakaoTalk() async {
     late OAuthToken token;
     if (await isKakaoTalkInstalled()) {
       token = await UserApi.instance.loginWithKakaoTalk(nonce: nonce);
@@ -36,16 +39,21 @@ final class AuthRepositoryImpl
     Response response =
         await client.post(uri, body: jsonEncode(token.toJson()));
 
-    return getData(response, (p0) => AuthorizationTokenRes.fromJson(p0['token'])).data;
+    return getData(response, (p0) => SignInRes.fromJson(p0)).data;
   }
 
   @override
-  Future<AuthorizationTokenRes> signInWithApple() async {
-    final credential = await SignInWithApple.getAppleIDCredential(scopes: [
+  Future<SignInRes> signInWithApple() async {
+    final AuthorizationCredentialAppleID credential =
+        await SignInWithApple.getAppleIDCredential(scopes: [
       AppleIDAuthorizationScopes.email,
-    ]);
+    ], nonce: nonce);
 
-    throw Exception();
+    Uri uri = getUri("/auth/signin/apple");
+    
+    Response response = await client.post(uri, body: jsonEncode(credential.toJson()));
+
+    return getData(response, (p) => SignInRes.fromJson(p)).data;
   }
 
   @override
@@ -90,5 +98,28 @@ final class AuthRepositoryImpl
 
     Response response = await client.post(uri, body: jsonEncode(req.toJson()));
     return getData(response, (p0) => AuthorizationTokenRes.fromJson(p0)).data;
+  }
+
+  @override
+  Future<SignInRes> dummySignIn(DummySignInReq req) async {
+    Uri uri = getUri("/auth/signin/dummy");
+
+    Response response = await client.post(uri, body: jsonEncode(req.toJson()));
+
+    return getData(response, (p0) => SignInRes.fromJson(p0)).data;
+  }
+}
+
+extension ToJson on AuthorizationCredentialAppleID {
+  Map<String, dynamic> toJson() {
+    return {
+      "userIdentifier": userIdentifier,
+      "givenName": givenName,
+      "familyName": familyName,
+      "authorizationCode": authorizationCode,
+      "email": email,
+      "identityToken": identityToken,
+      "state": state
+    };
   }
 }

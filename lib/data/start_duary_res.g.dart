@@ -1,16 +1,14 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'get_couple_res.dart';
+part of 'start_duary_res.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-GetCoupleRes _$GetCoupleResFromJson(Map<String, dynamic> json) => GetCoupleRes(
+StartDuaryRes _$StartDuaryResFromJson(Map<String, dynamic> json) =>
+    StartDuaryRes(
+      Member.fromJson(json['member'] as Map<String, dynamic>),
       Couple.fromJson(json['couple'] as Map<String, dynamic>),
+      AuthorizationTokenRes.fromJson(json['token'] as Object),
     );
-
-Map<String, dynamic> _$GetCoupleResToJson(GetCoupleRes instance) =>
-    <String, dynamic>{
-      'couple': instance.couple,
-    };

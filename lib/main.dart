@@ -7,13 +7,13 @@ import 'package:firebase_core/firebase_core.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/theme_provider.dart';
 import 'package:duary/provider/token_provider.dart';
 import 'package:duary/repository/impl/secure_storage_impl.dart';
-import 'package:duary/repository/repository_container.dart';
+import 'package:duary/support/repository_container.dart';
 import 'package:duary/repository/secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
@@ -29,9 +29,7 @@ void main() async {
   FlutterSecureStorage ss = const FlutterSecureStorage();
   final SecureStorage secureStorage = SecureStorageImpl(ss);
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // final fcmToken = await FirebaseMessaging.instance.getToken();
 
   // pre cache splash logo
@@ -48,39 +46,32 @@ void main() async {
   RepositoryContainer rc = RepositoryContainer();
   rc.initialize(secureStorage);
 
-  // initialize auth provider
-  AuthProvider authProvider = AuthProvider();
-  authProvider.init(rc.authRepository);
-
   EventProvider eventProvider = EventProvider(rc.eventRepository);
-  DuaryContext duaryContext = DuaryContext(rc.coupleRepository);
+  DuaryContext duaryContext = DuaryContext();
+  duaryContext.init(rc.coupleRepository, rc.authRepository);
 
-  // check signIn
-  await authProvider.checkSignIn().then((_) async {
-    if (authProvider.me != null) {
-      await duaryContext.getMyCouple(authProvider.me!, onSuccess: (couple) {
-        eventProvider.myCouple = couple;
-      });
+  // 로그인
+  await duaryContext.checkSignIn().then((_) async {
+    // 로그인 성공한 경우, 커플 정보까지 가져옴
+    if (duaryContext.me.value != null) {
+      if (duaryContext.me.value!.coupleId != null) {
+        await duaryContext.getMyCouple().catchError((_) {});
+      }
     }
   });
 
-  runApp(Main(
-    duaryContext: duaryContext,
-    eventProvider: eventProvider
-  ));
+  runApp(Main(eventProvider: eventProvider));
 }
 
 class Main extends StatelessWidget {
   const Main(
-      {super.key, required this.duaryContext, required this.eventProvider});
-  final DuaryContext duaryContext;
-  final  EventProvider eventProvider;
+      {super.key, required this.eventProvider});
+  final EventProvider eventProvider;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider.value(value: duaryContext),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         Provider.value(value: eventProvider)
       ],
