@@ -94,7 +94,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                   ),
                   onClick: () {
-                    duaryContext.signInWithApple();
+                    duaryContext.signInWithApple().then((_) {
+                      onSignInComplete();
+                    }).catchError((e) {
+                      Fluttertoast.showToast(msg: e.toString());
+                    });
                   },
                 ),
                 const SizedBox(
