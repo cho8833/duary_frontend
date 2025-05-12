@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'package:duary/screen/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
-import 'package:duary/screen/input_couple_info_screen.dart';
 import 'package:duary/support/http_request_interceptor.dart';
 import 'package:duary/support/uri_provider.dart';
 import 'package:duary/widget/main_app_bar.dart';
@@ -40,7 +40,7 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
             Navigator.pop(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const InputCoupleInfoScreen(),
+                  builder: (context) => const ConnectCoupleScreen(),
                 ));
           },
           child: const Icon(Icons.chevron_left),
