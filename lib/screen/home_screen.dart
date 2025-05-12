@@ -3,11 +3,9 @@ import 'dart:math';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
-import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/event_details_screen.dart';
 import 'package:duary/screen/schedule_screen.dart';
-import 'package:duary/support/button_base.dart';
 import 'package:duary/widget/characters.dart';
 import 'package:duary/widget/main_app_bar.dart';
 import 'package:duary/widget/set_character.dart';
@@ -120,8 +118,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   }
                                   return Text(
                                     title,
-                                    style: TextStyle(
-                                        color: me.character!.fontBlackColor,
+                                    style: const TextStyle(
+                                        color: Color(0xFF111111),
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15),
                                   );
@@ -163,8 +161,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   return Text(
                                     title,
                                     textAlign: TextAlign.end,
-                                    style: TextStyle(
-                                        color: lover.character!.fontBlackColor,
+                                    style: const TextStyle(
+                                        color: Color(0xFF111111),
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15),
                                   );
