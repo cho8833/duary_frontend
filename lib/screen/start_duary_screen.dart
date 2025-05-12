@@ -2,6 +2,8 @@ import 'package:duary/model/enums/character.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/repository/couple_repository.dart';
 import 'package:duary/screen/connect_copule_screen.dart';
+import 'package:duary/screen/login_screen.dart';
+import 'package:duary/support/button_base.dart';
 
 import 'package:duary/support/repository_container.dart';
 import 'package:duary/widget/characters.dart';
@@ -45,161 +47,221 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: MainAppBar(appBarObj: AppBar()),
-      body: Column(
-        children: [
-          const SizedBox(
-            height: 56, //58
-          ),
-          const Column(
-            children: [
-              Text(
-                '만나서 반가워요!',
-                style: TextStyle(
-                  color: Color(0xFFFF9000),
-                  fontFamily: 'NanumSquareRound',
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 56, //58
+            ),
+            const Column(
+              children: [
+                Text(
+                  '만나서 반가워요!',
+                  style: TextStyle(
+                    color: Color(0xFFFF9000),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-              SizedBox(
-                height: 8, //7
-              ),
-              Text(
-                '우리의 시작을 알려주세요.',
-                style: TextStyle(
-                  color: Color(0xFF6E6E6E),
-                  fontFamily: 'NanumSquareRound',
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
+                SizedBox(
+                  height: 8, //7
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 40,
-          ),
-          inputInfo(
-            hintText: "내 이름 / 닉네임",
-            myInfo: "",
-            inputBy: nameInputter(),
-            validateBy: isName,
-            errorMessage: nameErrorMssg,
-          ),
-          inputInfo(
-            hintText: "내 생년월일",
-            inputBy: _buildBirthdayDialogButton(),
-            myInfo: formatDateTime(birthday),
-            validateBy: isBirthday,
-            errorMessage: birthdayErrorMssg,
-          ),
-          inputInfo(
-            hintText: "우리가 처음 만난 날",
-            inputBy: _buildRelationDateDialogButton(),
-            myInfo: formatDateTime(relationDate),
-            validateBy: isRelationDate,
-            errorMessage: relationDateErrorMssg,
-          ),
-          whichCharacter(),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              '내 캐릭터',
-              style: TextStyle(
-                color: Color(0xFF3F3F3F),
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+                Text(
+                  '우리의 시작을 알려주세요.',
+                  style: TextStyle(
+                    color: Color(0xFF6E6E6E),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 40,
+            ),
+            inputInfo(
+                hintText: "내 이름 / 닉네임",
+                myInfo: "",
+                inputBy: nameInputter(),
+                validateBy: isName,
+                errorMessage: nameErrorMssg,
+                expandIcon: false),
+            inputInfo(
+              hintText: "내 생년월일",
+              inputBy: _buildBirthdayDialogButton(),
+              myInfo: formatDateTime(birthday),
+              validateBy: isBirthday,
+              errorMessage: birthdayErrorMssg,
+              expandIcon: true,
+            ),
+            inputInfo(
+              hintText: "우리가 처음 만난 날",
+              inputBy: _buildRelationDateDialogButton(),
+              myInfo: formatDateTime(relationDate),
+              validateBy: isRelationDate,
+              errorMessage: relationDateErrorMssg,
+              expandIcon: true,
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ButtonBase(
+                  onTap: () {
+                    setState(() {
+                      blue ? blue = false
+                          : blue = true;
+                    });
+                  },
+                  child: const Icon(
+                    Icons.chevron_left,
+                    color: Color(0xFF5D5D5D),
+                  ),
+                ),
+                const SizedBox(
+                  width: 40,
+                ),
+                whichCharacter(),
+                const SizedBox(
+                  width: 40,
+                ),
+                ButtonBase(
+                  onTap: () {
+                    setState(() {
+                      blue ? blue = false
+                          : blue = true;
+                    });
+                  },
+                  child: const Icon(
+                    Icons.chevron_right,
+                    color: Color(0xFF5D5D5D),
+                  ),
+                ),
+              ],
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                '내 캐릭터',
+                style: TextStyle(
+                  color: Color(0xFF3F3F3F),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 48,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 48),
-            child: GestureDetector(
-              onTap: () async {
-                if (name.isEmpty == true) {
-                  setState(
-                        () {
-                      nameErrorMssg = "이름을 입력해주세요";
-                    },
-                  );
-                }
-                if (isBirthday == false) {
-                  setState(
-                        () {
-                      birthdayErrorMssg = "생일을 입력해주세요";
-                    },
-                  );
-                }
-                if (isRelationDate == false) {
-                  setState(
-                        () {
-                      relationDateErrorMssg = "처음 만난 날을 입력해주세요";
-                    },
-                  );
-                }
-                if (name.isEmpty == false && isBirthday == true &&
-                    isRelationDate == true) {
-                  blue ? myCharacter = Character.blue : myCharacter = Character.yellow;
+            const SizedBox(
+              height: 24,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 48),
+              child: GestureDetector(
+                onTap: () async {
+                  if (name.isEmpty == true) {
+                    setState(
+                      () {
+                        nameErrorMssg = "이름을 입력해주세요";
+                      },
+                    );
+                  }
+                  if (isBirthday == false) {
+                    setState(
+                      () {
+                        birthdayErrorMssg = "생일을 입력해주세요";
+                      },
+                    );
+                  }
+                  if (isRelationDate == false) {
+                    setState(
+                      () {
+                        relationDateErrorMssg = "처음 만난 날을 입력해주세요";
+                      },
+                    );
+                  }
+                  if (name.isEmpty == false &&
+                      isBirthday == true &&
+                      isRelationDate == true) {
+                    blue
+                        ? myCharacter = Character.blue
+                        : myCharacter = Character.yellow;
 
-
-                  await duaryContext.startDuary(name, birthday, relationDate, myCharacter).then((_) {
-                    //validate 구현 필요
+                    await duaryContext
+                        .startDuary(name, birthday, relationDate, myCharacter)
+                        .then((_) {
+                      //validate 구현 필요
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const ConnectCoupleScreen()),
+                          (p) => false);
+                    }).catchError((e) {
+                      Fluttertoast.showToast(msg: e.toString());
+                    });
+                  }
+                },
+                child: Container(
+                  width: 304,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFBD64),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: const Center(
+                      child: Text(
+                    'Duary 시작하기',
+                    style: TextStyle(
+                      color: Color(0xFF573200),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  )),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            ButtonBase(
+                onTap: () {
+                  duaryContext.signOut().then((_) {
                     Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const ConnectCoupleScreen()),
-                            (p) => false);
-                  }).catchError((e) {
-                    Fluttertoast.showToast(msg: e.toString());
+                            builder: (context) => const LoginScreen()),
+                        (p) => false);
                   });
-                }
-              },
-              child: Container(
-                width: 304,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFBD64),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: const Center(
-                    child: Text(
-                      'Duary 시작하기',
-                      style: TextStyle(
-                        color: Color(0xFF573200),
-                        fontFamily: 'NanumSquareRound',
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    )),
+                },
+                child: const Text(
+                  "다른 계정으로 로그인",
+                  style: TextStyle(fontSize: 13),
+                )),
+            const SizedBox(
+              height: 16,
+            ),
+            const Text(
+              '위 내용은 연결된 상대방의 Duary에도 보이며\n'
+              '마이페이지에서 변경 가능합니다. 입력하신\n'
+              '모든 정보는 서비스 최적화를 위해서만 사용됩니다.',
+              style: TextStyle(
+                color: Color(0xFFCBCBCB),
+                fontSize: 11,
+                fontWeight: FontWeight.w400,
               ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(
-            height: 32,
-          ),
-          const Text(
-            '위 내용은 연결된 상대방의 Duary에도 보이며\n'
-                '마이페이지에서 변경 가능합니다. 입력하신\n'
-                '모든 정보는 서비스 최적화를 위해서만 사용됩니다.',
-            style: TextStyle(
-              color: Color(0xFFCBCBCB),
-              fontFamily: 'NanumSquareRound',
-              fontSize: 11,
-              fontWeight: FontWeight.w400,
-            ),
-            textAlign: TextAlign.center,
-          )
-        ],
+            const SizedBox(
+              height: 40,
+            )
+          ],
+        ),
       ),
     );
   }
 
-
-  TextField nameInputter() =>
-      TextField(
-
+  TextField nameInputter() => TextField(
         onChanged: (value) {
           name = value;
           setState(() {
@@ -214,12 +276,10 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
         textAlign: TextAlign.center,
         style: const TextStyle(
           color: Color(0xFF3F3F3F),
-          fontFamily: 'Pretendard',
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
         ),
         decoration: const InputDecoration(
-          isDense: true,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
         ),
@@ -231,90 +291,70 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
     required String myInfo,
     required bool validateBy,
     required String errorMessage,
+    required bool expandIcon,
   }) {
     return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 64),
-        child: SizedBox(
-          width: double.infinity,
-          height: 58,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 48),
+        child: Flexible(
+          child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: Icon(
-                  Icons.task_alt,
-                  color: validateBy
-                      ? const Color(0xFFFFBD64)
-                      : const Color(0xFFD4D4D4),
-                ),
-              ),
-              //icon 위치 조정하기
-              const SizedBox(
-                width: 13,
-              ),
-              Flexible(
-                child: Column(
-                  children: [
-                    Stack(
-                      children: [
-                        Container(
-                          width: 250,
-                          height: 33,
-                          decoration: BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                color: validateBy
-                                    ? const Color(0xFFFFBD64)
-                                    : const Color(0xFFD4D4D4),
-                                width: 1.5,
-                              ),
-                            ),
-                          ),
-                          child: Center(
-                            child: validateBy
-                                ? Text(
+              Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF7F7F7),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: validateBy
+                          ? Text(
                               myInfo,
                               style: const TextStyle(
                                 color: Color(0xFF3F3F3F),
-                                fontFamily: 'Pretendard',
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
                               ),
                             )
-                                : Text(
+                          : Text(
                               hintText,
                               style: const TextStyle(
-                                color: Color(0xFFD4D4D4),
-                                fontFamily: 'Pretendard',
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF6F6F6F),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
+                    ),
+                  ),
+                  expandIcon
+                      ? const Positioned(
+                          top: 12,
+                          right: 16,
+                          child: Icon(
+                            Icons.expand_more_rounded,
+                            color: Color(0xFF6F6F6F),
                           ),
-                        ),
-                        SizedBox(
-                          width: 250,
-                          height: 33,
-                          child: inputBy,
                         )
-                      ],
-                    ),
-                    SizedBox(
-                      width: 250,
-                      height: 25,
-                      child: Text(
-                        errorMessage,
-                        textAlign: TextAlign.start,
-                        style: const TextStyle(
-                          color: Colors.redAccent,
-                          fontFamily: 'NanumSquareRound',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
+                      : const SizedBox(),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: inputBy,
+                  )
+                ],
+              ),
+              SizedBox(
+                width: double.infinity,
+                height: 16,
+                child: Text(
+                  errorMessage,
+                  textAlign: TextAlign.start,
+                  style: const TextStyle(
+                    color: Colors.redAccent,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],
@@ -324,8 +364,10 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
 
   String formatDateTime(DateTime req) => DateFormat('yy.MM.dd').format(req);
 
-  String _getValueText(CalendarDatePicker2Type datePickerType,
-      List<DateTime?> value,) {
+  String _getValueText(
+    CalendarDatePicker2Type datePickerType,
+    List<DateTime?> value,
+  ) {
     value = value.map((e) => e != null ? DateUtils.dateOnly(e) : null).toList();
     var valueText = (value.isNotEmpty ? value[0] : null)
         .toString()
@@ -339,9 +381,9 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
       DateTime.now(),
     ];
     const dayTextStyle =
-    TextStyle(color: Colors.black, fontWeight: FontWeight.w700);
+        TextStyle(color: Colors.black, fontWeight: FontWeight.w700);
     final weekendTextStyle =
-    TextStyle(color: Colors.grey[500], fontWeight: FontWeight.w600);
+        TextStyle(color: Colors.grey[500], fontWeight: FontWeight.w600);
     final anniversaryTextStyle = TextStyle(
       color: Colors.red[400],
       fontWeight: FontWeight.w700,
@@ -463,9 +505,9 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
       DateTime.now(),
     ];
     const dayTextStyle =
-    TextStyle(color: Colors.black, fontWeight: FontWeight.w700);
+        TextStyle(color: Colors.black, fontWeight: FontWeight.w700);
     final weekendTextStyle =
-    TextStyle(color: Colors.grey[500], fontWeight: FontWeight.w600);
+        TextStyle(color: Colors.grey[500], fontWeight: FontWeight.w600);
     final anniversaryTextStyle = TextStyle(
       color: Colors.red[400],
       fontWeight: FontWeight.w700,

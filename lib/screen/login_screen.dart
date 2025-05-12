@@ -109,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
-                      width: 240,
+                      width: 200,
                       height: 48,
                       child: TextField(
                         onSubmitted: (value) {
