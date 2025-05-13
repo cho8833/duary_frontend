@@ -295,70 +295,68 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
   }) {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 48),
-        child: Flexible(
-          child: Column(
-            children: [
-              Stack(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF7F7F7),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: validateBy
-                          ? Text(
-                              myInfo,
-                              style: const TextStyle(
-                                color: Color(0xFF3F3F3F),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            )
-                          : Text(
-                              hintText,
-                              style: const TextStyle(
-                                color: Color(0xFF6F6F6F),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                    ),
+        child: Column(
+          children: [
+            Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 45,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF7F7F7),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  expandIcon
-                      ? const Positioned(
-                          top: 12,
-                          right: 16,
-                          child: Icon(
-                            Icons.expand_more_rounded,
-                            color: Color(0xFF6F6F6F),
+                  child: Center(
+                    child: validateBy
+                        ? Text(
+                            myInfo,
+                            style: const TextStyle(
+                              color: Color(0xFF3F3F3F),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          )
+                        : Text(
+                            hintText,
+                            style: const TextStyle(
+                              color: Color(0xFF6F6F6F),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        )
-                      : const SizedBox(),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: inputBy,
-                  )
-                ],
-              ),
-              SizedBox(
-                width: double.infinity,
-                height: 16,
-                child: Text(
-                  errorMessage,
-                  textAlign: TextAlign.start,
-                  style: const TextStyle(
-                    color: Colors.redAccent,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
+                expandIcon
+                    ? const Positioned(
+                        top: 12,
+                        right: 16,
+                        child: Icon(
+                          Icons.expand_more_rounded,
+                          color: Color(0xFF6F6F6F),
+                        ),
+                      )
+                    : const SizedBox(),
+                SizedBox(
+                  width: double.infinity,
+                  height: 45,
+                  child: inputBy,
+                )
+              ],
+            ),
+            SizedBox(
+              width: double.infinity,
+              height: 16,
+              child: Text(
+                errorMessage,
+                textAlign: TextAlign.start,
+                style: const TextStyle(
+                  color: Colors.redAccent,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ));
   }
 
@@ -478,7 +476,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
                   );
 
                   if (value != null) {
-                    birthday = value.first!;
+                    birthday = DateTime(value.first!.year, value.first!.month, value.first!.day);
                     setState(() {
                       _dialogCalendarPickerValue = value;
                       isBirthday = true;
@@ -602,12 +600,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
                   );
 
                   if (value != null) {
-                    // ignore: avoid_print
-                    print(_getValueText(
-                      config.calendarType,
-                      value,
-                    ));
-                    relationDate = value.first!;
+                    relationDate = DateTime(value.first!.year, value.first!.month, value.first!.day);
                     setState(() {
                       _dialogCalendarPickerValue = value;
                       isRelationDate = true;

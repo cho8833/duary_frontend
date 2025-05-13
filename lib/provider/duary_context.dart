@@ -107,7 +107,9 @@ class DuaryContext {
     DateTime relationDate,
     Character myCharacter,
   ) async {
-    StartDuaryReq req = StartDuaryReq(name, birthday, relationDate, myCharacter);
+    DateTime birthdayReq = DateTime(birthday.year, birthday.month, birthday.day);
+    DateTime relationDateReq = DateTime(relationDate.year, relationDate.month, relationDate.day);
+    StartDuaryReq req = StartDuaryReq(name, birthdayReq, relationDateReq, myCharacter);
     await _coupleRepository.startDuary(req).then((res) {
       me.value = res.member;
       myCouple.value = res.couple;
