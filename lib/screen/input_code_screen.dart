@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'package:duary/screen/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
-import 'package:duary/screen/input_couple_info_screen.dart';
 import 'package:duary/support/http_request_interceptor.dart';
 import 'package:duary/support/uri_provider.dart';
 import 'package:duary/widget/main_app_bar.dart';
@@ -9,6 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
 import 'package:http_interceptor/http/intercepted_client.dart';
+import 'package:duary/repository/impl/couple_repository_impl.dart';
+import 'package:duary/provider/duary_context.dart';
 
 class InputCodeScreen extends StatefulWidget {
   const InputCodeScreen({super.key});
@@ -18,15 +20,9 @@ class InputCodeScreen extends StatefulWidget {
 }
 
 class _InputCodeScreenState extends State<InputCodeScreen> {
-  late String coupleCode = "";
+  final DuaryContext duaryContext = DuaryContext();
+  String coupleCode = "";
 
-  Map<String, dynamic?> typechanger(coupleCode) {
-    Map<String, dynamic?> req = {
-      "coupleCode": coupleCode,
-    };
-
-    return req;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +36,7 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
             Navigator.pop(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const InputCoupleInfoScreen(),
+                  builder: (context) => const ConnectCoupleScreen(),
                 ));
           },
           child: const Icon(Icons.chevron_left),
@@ -73,14 +69,10 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
                 height: 32,
                 child: TextField(
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]'))
+                    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
                   ],
-                  onSubmitted: (value) {
-                    if (value == null || value.isEmpty == true) {
-                      Fluttertoast.showToast(msg: "커플 코드를 입력해주세요!");
-                    } else {
-                      coupleCode = value;
-                    }
+                  onChanged: (value) {
+                    coupleCode = value;
                   },
                   cursorColor: const Color(0XffE3DDD7),
                   textAlign: TextAlign.center,
@@ -117,7 +109,21 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 48),
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () async {
+                    if (coupleCode.isEmpty == true) {
+                      Fluttertoast.showToast(msg: "코드를 입력해주세요");
+                    } else {
+                      await duaryContext.inputCoupleCode(coupleCode).then((_) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const HomeScreen()),
+                              );
+                      }).catchError((e) {
+                        Fluttertoast.showToast(msg: e.toString());
+                      });
+                    }
+                  },
                   child: Container(
                     width: double.infinity,
                     height: 50,
