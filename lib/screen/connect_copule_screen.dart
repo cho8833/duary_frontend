@@ -1,5 +1,6 @@
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/home_screen.dart';
+import 'package:duary/screen/input_code_screen.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/support/button_base.dart';
@@ -156,7 +157,13 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                         height: 8,
                       ),
                       ButtonBase(
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const InputCodeScreen()));
+                          },
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
