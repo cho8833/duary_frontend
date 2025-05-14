@@ -1,6 +1,7 @@
 import 'package:duary/data/dummy_sign_in_req.dart';
 import 'package:duary/data/sign_in_res.dart';
 import 'package:duary/data/start_duary_req.dart';
+import 'package:duary/data/input_couple_code_req.dart';
 import 'package:duary/model/couple.dart';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/member.dart';
@@ -11,6 +12,7 @@ import 'package:duary/support/custom_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
 
 class DuaryContext {
   // singleton
@@ -93,11 +95,7 @@ class DuaryContext {
   Future<void> getMyCouple() async {
     await _coupleRepository.getMyCouple().then((couple) {
       myCouple.value = couple;
-
-      if (myCouple.value!.members.length > 1) {
-        lover.value = myCouple.value!.members
-            .firstWhere((m) => m.socialId != me.value!.socialId);
-      }
+      lover.value = getLoverFromCouple(couple);
     });
   }
 
@@ -118,6 +116,17 @@ class DuaryContext {
     });
   }
 
+  Future<void> inputCoupleCode(String coupleCode) async {
+    InputCoupleCodeReq req = InputCoupleCodeReq(coupleCode);
+    await _coupleRepository.inputCoupleCode(req).then((res) {
+      me.value = res.member;
+      myCouple.value = res.couple;
+      lover.value = getLoverFromCouple(res.couple);
+    }).catchError((e) {
+      throw ServerResponseException(e.toString());
+    });
+  }
+
   bool isLoggedIn() {
     return me.value != null;
   }
@@ -128,5 +137,14 @@ class DuaryContext {
 
   bool isCoupleConnected() {
     return lover.value != null;
+  }
+
+  Member? getLoverFromCouple(Couple couple) {
+    Member? lover;
+    if (myCouple.value!.members.length > 1) {
+      lover = myCouple.value!.members
+          .firstWhere((m) => m.socialId != me.value!.socialId);
+    }
+    return lover;
   }
 }
