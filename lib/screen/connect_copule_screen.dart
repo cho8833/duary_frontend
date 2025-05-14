@@ -47,20 +47,6 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
     return Scaffold(
       appBar: MainAppBar(
         appBarObj: AppBar(),
-        trailingBuilder: (context) => ButtonBase(
-            onTap: () {
-              duaryContext.signOut().then((_) {
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const LoginScreen()),
-                    (p) => false);
-              });
-            },
-            child: const Text(
-              "다른 계정으로 로그인",
-              style: TextStyle(fontSize: 12),
-            )),
       ),
       body: SafeArea(
         child: SizedBox(
@@ -101,7 +87,9 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                 ),
                 ButtonBase(
                   onTap: () {
-                    Clipboard.setData(ClipboardData(text: duaryContext.myCouple.value!.code)).then((_) {
+                    Clipboard.setData(ClipboardData(
+                            text: duaryContext.myCouple.value!.code))
+                        .then((_) {
                       Fluttertoast.showToast(msg: "복사되었습니다");
                     });
                   },
@@ -185,6 +173,27 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                                   fontSize: 15),
                             ),
                           )),
+                      const SizedBox(
+                        height: 19,
+                      ),
+                      ButtonBase(
+                          onTap: () {
+                            duaryContext.signOut().then((_) {
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const LoginScreen()),
+                                  (p) => false);
+                            });
+                          },
+                          child: const Text(
+                            "다른 계정으로 로그인",
+                            style: TextStyle(fontSize: 12),
+                          )),
+                      const SizedBox(
+                        height: 32,
+                      )
                     ],
                   ),
                 )
