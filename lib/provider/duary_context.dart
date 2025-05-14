@@ -95,11 +95,7 @@ class DuaryContext {
   Future<void> getMyCouple() async {
     await _coupleRepository.getMyCouple().then((couple) {
       myCouple.value = couple;
-
-      if (myCouple.value!.members.length > 1) {
-        lover.value = myCouple.value!.members
-            .firstWhere((m) => m.socialId != me.value!.socialId);
-      }
+      lover.value = getLoverFromCouple(couple);
     });
   }
 
@@ -123,6 +119,7 @@ class DuaryContext {
     await _coupleRepository.inputCoupleCode(req).then((res) {
       me.value = res.member;
       myCouple.value = res.couple;
+      lover.value = getLoverFromCouple(res.couple);
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
@@ -138,5 +135,14 @@ class DuaryContext {
 
   bool isCoupleConnected() {
     return lover.value != null;
+  }
+
+  Member? getLoverFromCouple(Couple couple) {
+    Member? lover;
+    if (myCouple.value!.members.length > 1) {
+      lover = myCouple.value!.members
+          .firstWhere((m) => m.socialId != me.value!.socialId);
+    }
+    return lover;
   }
 }
