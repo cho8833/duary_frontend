@@ -158,11 +158,14 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                       ),
                       ButtonBase(
                           onTap: () {
+                            pullingManager.pause();
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                        const InputCodeScreen()));
+                                        const InputCodeScreen())).then((_) {
+                              pullingManager.resume();
+                            });
                           },
                           child: Container(
                             width: double.infinity,
