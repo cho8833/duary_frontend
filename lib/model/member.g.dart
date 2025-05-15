@@ -12,9 +12,8 @@ Member _$MemberFromJson(Map<String, dynamic> json) => Member(
           ? null
           : Character.fromJson(json['character'] as String),
       json['coupleId'] as String?,
-      json['birthday'] == null
-          ? null
-          : DateTime.parse(json['birthday'] as String),
+      _$JsonConverterFromJson<String, DateTime>(
+          json['birthday'], const ISO8601TimeZoneFormatter().fromJson),
       json['socialId'] as String,
       json['provider'] as String,
     );
@@ -23,7 +22,20 @@ Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
       'name': instance.name,
       'character': instance.character,
       'coupleId': instance.coupleId,
-      'birthday': instance.birthday?.toIso8601String(),
+      'birthday': _$JsonConverterToJson<String, DateTime>(
+          instance.birthday, const ISO8601TimeZoneFormatter().toJson),
       'socialId': instance.socialId,
       'provider': instance.provider,
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) =>
+    json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);

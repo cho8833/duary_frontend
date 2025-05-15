@@ -6,7 +6,8 @@ class ISO8601TimeZoneFormatter implements JsonConverter<DateTime, String> {
 
   @override
   DateTime fromJson(String json) {
-    throw UnimplementedError();
+    DateTime parse = DateTime.parse(json);
+    return parse.toLocal();
   }
 
   @override
