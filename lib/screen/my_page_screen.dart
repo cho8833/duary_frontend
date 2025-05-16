@@ -1,6 +1,7 @@
 import 'package:duary/model/couple.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/screen/edit_name_screen.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/support/button_base.dart';
 import 'package:duary/widget/base_app_bar.dart';
@@ -136,7 +137,12 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 height: 8,
               ),
               ButtonBase(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const EditNameScreen()));
+                  },
                   child: infoBox(labelText: "닉네임", currentValue: me.name!)),
               const SizedBox(
                 height: 10,
