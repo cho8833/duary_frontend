@@ -6,14 +6,6 @@ part of 'start_duary_req.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-StartDuaryReq _$StartDuaryReqFromJson(Map<String, dynamic> json) =>
-    StartDuaryReq(
-      json['name'] as String,
-      const ISO8601TimeZoneFormatter().fromJson(json['birthday'] as String),
-      const ISO8601TimeZoneFormatter().fromJson(json['relationDate'] as String),
-      Character.fromJson(json['myCharacter'] as String),
-    );
-
 Map<String, dynamic> _$StartDuaryReqToJson(StartDuaryReq instance) =>
     <String, dynamic>{
       'name': instance.name,

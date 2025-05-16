@@ -8,7 +8,7 @@ part of 'couple.dart';
 
 Couple _$CoupleFromJson(Map<String, dynamic> json) => Couple(
       json['id'] as String,
-      DateTime.parse(json['relationDate'] as String),
+      const ISO8601TimeZoneFormatter().fromJson(json['relationDate'] as String),
       (json['members'] as List<dynamic>)
           .map((e) => Member.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -16,7 +16,8 @@ Couple _$CoupleFromJson(Map<String, dynamic> json) => Couple(
     );
 
 Map<String, dynamic> _$CoupleToJson(Couple instance) => <String, dynamic>{
-      'relationDate': instance.relationDate.toIso8601String(),
+      'relationDate':
+          const ISO8601TimeZoneFormatter().toJson(instance.relationDate),
       'members': instance.members,
       'id': instance.id,
       'code': instance.code,
