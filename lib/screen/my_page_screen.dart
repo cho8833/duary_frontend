@@ -1,6 +1,7 @@
 import 'package:duary/model/couple.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/screen/edit_birthday_screen.dart';
 import 'package:duary/screen/edit_name_screen.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/support/button_base.dart';
@@ -18,8 +19,18 @@ class MyPageScreen extends StatefulWidget {
 }
 
 class _MyPageScreenState extends State<MyPageScreen> {
-  Member me = DuaryContext().me.value!;
-  Couple myCouple = DuaryContext().myCouple.value!;
+  DuaryContext duaryContext = DuaryContext();
+
+  late Member me;
+
+  late Couple myCouple;
+
+  @override
+  void initState() {
+    me = duaryContext.me.value!;
+    myCouple = duaryContext.myCouple.value!;
+    super.initState();
+  }
 
   String formatDateTime(DateTime req) => DateFormat('yy.MM.dd').format(req);
 
@@ -101,14 +112,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
               const SizedBox(
                 height: 48,
               ),
-              const Text(
-                "알림 설정",
-                style: TextStyle(
-                  color: Color(0xFF323232),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              const SectionTitle(text: "알림 설정"),
               const SizedBox(
                 height: 8,
               ),
@@ -125,14 +129,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
               const SizedBox(
                 height: 27,
               ),
-              const Text(
-                "내 정보",
-                style: TextStyle(
-                  color: Color(0xFF323232),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              const SectionTitle(text: "내 정보"),
               const SizedBox(
                 height: 8,
               ),
@@ -148,21 +145,19 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 height: 10,
               ),
               ButtonBase(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const EditBirthdayScreen()));
+                  },
                   child: infoBox(
                       labelText: "생일",
                       currentValue: formatDateTime(me.birthday!))),
               const SizedBox(
                 height: 27,
               ),
-              const Text(
-                "커플 정보",
-                style: TextStyle(
-                  color: Color(0xFF323232),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              const SectionTitle(text: "커플 정보"),
               const SizedBox(
                 height: 8,
               ),
@@ -249,6 +244,24 @@ class _MyPageScreenState extends State<MyPageScreen> {
             )
           ],
         ),
+      ),
+    );
+  }
+}
+
+class SectionTitle extends StatelessWidget {
+  const SectionTitle({super.key, required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: Color(0xFF323232),
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
       ),
     );
   }
