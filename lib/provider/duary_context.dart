@@ -147,4 +147,10 @@ class DuaryContext {
     }
     return lover;
   }
+
+  Future<void> validateName(String? name) async {
+    if (name == null || name.isEmpty == true) {
+      throw CustomException("닉네임을 다시 입력해주세요");
+    }
+  }
 }
