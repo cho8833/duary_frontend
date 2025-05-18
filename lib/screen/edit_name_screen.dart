@@ -1,12 +1,9 @@
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
-import 'package:duary/screen/connect_copule_screen.dart';
-import 'package:duary/screen/home_screen.dart';
 import 'package:duary/support/button_base.dart';
 import 'package:duary/widget/duary_widget.dart';
 import 'package:duary/widget/main_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class EditNameScreen extends StatefulWidget {
@@ -18,8 +15,17 @@ class EditNameScreen extends StatefulWidget {
 
 class _EditNameScreenState extends State<EditNameScreen> {
   final DuaryContext duaryContext = DuaryContext();
-  Member me = DuaryContext().me.value!;
-  String name = "";
+
+  String? name;
+
+  late Member me;
+
+  @override
+  void initState() {
+    Member me = duaryContext.me.value!;
+    name = me.name;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +72,7 @@ class _EditNameScreenState extends State<EditNameScreen> {
             name = value;
           },
             hintText: "닉네임",
-            initialValue: me.name,)
+            initialValue: name)
               ],
             ),
             ButtonBase(
