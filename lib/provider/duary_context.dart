@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-
 class DuaryContext {
   // singleton
   static final DuaryContext _instance = DuaryContext._internal();
@@ -30,7 +29,8 @@ class DuaryContext {
 
   late final MemberRepository _memberRepository;
 
-  void init(CoupleRepository coupleRepository, AuthRepository authRepository, MemberRepository memberRepository) {
+  void init(CoupleRepository coupleRepository, AuthRepository authRepository,
+      MemberRepository memberRepository) {
     _coupleRepository = coupleRepository;
     _authRepository = authRepository;
     _memberRepository = memberRepository;
@@ -110,9 +110,12 @@ class DuaryContext {
     DateTime relationDate,
     Character myCharacter,
   ) async {
-    DateTime birthdayReq = DateTime(birthday.year, birthday.month, birthday.day);
-    DateTime relationDateReq = DateTime(relationDate.year, relationDate.month, relationDate.day);
-    StartDuaryReq req = StartDuaryReq(name, birthdayReq, relationDateReq, myCharacter);
+    DateTime birthdayReq =
+        DateTime(birthday.year, birthday.month, birthday.day);
+    DateTime relationDateReq =
+        DateTime(relationDate.year, relationDate.month, relationDate.day);
+    StartDuaryReq req =
+        StartDuaryReq(name, birthdayReq, relationDateReq, myCharacter);
     await _coupleRepository.startDuary(req).then((res) {
       me.value = res.member;
       myCouple.value = res.couple;
@@ -153,7 +156,7 @@ class DuaryContext {
     return lover;
   }
 
-  Future<void> validateName(String? name) async {
+  void validateName(String? name) {
     if (name == null || name.isEmpty == true) {
       throw ValidationException("닉네임을 입력해주세요");
     }
@@ -166,6 +169,14 @@ class DuaryContext {
   }
 
   Future<void> updateMember({String? name, DateTime? birthday}) async {
+    if (name != null) {
+      try {
+        validateName(name);
+      } catch (e) {
+        throw ValidationException(e.toString());
+      }
+    }
+
     UpdateMemberReq req = UpdateMemberReq(name, birthday);
     await _memberRepository.updateMember(req).then((res) {
       me.value = res.member;

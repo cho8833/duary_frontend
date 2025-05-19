@@ -79,15 +79,12 @@ class _EditBirthdayScreenState extends State<EditBirthdayScreen> {
             ButtonBase(
               onTap: () async {
                 if (birthday != me.birthday) {
-                await duaryContext.validateBirthday(birthday).then((_) {
-                  duaryContext.updateMember(birthday: birthday).then((_) {
+                  await duaryContext.updateMember(birthday: birthday).then((_) {
                     Navigator.pop(context);
                   }).catchError((e) {
                     Fluttertoast.showToast(msg: e.toString());
                   });
-                }).catchError((e) {
-                  Fluttertoast.showToast(msg: e.toString());
-                });} else {
+                } else {
                   Navigator.pop(context);
                 }
               },

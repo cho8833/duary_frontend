@@ -81,12 +81,8 @@ class _EditNameScreenState extends State<EditNameScreen> {
               // TODO
               onTap: () async {
                 if (name != me.name) {
-                  await duaryContext.validateName(name).then((_) {
-                    duaryContext.updateMember(name: name).then((_) {
-                      Navigator.pop(context);
-                    }).catchError((e) {
-                      Fluttertoast.showToast(msg: e.toString());
-                    });
+                  await duaryContext.updateMember(name: name).then((_) {
+                    Navigator.pop(context);
                   }).catchError((e) {
                     Fluttertoast.showToast(msg: e.toString());
                   });
