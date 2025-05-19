@@ -70,6 +70,13 @@ class ConnectionException implements Exception {
   }
 }
 
+class EmptyNameException implements Exception {
+  @override
+  String toString() {
+    return '닉네임을 입력해주세요';
+  }
+}
+
 class EmptyBirthdayException implements Exception {
   @override
   String toString() {
