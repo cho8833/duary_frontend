@@ -70,16 +70,13 @@ class ConnectionException implements Exception {
   }
 }
 
-class EmptyNameException implements Exception {
-  @override
-  String toString() {
-    return '닉네임을 입력해주세요';
-  }
-}
+class ValidationException implements Exception {
+  final String message;
 
-class EmptyBirthdayException implements Exception {
+  ValidationException(this.message);
+
   @override
   String toString() {
-    return '생일을 설정해주세요';
+    return message;
   }
 }

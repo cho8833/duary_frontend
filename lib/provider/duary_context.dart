@@ -155,13 +155,13 @@ class DuaryContext {
 
   Future<void> validateName(String? name) async {
     if (name == null || name.isEmpty == true) {
-      throw EmptyNameException();
+      throw ValidationException("닉네임을 입력해주세요");
     }
   }
 
   Future<void> validateBirthday(DateTime? birthday) async {
     if (birthday == null) {
-      throw EmptyBirthdayException();
+      throw ValidationException("생일을 설정해주세요");
     }
   }
 
