@@ -25,9 +25,20 @@ class _MyPageScreenState extends State<MyPageScreen> {
 
   late Couple myCouple;
 
+  late final void Function() listener;
+
   @override
   void initState() {
     me = duaryContext.me.value!;
+    listener = () {
+      if (duaryContext.me.value != null) {
+        setState(() {
+          me = duaryContext.me.value!;
+        });
+      }
+      return;
+    };
+    duaryContext.me.addListener(listener);
     myCouple = duaryContext.myCouple.value!;
     super.initState();
   }
@@ -93,12 +104,14 @@ class _MyPageScreenState extends State<MyPageScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                "${me.name}, 좋은 하루애오!",
-                                style: const TextStyle(
-                                  color: Color(0xFF434343),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
+                              Expanded(
+                                child: Text(
+                                  "${me.name!}, 좋은 하루애오!",
+                                  style: const TextStyle(
+                                    color: Color(0xFF434343),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ],
@@ -246,6 +259,12 @@ class _MyPageScreenState extends State<MyPageScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    duaryContext.me.removeListener(listener);
+    super.dispose();
   }
 }
 
