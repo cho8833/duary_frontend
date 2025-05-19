@@ -68,7 +68,6 @@ class _EditBirthdayScreenState extends State<EditBirthdayScreen> {
                 const SizedBox(
                   height: 26,
                 ),
-                //TODO: Text 색 수정
                 DuaryDateInputBox(
                     initialValue: birthday,
                     onSelect: (value) {

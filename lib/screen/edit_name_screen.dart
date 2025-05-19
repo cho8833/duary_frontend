@@ -68,7 +68,6 @@ class _EditNameScreenState extends State<EditNameScreen> {
                 const SizedBox(
                   height: 26,
                 ),
-                // TODO: Text 색 수정
                 DuaryTextInputBox(
                     onChange: (value) {
                       name = value;
@@ -78,7 +77,6 @@ class _EditNameScreenState extends State<EditNameScreen> {
               ],
             ),
             ButtonBase(
-              // TODO
               onTap: () async {
                 if (name != me.name) {
                   await duaryContext.updateMember(name: name).then((_) {
