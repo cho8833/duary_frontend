@@ -69,3 +69,10 @@ class ConnectionException implements Exception {
     return "서버와의 연결이 끊어졌습니다";
   }
 }
+
+class EmptyBirthdayException implements Exception {
+  @override
+  String toString() {
+    return '생일을 설정해주세요';
+  }
+}

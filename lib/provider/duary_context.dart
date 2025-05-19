@@ -2,12 +2,14 @@ import 'package:duary/data/dummy_sign_in_req.dart';
 import 'package:duary/data/sign_in_res.dart';
 import 'package:duary/data/start_duary_req.dart';
 import 'package:duary/data/input_couple_code_req.dart';
+import 'package:duary/data/update_member_req.dart';
 import 'package:duary/model/couple.dart';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/token_provider.dart';
 import 'package:duary/repository/auth_repository.dart';
 import 'package:duary/repository/couple_repository.dart';
+import 'package:duary/repository/member_repository.dart';
 import 'package:duary/support/custom_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,9 +28,12 @@ class DuaryContext {
 
   late final AuthRepository _authRepository;
 
-  void init(CoupleRepository coupleRepository, AuthRepository authRepository) {
+  late final MemberRepository _memberRepository;
+
+  void init(CoupleRepository coupleRepository, AuthRepository authRepository, MemberRepository memberRepository) {
     _coupleRepository = coupleRepository;
     _authRepository = authRepository;
+    _memberRepository = memberRepository;
   }
 
   final TokenProvider tokenProvider = TokenProvider();
@@ -152,5 +157,20 @@ class DuaryContext {
     if (name == null || name.isEmpty == true) {
       throw CustomException("닉네임을 다시 입력해주세요");
     }
+  }
+
+  Future<void> validateBirthday(DateTime? birthday) async {
+    if (birthday == null) {
+      throw EmptyBirthdayException();
+    }
+  }
+
+  Future<void> updateMember({String? name, DateTime? birthday}) async {
+    UpdateMemberReq req = UpdateMemberReq(name, birthday);
+    await _memberRepository.updateMember(req).then((res) {
+      me.value = res.member;
+    }).catchError((e) {
+      throw ServerResponseException(e);
+    });
   }
 }

@@ -22,7 +22,7 @@ class _EditNameScreenState extends State<EditNameScreen> {
 
   @override
   void initState() {
-    Member me = duaryContext.me.value!;
+    me = duaryContext.me.value!;
     name = me.name;
     super.initState();
   }
@@ -40,8 +40,10 @@ class _EditNameScreenState extends State<EditNameScreen> {
               context,
             );
           },
-          child: const Icon(Icons.chevron_left,
-          color: Color(0xFF9A9A9A),),
+          child: const Icon(
+            Icons.chevron_left,
+            color: Color(0xFF9A9A9A),
+          ),
         ),
       ),
       body: Padding(
@@ -66,19 +68,31 @@ class _EditNameScreenState extends State<EditNameScreen> {
                 const SizedBox(
                   height: 26,
                 ),
-        // TODO: Text 색 수정
-        DuaryTextInputBox(
-          onChange: (value) {
-            name = value;
-          },
-            hintText: "닉네임",
-            initialValue: name)
+                // TODO: Text 색 수정
+                DuaryTextInputBox(
+                    onChange: (value) {
+                      name = value;
+                    },
+                    hintText: "닉네임",
+                    initialValue: name)
               ],
             ),
             ButtonBase(
               // TODO
               onTap: () async {
-
+                if (name != me.name) {
+                  await duaryContext.validateName(name).then((_) {
+                    duaryContext.updateMember(name: name).then((_) {
+                      Navigator.pop(context);
+                    }).catchError((e) {
+                      Fluttertoast.showToast(msg: e.toString());
+                    });
+                  }).catchError((e) {
+                    Fluttertoast.showToast(msg: e.toString());
+                  });
+                } else {
+                  Navigator.pop(context);
+                }
               },
               child: Container(
                 width: double.infinity,

@@ -48,7 +48,7 @@ void main() async {
 
   EventProvider eventProvider = EventProvider(rc.eventRepository);
   DuaryContext duaryContext = DuaryContext();
-  duaryContext.init(rc.coupleRepository, rc.authRepository);
+  duaryContext.init(rc.coupleRepository, rc.authRepository, rc.memberRepository);
 
   // 로그인
   await duaryContext.checkSignIn().then((_) async {

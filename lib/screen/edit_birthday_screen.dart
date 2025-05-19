@@ -4,6 +4,7 @@ import 'package:duary/support/button_base.dart';
 import 'package:duary/widget/duary_widget.dart';
 import 'package:duary/widget/main_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class EditBirthdayScreen extends StatefulWidget {
   const EditBirthdayScreen({super.key});
@@ -76,8 +77,20 @@ class _EditBirthdayScreenState extends State<EditBirthdayScreen> {
               ],
             ),
             ButtonBase(
-              // TODO
-              onTap: () async {},
+              onTap: () async {
+                if (birthday != me.birthday) {
+                await duaryContext.validateBirthday(birthday).then((_) {
+                  duaryContext.updateMember(birthday: birthday).then((_) {
+                    Navigator.pop(context);
+                  }).catchError((e) {
+                    Fluttertoast.showToast(msg: e.toString());
+                  });
+                }).catchError((e) {
+                  Fluttertoast.showToast(msg: e.toString());
+                });} else {
+                  Navigator.pop(context);
+                }
+              },
               child: Container(
                 width: double.infinity,
                 height: 50,
