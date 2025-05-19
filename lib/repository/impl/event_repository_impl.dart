@@ -1,6 +1,7 @@
 import 'package:duary/model/event.dart';
 import 'package:duary/repository/event_repository.dart';
 import 'package:duary/support/http_response_handler.dart';
+import 'package:duary/support/iso8601_time_zone_formatter.dart';
 import 'package:duary/support/uri_provider.dart';
 import 'package:http/http.dart';
 
@@ -12,10 +13,11 @@ class EventRepositoryImpl with UriProvider, HttpResponseHandler implements Event
 
   @override
   Future<List<Event>> getEvent(String coupleId, DateTime startDate, DateTime endDate) async {
+    const ISO8601TimeZoneFormatter formatter = ISO8601TimeZoneFormatter();
     Uri uri = getUri("/event", queryParameters: {
       "coupleId": coupleId,
-      "startDate": startDate.toIso8601String(),
-      "endDate": endDate.toIso8601String()
+      "startDate": formatter.toJson(startDate),
+      "endDate": formatter.toJson(endDate)
     });
 
     Response response = await interceptedClient.get(uri);
