@@ -1,4 +1,4 @@
-import 'package:duary/support/button_base.dart';
+import 'package:duary/widget/button_base.dart';
 import 'package:flutter/material.dart';
 
 class DuaryTextInputBox extends StatefulWidget {

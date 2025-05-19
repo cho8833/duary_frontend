@@ -5,7 +5,9 @@ import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/event_details_screen.dart';
+import 'package:duary/screen/my_page_screen.dart';
 import 'package:duary/screen/schedule_screen.dart';
+import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/characters.dart';
 import 'package:duary/widget/main_app_bar.dart';
 import 'package:duary/widget/set_character.dart';
@@ -49,7 +51,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: MainAppBar(
         appBarObj: AppBar(),
-        leadingBuilder: (context) => const Icon(Icons.menu),
+        leadingBuilder: (context) => ButtonBase(
+            onTap: () async {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const MyPageScreen()));
+            },
+            child: const Icon(Icons.menu)),
         trailingBuilder: (context) => const Icon(Icons.notifications_outlined),
       ),
       body: LayoutBuilder(builder: (context, constraints) {

@@ -3,7 +3,7 @@ import 'package:duary/provider/duary_context.dart';
 import 'package:duary/repository/couple_repository.dart';
 import 'package:duary/screen/connect_copule_screen.dart';
 import 'package:duary/screen/login_screen.dart';
-import 'package:duary/support/button_base.dart';
+import 'package:duary/widget/button_base.dart';
 
 import 'package:duary/support/repository_container.dart';
 import 'package:duary/widget/characters.dart';
@@ -109,7 +109,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ButtonBase(
-                  onTap: () {
+                  onTap: () async {
                     setState(() {
                       blue ? blue = false
                           : blue = true;
@@ -128,7 +128,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
                   width: 40,
                 ),
                 ButtonBase(
-                  onTap: () {
+                  onTap: () async {
                     setState(() {
                       blue ? blue = false
                           : blue = true;
@@ -225,7 +225,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
               height: 16,
             ),
             ButtonBase(
-                onTap: () {
+                onTap: () async {
                   duaryContext.signOut().then((_) {
                     Navigator.pushAndRemoveUntil(
                         context,
