@@ -169,6 +169,7 @@ class DuaryContext {
     UpdateMemberReq req = UpdateMemberReq(name, birthday);
     await _memberRepository.updateMember(req).then((res) {
       me.value = res.member;
+      myCouple.value = res.couple;
     }).catchError((e) {
       throw ServerResponseException(e);
     });
