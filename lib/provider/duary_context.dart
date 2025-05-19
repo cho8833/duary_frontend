@@ -156,25 +156,25 @@ class DuaryContext {
     return lover;
   }
 
-  void validateName(String? name) {
-    if (name == null || name.isEmpty == true) {
+  void validateName(String name) {
+    if (name.isEmpty == true) {
       throw ValidationException("닉네임을 입력해주세요");
     }
   }
 
-  Future<void> validateBirthday(DateTime? birthday) async {
-    if (birthday == null) {
-      throw ValidationException("생일을 설정해주세요");
+  Future<void> validateBirthday(DateTime birthday) async {
+    DateTime now = DateTime.now();
+    if (birthday.isAfter(now)) {
+      throw ValidationException("생일을 다시 설정해주세요");
     }
   }
 
   Future<void> updateMember({String? name, DateTime? birthday}) async {
     if (name != null) {
-      try {
-        validateName(name);
-      } catch (e) {
-        throw ValidationException(e.toString());
-      }
+      validateName(name);
+    }
+    if (birthday != null) {
+      validateBirthday(birthday);
     }
 
     UpdateMemberReq req = UpdateMemberReq(name, birthday);
