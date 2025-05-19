@@ -4,7 +4,7 @@ import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/edit_birthday_screen.dart';
 import 'package:duary/screen/edit_name_screen.dart';
 import 'package:duary/screen/login_screen.dart';
-import 'package:duary/support/button_base.dart';
+import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/characters.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +51,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
       appBar: AppBarBase(
         appBarObj: AppBar(),
         leadingBuilder: (context) => ButtonBase(
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
             },
             child: const Icon(Icons.navigate_before)),
@@ -104,14 +104,12 @@ class _MyPageScreenState extends State<MyPageScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Expanded(
-                                child: Text(
-                                  "${me.name!}, 좋은 하루애오!",
-                                  style: const TextStyle(
-                                    color: Color(0xFF434343),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                              Text(
+                                "${me.name}, 좋은 하루애오!",
+                                style: const TextStyle(
+                                  color: Color(0xFF434343),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
@@ -131,13 +129,13 @@ class _MyPageScreenState extends State<MyPageScreen> {
               ),
               // TODO: 일정 알림 설정값
               ButtonBase(
-                  onTap: () {},
+                  onTap: () async {},
                   child: infoBox(labelText: "내 일정 알림", currentValue: "30분 전")),
               const SizedBox(
                 height: 10,
               ),
               ButtonBase(
-                  onTap: () {},
+                  onTap: () async {},
                   child: infoBox(labelText: "연인 일정 알림", currentValue: "30분 전")),
               const SizedBox(
                 height: 27,
@@ -147,7 +145,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 height: 8,
               ),
               ButtonBase(
-                  onTap: () {
+                  onTap: () async {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -158,7 +156,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 height: 10,
               ),
               ButtonBase(
-                  onTap: () {
+                  onTap: () async {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -175,7 +173,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 height: 8,
               ),
               ButtonBase(
-                  onTap: () {},
+                  onTap: () async {},
                   child: infoBox(
                       labelText: "사랑이 시작된 날",
                       currentValue: formatDateTime(myCouple.relationDate))),
@@ -260,7 +258,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
       ),
     );
   }
-
   @override
   void dispose() {
     duaryContext.me.removeListener(listener);

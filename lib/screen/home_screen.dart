@@ -7,9 +7,10 @@ import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/event_details_screen.dart';
 import 'package:duary/screen/my_page_screen.dart';
 import 'package:duary/screen/schedule_screen.dart';
-import 'package:duary/support/button_base.dart';
+
+import 'package:duary/widget/base_app_bar.dart';
+import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/characters.dart';
-import 'package:duary/widget/main_app_bar.dart';
 import 'package:duary/widget/set_character.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -52,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: MainAppBar(
         appBarObj: AppBar(),
         leadingBuilder: (context) => ButtonBase(
-            onTap: () {
+            onTap: () async {
               Navigator.push(
                   context,
                   MaterialPageRoute(

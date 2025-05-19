@@ -3,8 +3,8 @@ import 'package:duary/screen/home_screen.dart';
 import 'package:duary/screen/input_code_screen.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/support/asset_path.dart';
-import 'package:duary/support/button_base.dart';
-import 'package:duary/widget/main_app_bar.dart';
+import 'package:duary/widget/base_app_bar.dart';
+import 'package:duary/widget/button_base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -87,7 +87,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                   ),
                 ),
                 ButtonBase(
-                  onTap: () {
+                  onTap: () async {
                     Clipboard.setData(ClipboardData(
                             text: duaryContext.myCouple.value!.code))
                         .then((_) {
@@ -111,7 +111,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                   child: Column(
                     children: [
                       ButtonBase(
-                          onTap: () {},
+                          onTap: () async {},
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
@@ -157,7 +157,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                         height: 8,
                       ),
                       ButtonBase(
-                          onTap: () {
+                          onTap: () async {
                             pullingManager.pause();
                             Navigator.push(
                                 context,
@@ -187,7 +187,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                         height: 19,
                       ),
                       ButtonBase(
-                          onTap: () {
+                          onTap: () async {
                             duaryContext.signOut().then((_) {
                               Navigator.pushAndRemoveUntil(
                                   context,
