@@ -21,8 +21,6 @@ class StartDuaryScreen extends StatefulWidget {
 class _StartDuaryScreenState extends State<StartDuaryScreen> {
   final DuaryContext duaryContext = DuaryContext();
 
-  CoupleRepository coupleRepository = RepositoryContainer().coupleRepository;
-
   String? name;
 
   DateTime? birthday;

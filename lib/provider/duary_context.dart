@@ -170,7 +170,7 @@ class DuaryContext {
     if (birthday == null) {
       throw ValidationException("생일을 입력해주세요");
     }
-    else if (birthday.isAfter(now)) {
+    if (birthday.isAfter(now)) {
       throw ValidationException("생일을 다시 설정해주세요");
     }
   }
@@ -180,7 +180,7 @@ class DuaryContext {
     if (relationDate == null) {
       throw ValidationException("처음 만난 날을 입력해주세요");
     }
-    else if (relationDate.isAfter(now)) {
+    if (relationDate.isAfter(now)) {
       throw ValidationException("생일을 다시 설정해주세요");
     }
   }
