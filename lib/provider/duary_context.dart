@@ -105,17 +105,20 @@ class DuaryContext {
   }
 
   Future<void> startDuary(
-    String name,
-    DateTime birthday,
-    DateTime relationDate,
+    String? name,
+    DateTime? birthday,
+    DateTime? relationDate,
     Character myCharacter,
   ) async {
+    validateName(name);
+    validateBirthday(birthday);
+    validateRelationDate(relationDate);
     DateTime birthdayReq =
-        DateTime(birthday.year, birthday.month, birthday.day);
+        DateTime(birthday!.year, birthday.month, birthday.day);
     DateTime relationDateReq =
-        DateTime(relationDate.year, relationDate.month, relationDate.day);
+        DateTime(relationDate!.year, relationDate.month, relationDate.day);
     StartDuaryReq req =
-        StartDuaryReq(name, birthdayReq, relationDateReq, myCharacter);
+        StartDuaryReq(name!, birthdayReq, relationDateReq, myCharacter);
     await _coupleRepository.startDuary(req).then((res) {
       me.value = res.member;
       myCouple.value = res.couple;
@@ -156,15 +159,28 @@ class DuaryContext {
     return lover;
   }
 
-  void validateName(String name) {
-    if (name.isEmpty == true) {
+  void validateName(String? name) {
+    if (name == null || name.isEmpty == true) {
       throw ValidationException("닉네임을 입력해주세요");
     }
   }
 
-  Future<void> validateBirthday(DateTime birthday) async {
+  void validateBirthday(DateTime? birthday) {
     DateTime now = DateTime.now();
-    if (birthday.isAfter(now)) {
+    if (birthday == null) {
+      throw ValidationException("생일을 입력해주세요");
+    }
+    else if (birthday.isAfter(now)) {
+      throw ValidationException("생일을 다시 설정해주세요");
+    }
+  }
+
+  void validateRelationDate(DateTime? relationDate) {
+    DateTime now = DateTime.now();
+    if (relationDate == null) {
+      throw ValidationException("처음 만난 날을 입력해주세요");
+    }
+    else if (relationDate.isAfter(now)) {
       throw ValidationException("생일을 다시 설정해주세요");
     }
   }
