@@ -55,11 +55,13 @@ class _DuaryTextInputBoxState extends State<DuaryTextInputBox> {
 
 class DuaryDateInputBox extends StatefulWidget {
   const DuaryDateInputBox(
-      {super.key, this.initialValue, required this.onSelect});
+      {super.key, this.initialValue, this.hintText, required this.onSelect});
 
   final DateTime? initialValue;
 
   final void Function(DateTime) onSelect;
+
+  final String? hintText;
 
   @override
   State<DuaryDateInputBox> createState() => _DuaryDateInputBoxState();
@@ -159,7 +161,7 @@ class _DuaryDateInputBoxState extends State<DuaryDateInputBox> {
     ];
     currentValue = widget.initialValue != null
         ? DateFormat('yy.MM.dd').format(widget.initialValue!)
-        : "내 생년월일";
+        : "";
     super.initState();
   }
 
@@ -201,7 +203,7 @@ class _DuaryDateInputBoxState extends State<DuaryDateInputBox> {
                   height: 24,
                 ),
                 Text(
-                  currentValue,
+                  currentValue.isNotEmpty ? currentValue : widget.hintText!,
                   style: const TextStyle(
                     color: Color(0xFF3F3F3F),
                     fontSize: 16,
