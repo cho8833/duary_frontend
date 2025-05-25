@@ -55,13 +55,19 @@ class _DuaryTextInputBoxState extends State<DuaryTextInputBox> {
 
 class DuaryDateInputBox extends StatefulWidget {
   const DuaryDateInputBox(
-      {super.key, this.initialValue, this.hintText, required this.onSelect});
+      {super.key,
+      this.initialValue,
+      this.hintText,
+      required this.onSelect,
+      this.futureDateSelectable = true,});
 
   final DateTime? initialValue;
 
   final void Function(DateTime) onSelect;
 
   final String? hintText;
+
+  final bool futureDateSelectable;
 
   @override
   State<DuaryDateInputBox> createState() => _DuaryDateInputBoxState();
@@ -74,85 +80,7 @@ class _DuaryDateInputBoxState extends State<DuaryDateInputBox> {
   //현재 박스에 표시되는 값
   late String currentValue;
 
-  //날짜 선택 위젯창 구현부
-  final config = CalendarDatePicker2WithActionButtonsConfig(
-    calendarType: CalendarDatePicker2Type.single,
-    calendarViewScrollPhysics: const NeverScrollableScrollPhysics(),
-    dayTextStyle:
-        const TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
-    selectedDayHighlightColor: const Color(0xFFFFBD64),
-    closeDialogOnCancelTapped: true,
-    firstDayOfWeek: 1,
-    weekdayLabelTextStyle: const TextStyle(
-      color: Color(0xFFFFBD64),
-      fontWeight: FontWeight.bold,
-    ),
-    controlsTextStyle: const TextStyle(
-      color: Colors.black,
-      fontSize: 15,
-      fontWeight: FontWeight.bold,
-    ),
-    centerAlignModePicker: true,
-    customModePickerIcon: const SizedBox(),
-    selectedDayTextStyle:
-        const TextStyle(color: Colors.black, fontWeight: FontWeight.w700)
-            .copyWith(color: Colors.white),
-    dayTextStylePredicate: ({required date}) {
-      TextStyle? textStyle;
-      if (date.weekday == DateTime.saturday) {
-        textStyle =
-            TextStyle(color: Colors.blue[500], fontWeight: FontWeight.w600);
-      }
-      if (DateUtils.isSameDay(date, DateTime(2021, 1, 25)) ||
-          date.weekday == DateTime.sunday) {
-        textStyle = TextStyle(
-          color: Colors.red[400],
-          fontWeight: FontWeight.w700,
-        );
-      }
-      return textStyle;
-    },
-    yearBuilder: ({
-      required year,
-      decoration,
-      isCurrentYear,
-      isDisabled,
-      isSelected,
-      textStyle,
-    }) {
-      return Center(
-        child: Container(
-          decoration: decoration,
-          height: 36,
-          width: 72,
-          child: Center(
-            child: Semantics(
-              selected: isSelected,
-              button: true,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    year.toString(),
-                    style: textStyle,
-                  ),
-                  if (isCurrentYear == true)
-                    Container(
-                      padding: const EdgeInsets.all(5),
-                      margin: const EdgeInsets.only(left: 5),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.redAccent,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    },
-  );
+  late final CalendarDatePicker2WithActionButtonsConfig config;
 
   @override
   void initState() {
@@ -162,6 +90,76 @@ class _DuaryDateInputBoxState extends State<DuaryDateInputBox> {
     currentValue = widget.initialValue != null
         ? DateFormat('yy.MM.dd').format(widget.initialValue!)
         : "";
+    //날짜 선택 위젯창 구현부
+    config = CalendarDatePicker2WithActionButtonsConfig(
+      lastDate: widget.futureDateSelectable ? null : DateTime.now(),
+      calendarType: CalendarDatePicker2Type.single,
+      calendarViewScrollPhysics: const NeverScrollableScrollPhysics(),
+      dayTextStyle:
+          const TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
+      selectedDayHighlightColor: const Color(0xFFFFBD64),
+      closeDialogOnCancelTapped: true,
+      weekdayLabelTextStyle: const TextStyle(
+        color: Color(0xFFFFBD64),
+        fontWeight: FontWeight.bold,
+      ),
+      controlsTextStyle: const TextStyle(
+        color: Colors.black,
+        fontSize: 15,
+        fontWeight: FontWeight.bold,
+      ),
+      centerAlignModePicker: true,
+      customModePickerIcon: const SizedBox(),
+      selectedDayTextStyle:
+          const TextStyle(color: Colors.black, fontWeight: FontWeight.w700)
+              .copyWith(color: Colors.white),
+      dayTextStylePredicate: ({required date}) {
+        TextStyle? textStyle;
+        if (date.weekday == DateTime.saturday) {
+          textStyle =
+              TextStyle(color: Colors.blue[500], fontWeight: FontWeight.w600);
+        }
+        if (DateUtils.isSameDay(date, DateTime(2021, 1, 25)) ||
+            date.weekday == DateTime.sunday) {
+          textStyle = TextStyle(
+            color: Colors.red[400],
+            fontWeight: FontWeight.w700,
+          );
+        }
+        return textStyle;
+      },
+      yearBuilder: ({
+        required year,
+        decoration,
+        isCurrentYear,
+        isDisabled,
+        isSelected,
+        textStyle,
+      }) {
+        return Center(
+          child: Container(
+            decoration: decoration,
+            height: 36,
+            width: 72,
+            child: Center(
+              child: Semantics(
+                selected: isSelected,
+                button: true,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      year.toString(),
+                      style: textStyle,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
     super.initState();
   }
 

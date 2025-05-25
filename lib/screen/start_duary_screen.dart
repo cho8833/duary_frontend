@@ -86,6 +86,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
                   birthday = value;
                 },
                 hintText: "내 생년월일",
+                futureDateSelectable: false,
               ),
               const SizedBox(
                 height: 18,
@@ -95,6 +96,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
                   relationDate = value;
                 },
                 hintText: "우리가 처음 만난 날",
+                futureDateSelectable: false,
               ),
               const SizedBox(
                 height: 35,
