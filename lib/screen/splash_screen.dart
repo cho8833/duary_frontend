@@ -1,4 +1,3 @@
-import 'package:duary/model/couple.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
@@ -9,7 +8,6 @@ import 'package:duary/widget/characters.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -26,9 +24,27 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _yellowBounceXAnimation;
   late DuaryContext duaryContext;
 
+  late Future<void> signInFuture;
+
+  bool _isSignInCompleted = false;
+  bool _isAnimationCompleted = false;
+
   @override
   void initState() {
     duaryContext = DuaryContext();
+
+    // 로그인
+    signInFuture = duaryContext.checkSignIn().then((_) async {
+      // 로그인 성공한 경우, 커플 정보까지 가져옴
+      if (duaryContext.me.value != null) {
+        if (duaryContext.me.value!.coupleId != null) {
+          await duaryContext.getMyCouple().catchError((_) {});
+        }
+      }
+    }).whenComplete(() {
+      _isSignInCompleted = true;
+      whenTaskComplete();
+    });
 
     _controller = AnimationController(
         duration: const Duration(milliseconds: 800), vsync: this);
@@ -47,34 +63,42 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
 
     // route screen when animation end
-    _controller.addStatusListener((status) {
+    _controller.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        Navigator.of(context)
-            .pushReplacement(MaterialPageRoute(builder: (context) {
-          // 로그인되어 있으면
-          if (duaryContext.isLoggedIn()) {
-            // 커플이 생성되어 있는지 확인
-            if (duaryContext.isCoupleCreated()) {
-              // 커플이 생성되어 있는 경우 커플이 연결되어 있는지 확인
-              if (duaryContext.isCoupleConnected()) {
-                // Couple 연결 완료 상태면 HomeScreen 으로 route
-                return const HomeScreen();
-              } else {
-                // Couple 연결이 되어있지 않은 경우 ConnectCoupleScreen 으로 route
-                return const ConnectCoupleScreen();
-              }
-              // 커플이 생성되어 있지 않은 경우 StartDuaryScreen 으로 route
-            } else {
-              return const StartDuaryScreen();
-            }
-            // 로그인되어 있지 않으면 LoginScreen 으로 route
-          } else {
-            return const LoginScreen();
-          }
-        }));
+        _isAnimationCompleted = true;
+        await Future.delayed(const Duration(milliseconds: 500));
+        whenTaskComplete();
       }
     });
     super.initState();
+  }
+
+  void whenTaskComplete() {
+    if (_isAnimationCompleted && _isSignInCompleted) {
+      Navigator.of(context)
+          .pushReplacement(MaterialPageRoute(builder: (context) {
+        // 로그인되어 있으면
+        if (duaryContext.isLoggedIn()) {
+          // 커플이 생성되어 있는지 확인
+          if (duaryContext.isCoupleCreated()) {
+            // 커플이 생성되어 있는 경우 커플이 연결되어 있는지 확인
+            if (duaryContext.isCoupleConnected()) {
+              // Couple 연결 완료 상태면 HomeScreen 으로 route
+              return const HomeScreen();
+            } else {
+              // Couple 연결이 되어있지 않은 경우 ConnectCoupleScreen 으로 route
+              return const ConnectCoupleScreen();
+            }
+            // 커플이 생성되어 있지 않은 경우 StartDuaryScreen 으로 route
+          } else {
+            return const StartDuaryScreen();
+          }
+          // 로그인되어 있지 않으면 LoginScreen 으로 route
+        } else {
+          return const LoginScreen();
+        }
+      }));
+    }
   }
 
   @override
