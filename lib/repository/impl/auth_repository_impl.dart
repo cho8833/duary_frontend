@@ -73,4 +73,12 @@ final class AuthRepositoryImpl
 
     return getData(response, (p0) => DuaryInfoRes.fromJson(p0)).data;
   }
+
+  Future<void> signOut() async {
+    Uri uri = getUri("/auth/signout");
+
+    Response response = await interceptedClient.post(uri);
+
+    checkResponse(response);
+  }
 }

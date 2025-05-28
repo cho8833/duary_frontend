@@ -15,4 +15,6 @@ abstract interface class AuthRepository {
 
   Future<DuaryInfoRes> dummySignIn(DummySignInReq req);
 
+  Future<void> signOut();
+
 }

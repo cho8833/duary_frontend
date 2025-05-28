@@ -124,10 +124,14 @@ class DuaryContext {
   void onSignInSuccess(DuaryInfoRes res) {
     me.value = res.member;
     myCouple.value = res.couple;
+    if (res.couple != null ) {
+      lover.value = getLoverFromCouple(res.couple!);
+    }
   }
 
   Future<void> signOut() async {
     await tokenProvider.deleteToken();
+    await _authRepository.signOut();
     me.value = null;
   }
 

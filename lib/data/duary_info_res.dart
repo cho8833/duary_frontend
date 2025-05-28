@@ -9,7 +9,7 @@ part 'duary_info_res.g.dart';
 final class DuaryInfoRes {
   Member member;
 
-  Couple couple;
+  Couple? couple;
 
   AuthorizationTokenRes token;
 
