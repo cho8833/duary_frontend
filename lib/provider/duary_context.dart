@@ -63,7 +63,7 @@ class DuaryContext {
         }
       }
     }
-    final String? fcmToken = await requestFcmToken();
+    final String? fcmToken = await _requestFcmToken();
     SignInReq req = SignInReq(appleOAuthToken: credential, fcmToken: fcmToken);
     await _authRepository.signInWithApple(req).then((res) async {
       onSignInSuccess(res);
@@ -87,7 +87,7 @@ class DuaryContext {
         }
       }
     }
-    final String? fcmToken = await requestFcmToken();
+    final String? fcmToken = await _requestFcmToken();
     SignInReq req = SignInReq(kakaoOAuthToken: token, fcmToken: fcmToken);
     await _authRepository.signInWithKakaoTalk(req).then((res) async {
       onSignInSuccess(res);
@@ -97,7 +97,7 @@ class DuaryContext {
   }
 
   Future<void> signInWithToken() async {
-    final String? fcmToken = await requestFcmToken();
+    final String? fcmToken = await _requestFcmToken();
     SignInReq req = SignInReq(fcmToken: fcmToken);
     await _authRepository.signInWithToken(req).then((res) {
       onSignInSuccess(res);
@@ -105,7 +105,7 @@ class DuaryContext {
   }
 
   Future<void> dummySignIn(String username) async {
-    final String? fcmToken = await requestFcmToken();
+    final String? fcmToken = await _requestFcmToken();
     DummySignInReq req = DummySignInReq(username, fcmToken: fcmToken);
     await _authRepository.dummySignIn(req).then((res) async {
       onSignInSuccess(res);
@@ -114,12 +114,7 @@ class DuaryContext {
     });
   }
 
-  Future<String?> requestFcmToken() async {
-    await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true
-    );
+  Future<String?> _requestFcmToken() async {
     final String? fcmToken = await FirebaseMessaging.instance.getToken().catchError((e) {
       return null;
     });
