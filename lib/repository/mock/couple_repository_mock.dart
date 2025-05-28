@@ -1,7 +1,7 @@
 import 'package:duary/data/input_couple_code_req.dart';
 import 'package:duary/data/input_couple_code_res.dart';
 import 'package:duary/data/start_duary_req.dart';
-import 'package:duary/data/start_duary_res.dart';
+import 'package:duary/data/duary_info_res.dart';
 import 'package:duary/model/couple.dart';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/member.dart';
@@ -37,7 +37,7 @@ class CoupleRepositoryMock implements CoupleRepository {
   }
 
   @override
-  Future<StartDuaryRes> startDuary(StartDuaryReq req) {
+  Future<DuaryInfoRes> startDuary(StartDuaryReq req) {
     // TODO: implement startDuary
     throw UnimplementedError();
   }

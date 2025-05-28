@@ -54,7 +54,7 @@ dependencies:
     git:
       url: https://github.com/cho8833/infinite_scroll_pagination
       ref: master
-#  firebase_messaging: ^15.1.0
+  firebase_messaging: ^15.1.0
   firebase_core: ^3.4.0
   get: ^4.6.6
   flutter_staggered_grid_view: ^0.7.0

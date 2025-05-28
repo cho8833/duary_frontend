@@ -9,4 +9,6 @@ abstract class SecureStorage {
   Future<String?> getRefreshToken();
   Future<void> storeRefreshToken(String token);
   Future<void> deleteRefreshToken();
+  Future<void> storeFCMToken(String value);
+  Future<String?> getFCMToken();
 }

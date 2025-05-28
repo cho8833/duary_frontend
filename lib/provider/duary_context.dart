@@ -1,5 +1,6 @@
+import 'package:duary/data/duary_info_res.dart';
 import 'package:duary/data/dummy_sign_in_req.dart';
-import 'package:duary/data/sign_in_res.dart';
+import 'package:duary/data/sign_in_req.dart';
 import 'package:duary/data/start_duary_req.dart';
 import 'package:duary/data/input_couple_code_req.dart';
 import 'package:duary/data/update_member_req.dart';
@@ -11,8 +12,11 @@ import 'package:duary/repository/auth_repository.dart';
 import 'package:duary/repository/couple_repository.dart';
 import 'package:duary/repository/member_repository.dart';
 import 'package:duary/support/custom_exception.dart';
+import 'package:duary/support/secret_key.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class DuaryContext {
@@ -22,6 +26,8 @@ class DuaryContext {
   factory DuaryContext() => _instance;
 
   DuaryContext._internal();
+
+  static const String nonce = SecretKey.oidcNonce;
 
   late final CoupleRepository _coupleRepository;
 
@@ -44,52 +50,85 @@ class DuaryContext {
 
   ValueNotifier<Member?> lover = ValueNotifier(null);
 
-  Member onSignInSuccess(SignInRes res) {
-    me.value = res.member;
-    return me.value!;
-  }
-
   Future<void> signInWithApple() async {
-    await _authRepository.signInWithApple().then((res) async {
-      onSignInSuccess(res);
-    }).catchError((e) {
+    late final AuthorizationCredentialAppleID credential;
+    try {
+      credential = await SignInWithApple.getAppleIDCredential(scopes: [
+        AppleIDAuthorizationScopes.email,
+      ], nonce: nonce);
+    } catch (e) {
       if (e is SignInWithAppleAuthorizationException) {
         if (e.code == AuthorizationErrorCode.canceled) {
           throw CustomException("취소되었습니다");
         }
       }
+    }
+    final String? fcmToken = await requestFcmToken();
+    SignInReq req = SignInReq(appleOAuthToken: credential, fcmToken: fcmToken);
+    await _authRepository.signInWithApple(req).then((res) async {
+      onSignInSuccess(res);
+    }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
   }
 
   Future<void> signInWithKakaoTalk() async {
-    await _authRepository.signInWithKakaoTalk().then((res) async {
-      onSignInSuccess(res);
-    }).catchError((e) {
+    late OAuthToken token;
+    try {
+      if (await isKakaoTalkInstalled()) {
+        token = await UserApi.instance.loginWithKakaoTalk(nonce: nonce);
+      } else {
+        token = await UserApi.instance.loginWithKakaoAccount(nonce: nonce);
+      }
+    } catch (e) {
       if (e is PlatformException) {
         if (e.code == "CANCELED") {
           throw CustomException("취소되었습니다");
         }
       }
+    }
+    final String? fcmToken = await requestFcmToken();
+    SignInReq req = SignInReq(kakaoOAuthToken: token, fcmToken: fcmToken);
+    await _authRepository.signInWithKakaoTalk(req).then((res) async {
+      onSignInSuccess(res);
+    }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
   }
 
-  Future<void> checkSignIn() async {
-    await _authRepository.getUserInfo().then((user) {
-      me.value = user;
-    }).catchError((e) {
-      print(e);
-    });
+  Future<void> signInWithToken() async {
+    final String? fcmToken = await requestFcmToken();
+    SignInReq req = SignInReq(fcmToken: fcmToken);
+    await _authRepository.signInWithToken(req).then((res) {
+      onSignInSuccess(res);
+    }).catchError((e) {});
   }
 
   Future<void> dummySignIn(String username) async {
-    DummySignInReq req = DummySignInReq(username);
+    final String? fcmToken = await requestFcmToken();
+    DummySignInReq req = DummySignInReq(username, fcmToken: fcmToken);
     await _authRepository.dummySignIn(req).then((res) async {
       onSignInSuccess(res);
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
+  }
+
+  Future<String?> requestFcmToken() async {
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true
+    );
+    final String? fcmToken = await FirebaseMessaging.instance.getToken().catchError((e) {
+      return null;
+    });
+    return fcmToken;
+  }
+
+  void onSignInSuccess(DuaryInfoRes res) {
+    me.value = res.member;
+    myCouple.value = res.couple;
   }
 
   Future<void> signOut() async {

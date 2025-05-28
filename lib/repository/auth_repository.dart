@@ -1,24 +1,18 @@
 import 'package:duary/data/authorization_token_res.dart';
-import 'package:duary/data/sign_in_req.dart';
+import 'package:duary/data/duary_info_res.dart';
 import 'package:duary/data/dummy_sign_in_req.dart';
-import 'package:duary/data/sign_in_res.dart';
-import 'package:duary/data/sign_up_req.dart';
-import 'package:duary/model/member.dart';
+import 'package:duary/data/sign_in_req.dart';
 
 abstract interface class AuthRepository {
 
-  Future<AuthorizationTokenRes> signInWithIdPw({SignInReq? req});
-
-  Future<Member> getUserInfo();
+  Future<DuaryInfoRes> signInWithToken(SignInReq req);
 
   Future<AuthorizationTokenRes> reissue(String accessToken, String refreshToken);
 
-  Future<AuthorizationTokenRes> signUp(SignUpReq req);
+  Future<DuaryInfoRes> signInWithKakaoTalk(SignInReq req);
 
-  Future<SignInRes> signInWithKakaoTalk();
+  Future<DuaryInfoRes> signInWithApple(SignInReq req);
 
-  Future<SignInRes> signInWithApple();
-
-  Future<SignInRes> dummySignIn(DummySignInReq req);
+  Future<DuaryInfoRes> dummySignIn(DummySignInReq req);
 
 }

@@ -26,23 +26,16 @@ class _SplashScreenState extends State<SplashScreen>
 
   late Future<void> signInFuture;
 
-  bool _isSignInCompleted = false;
-  bool _isAnimationCompleted = false;
+  bool _isSIgnInDone = false;
+  bool _isAnimationDone = false;
 
   @override
   void initState() {
     duaryContext = DuaryContext();
 
     // 로그인
-    signInFuture = duaryContext.checkSignIn().then((_) async {
-      // 로그인 성공한 경우, 커플 정보까지 가져옴
-      if (duaryContext.me.value != null) {
-        if (duaryContext.me.value!.coupleId != null) {
-          await duaryContext.getMyCouple().catchError((_) {});
-        }
-      }
-    }).whenComplete(() {
-      _isSignInCompleted = true;
+    signInFuture = duaryContext.signInWithToken().whenComplete(() {
+      _isSIgnInDone = true;
       whenTaskComplete();
     });
 
@@ -65,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen>
     // route screen when animation end
     _controller.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        _isAnimationCompleted = true;
+        _isAnimationDone = true;
         await Future.delayed(const Duration(milliseconds: 500));
         whenTaskComplete();
       }
@@ -74,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void whenTaskComplete() {
-    if (_isAnimationCompleted && _isSignInCompleted) {
+    if (_isAnimationDone && _isSIgnInDone) {
       Navigator.of(context)
           .pushReplacement(MaterialPageRoute(builder: (context) {
         // 로그인되어 있으면

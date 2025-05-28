@@ -3,8 +3,9 @@ import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/splash_screen.dart';
 import 'package:duary/support/asset_path.dart';
+import 'package:duary/support/secret_key.dart';
 import 'package:firebase_core/firebase_core.dart';
-// import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:duary/provider/theme_provider.dart';
@@ -22,16 +23,13 @@ void main() async {
 
   // init kakao sdk
   KakaoSdk.init(
-    nativeAppKey: 'c39358bbd16f0444208eb658c37cd69e',
+    nativeAppKey: SecretKey.kakaoNativeAppKey,
   );
   // secure storage
   FlutterSecureStorage ss = const FlutterSecureStorage();
   final SecureStorage secureStorage = SecureStorageImpl(ss);
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // final String? fcmToken = await FirebaseMessaging.instance.getToken();
-
-
 
   // pre cache splash logo
   // Native Splash Screen -> SplashScreen.dart 전환 중 로고 깜빡임 제거
