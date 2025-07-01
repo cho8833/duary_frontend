@@ -36,6 +36,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late Member lover;
 
+  DraggableScrollableController sheetController = DraggableScrollableController(
+
+  );
+
   @override
   void initState() {
     super.initState();
@@ -270,29 +274,35 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             DraggableScrollableSheet(
+              controller: sheetController,
                 minChildSize: _minSheetSize,
                 initialChildSize: _minSheetSize,
                 snap: true,
                 builder: (ctx, controller) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: const [
-                        BoxShadow(
-                            color: Color.from(
-                                alpha: 0.1, red: 0, green: 0, blue: 0),
-                            offset: Offset(0, -2),
-                            blurRadius: 15)
-                      ],
-                      color: Colors.white,
-                    ),
-                    child: SingleChildScrollView(
-                      physics: const ClampingScrollPhysics(),
-                      // 오버스크롤(바운딩) 방지
-                      controller: controller,
-                      child: SizedBox(
-                        height: constraints.maxHeight,
-                        child: const TimetableScreen(),
+                  return ButtonBase(
+                    onTap: () async {
+                     sheetController.animateTo(1, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: const [
+                          BoxShadow(
+                              color: Color.from(
+                                  alpha: 0.1, red: 0, green: 0, blue: 0),
+                              offset: Offset(0, -2),
+                              blurRadius: 15)
+                        ],
+                        color: Colors.white,
+                      ),
+                      child: SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        // 오버스크롤(바운딩) 방지
+                        controller: controller,
+                        child: SizedBox(
+                          height: constraints.maxHeight,
+                          child: const TimetableScreen(),
+                        ),
                       ),
                     ),
                   );
