@@ -1,7 +1,11 @@
+import 'package:duary/model/enums/frequency.dart';
 import 'package:duary/model/event.dart';
+import 'package:duary/provider/event_provider.dart';
 import 'package:duary/widget/base_app_bar.dart';
+import 'package:duary/widget/button_base.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class EditEventScreen extends StatefulWidget {
   const EditEventScreen({super.key, this.event});
@@ -21,9 +25,11 @@ class _EditEventScreenState extends State<EditEventScreen> {
   String? content;
   bool isTogether = false;
   bool allDay = false;
-  Recurrence? repeat;
   late DateTime startDateTime;
   late DateTime endDateTime;
+  Frequency frequency = Frequency.oneTime;
+
+  late EventProvider eventProvider;
 
   @override
   void initState() {
@@ -38,11 +44,13 @@ class _EditEventScreenState extends State<EditEventScreen> {
       content = event.content;
       isTogether = event.isTogether;
       allDay = event.isAllDay;
-      repeat = event.recurrence;
+      frequency = event.frequency;
     }
     startDateTime = widget.event?.startDateTime ?? DateTime.now();
     endDateTime = widget.event?.endDateTime ??
         DateTime.now().add(const Duration(days: 1));
+
+    eventProvider = context.read<EventProvider>();
   }
 
   @override
@@ -242,10 +250,10 @@ class _EditEventScreenState extends State<EditEventScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            repeat?.frequency.title ?? "일정 반복 안함",
+                            frequency.title,
                             style: TextStyle(
                                 fontSize: 16,
-                                color: repeat != null
+                                color: frequency != Frequency.oneTime
                                     ? const Color(0xFF333333)
                                     : const Color(0xFFD0D0D0)),
                           ),
@@ -300,21 +308,26 @@ class _EditEventScreenState extends State<EditEventScreen> {
                 ),
               ),
             ),
-            Container(
-              margin: const EdgeInsets.fromLTRB(0, 30, 0, 30),
-              width: double.infinity,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFBD64),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Center(
-                child: Text(
-                  isEdit ? "일정 수정하기" : "새 일정 등록하기",
-                  style: const TextStyle(
-                      color: Color(0xFF573200),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15),
+            ButtonBase(
+              onTap: () async {
+
+              },
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(0, 30, 0, 30),
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFBD64),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Center(
+                  child: Text(
+                    isEdit ? "일정 수정하기" : "새 일정 등록하기",
+                    style: const TextStyle(
+                        color: Color(0xFF573200),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15),
+                  ),
                 ),
               ),
             ),

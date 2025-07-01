@@ -1,3 +1,4 @@
+import 'package:duary/model/enums/frequency.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/repository/event_repository.dart';
 
@@ -7,55 +8,59 @@ class EventRepositoryMock implements EventRepository {
 
   static Event dummy1(DateTime date) {
     return Event(
-      "1",
+      "eventId1",
+      "coupleId1",
+      "createdBy1",
       date.copyWith(hour: 4),
       date.copyWith(hour: 5),
       "${date.month}/${date.day} 송상현 광장 / 응가가방 챙기기",
-      1,
+      Frequency.oneTime,
       true,
       false,
-      "84ad69ea-1937-4aa0-872a-9dccc2274c9e",
       content: "${date.month}/${date.day} 은동이랑 셋이서 산책하기 🐶",
     );
   }
 
   static Event dummy2(DateTime date) {
     return Event(
-      "2",
+      "eventId2",
+      "coupleId2",
+      "createdBy2",
       date.copyWith(hour: 12),
       date.copyWith(hour: 16),
       "${date.month}/${date.day} 사상 타건샵 '몬스터기어매장",
-      3428835809,
+      Frequency.oneTime,
       false,
       false,
-      "84ad69ea-1937-4aa0-872a-9dccc2274c9e",
       content: '${date.month}/${date.day} 타건샵 방문 후 키보드 수령 🤩',
     );
   }
 
   static Event dummy3(DateTime date) {
     return Event(
-      "3",
+      "eventId3",
+      "coupleId3",
+      "createdBy3",
       date.copyWith(hour: 13),
       date.copyWith(hour: 14),
       "송상현 광장 / 응가가방 챙기기",
-      1,
+      Frequency.oneTime,
       true,
       false,
-      "84ad69ea-1937-4aa0-872a-9dccc2274c9e",
       content: "${date.month}/${date.day} 은동이랑 셋이서 산책하기 🐶",
     );
   }
   static Event dummy4(DateTime date) {
     return Event(
-      "4",
+      "eventId4",
+      "coupleId4",
+      "createdBy4",
       date.copyWith(hour: 9),
       date.copyWith(hour: 10),
       "${date.month}/${date.day} 제목",
-      1,
+      Frequency.oneTime,
       false,
       false,
-      "84ad69ea-1937-4aa0-872a-9dccc2274c9e",
       content: "내용",
     );
   }
