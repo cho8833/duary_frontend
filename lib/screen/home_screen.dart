@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
+import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/event_details_screen.dart';
 import 'package:duary/screen/my_page_screen.dart';
@@ -25,6 +26,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final EventProvider _eventProvider;
+  final DuaryContext duaryContext = DuaryContext();
 
   static const String _noOngoingEventMent = "쉬는 중이야";
 
@@ -36,6 +38,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late Member lover;
 
+  late final void Function() meListener;
+  late final void Function() loverListener;
+
   DraggableScrollableController sheetController = DraggableScrollableController(
 
   );
@@ -45,10 +50,34 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _eventProvider = context.read<EventProvider>();
 
-    me = _eventProvider.me!;
-    lover = _eventProvider.lover!;
+    me = duaryContext.me.value!;
+    lover = duaryContext.lover.value!;
+    meListener = () {
+      if (duaryContext.me.value != null) {
+        setState(() {
+          me = duaryContext.me.value!;
+        });
+      }
+      return;
+    };
+    loverListener = () {
+      if (duaryContext.myCouple.value != null) {
+        setState(() {
+          lover = duaryContext.lover.value!;
+        });
+      }
+    };
+    duaryContext.me.addListener(meListener);
+    duaryContext.lover.addListener(loverListener);
 
     getOngoingEventRequest = _eventProvider.getOngoingEvent();
+  }
+
+  @override
+  void dispose() {
+    duaryContext.me.removeListener(meListener);
+    duaryContext.lover.removeListener(loverListener);
+    super.dispose();
   }
 
   @override
