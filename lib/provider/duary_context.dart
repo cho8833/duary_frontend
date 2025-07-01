@@ -3,6 +3,7 @@ import 'package:duary/data/dummy_sign_in_req.dart';
 import 'package:duary/data/sign_in_req.dart';
 import 'package:duary/data/start_duary_req.dart';
 import 'package:duary/data/input_couple_code_req.dart';
+import 'package:duary/data/update_couple_req.dart';
 import 'package:duary/data/update_member_req.dart';
 import 'package:duary/model/couple.dart';
 import 'package:duary/model/enums/character.dart';
@@ -115,7 +116,8 @@ class DuaryContext {
   }
 
   Future<String?> _requestFcmToken() async {
-    final String? fcmToken = await FirebaseMessaging.instance.getToken().catchError((e) {
+    final String? fcmToken =
+        await FirebaseMessaging.instance.getToken().catchError((e) {
       return null;
     });
     return fcmToken;
@@ -124,7 +126,7 @@ class DuaryContext {
   void onSignInSuccess(DuaryInfoRes res) {
     me.value = res.member;
     myCouple.value = res.couple;
-    if (res.couple != null ) {
+    if (res.couple != null) {
       lover.value = getLoverFromCouple(res.couple!);
     }
   }
@@ -237,6 +239,14 @@ class DuaryContext {
       myCouple.value = res.couple;
     }).catchError((e) {
       throw ServerResponseException(e);
+    });
+  }
+
+  Future<void> updateCouple({DateTime? relationDate}) async {
+    validateRelationDate(relationDate);
+    UpdateCoupleReq req = UpdateCoupleReq(relationDate!);
+    await _coupleRepository.updateCouple(req).then((couple) {
+      myCouple.value = couple;
     });
   }
 }

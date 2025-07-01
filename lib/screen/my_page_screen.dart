@@ -3,6 +3,7 @@ import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/edit_birthday_screen.dart';
 import 'package:duary/screen/edit_name_screen.dart';
+import 'package:duary/screen/edit_relation_date_screen.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/base_app_bar.dart';
@@ -25,12 +26,14 @@ class _MyPageScreenState extends State<MyPageScreen> {
 
   late Couple myCouple;
 
-  late final void Function() listener;
+  late final void Function() meListener;
+  late final void Function() coupleListener;
 
   @override
   void initState() {
     me = duaryContext.me.value!;
-    listener = () {
+    myCouple = duaryContext.myCouple.value!;
+    meListener = () {
       if (duaryContext.me.value != null) {
         setState(() {
           me = duaryContext.me.value!;
@@ -38,8 +41,15 @@ class _MyPageScreenState extends State<MyPageScreen> {
       }
       return;
     };
-    duaryContext.me.addListener(listener);
-    myCouple = duaryContext.myCouple.value!;
+    coupleListener = () {
+      if (duaryContext.myCouple.value != null) {
+        setState(() {
+          myCouple = duaryContext.myCouple.value!;
+        });
+      }
+    };
+    duaryContext.me.addListener(meListener);
+    duaryContext.myCouple.addListener(coupleListener);
     super.initState();
   }
 
@@ -173,7 +183,13 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 height: 8,
               ),
               ButtonBase(
-                  onTap: () async {},
+                  onTap: () async {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const EditRelationDateScreen()));
+                  },
                   child: infoBox(
                       labelText: "사랑이 시작된 날",
                       currentValue: formatDateTime(myCouple.relationDate))),
@@ -258,9 +274,11 @@ class _MyPageScreenState extends State<MyPageScreen> {
       ),
     );
   }
+
   @override
   void dispose() {
-    duaryContext.me.removeListener(listener);
+    duaryContext.me.removeListener(meListener);
+    duaryContext.myCouple.removeListener(coupleListener);
     super.dispose();
   }
 }
