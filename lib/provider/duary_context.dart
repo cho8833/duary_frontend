@@ -102,7 +102,9 @@ class DuaryContext {
     SignInReq req = SignInReq(fcmToken: fcmToken);
     await _authRepository.signInWithToken(req).then((res) {
       onSignInSuccess(res);
-    }).catchError((e) {});
+    }).catchError((e) {
+      print(e);
+    });
   }
 
   Future<void> dummySignIn(String username) async {

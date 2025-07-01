@@ -42,7 +42,7 @@ final class AuthRepositoryImpl
   Future<DuaryInfoRes> signInWithToken(SignInReq req) async {
     Uri uri = getUri("/auth/signin/token");
 
-    Response response = await interceptedClient.get(uri);
+    Response response = await interceptedClient.post(uri, body: jsonEncode(req.toJson()));
 
     return getData(response, (p0) => DuaryInfoRes.fromJson(p0)).data;
   }
