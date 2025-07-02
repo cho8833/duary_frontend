@@ -5,7 +5,6 @@ import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/edit_event_screen.dart';
 import 'package:duary/screen/event_details_screen.dart';
 import 'package:duary/support/custom_page_route.dart';
-import 'package:duary/widget/bubble_painter.dart';
 import 'package:duary/widget/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -31,14 +30,15 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
   late DateTime dayFocus;
   late int dayIndex;
   late final int initialDayIndex;
+
   late final PagingController<DateTime, List<Event>> _pagingUpController;
   late final PagingController<DateTime, List<Event>> _pagingDownController;
   late ScrollController _scrollController;
-  final DuaryContext _duaryContext = DuaryContext();
+
   late final EventProvider _eventProvider;
 
   // 중복 fetch 를 방지하기 위한 flag
-  // 오늘 날짜 index 를 0으로, 내일 index 는 1, 어제 index 는 0
+  // 오늘 날짜 index 를 0으로, 내일 index 는 1, 어제 index 는 -1
   // if fetchFlag[0] == true, already fetched
   // else if fetchFlag[-2] == null, noy fetched yet
   final Map<int, bool> fetchFlag = {};
@@ -74,6 +74,13 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
 
     _scrollController = ScrollController();
     _scrollController.addListener(updateDayIndex);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _pagingDownController.dispose();
+    _pagingUpController.dispose();
   }
 
   String _formatDate(DateTime date) {
@@ -136,75 +143,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     }
   }
 
-  List<List<Event>> groupOverlappingEvents(List<Event> events,{required bool isMine}) {
-    const int maxTime = 1440;
-    final List<List<Event>> startEvents = List.generate(maxTime + 2, (_) => []);
-    final List<List<Event>> endEvents = List.generate(maxTime + 2, (_) => []);
-
-    List<Event> filtered = events.where((event) {
-      if (isMine) {
-        return _duaryContext.me.value!.socialId == event.member.socialId || event.isTogether;
-      } else {
-        return _duaryContext.me.value!.socialId != event.member.socialId || event.isTogether;
-      }
-    }).toList();
-
-    for (final event in filtered) {
-      int start = event.startDateTime.hour * 60 + event.startDateTime.minute;
-      int end = event.endDateTime.hour * 60 + event.endDateTime.minute;
-
-      startEvents[start].add(event);
-      endEvents[end].add(event);
-    }
-
-    final Set<Event> activeEvents = <Event>{};
-    final Map<String, Set<String>> overlaps = {
-      for (var event in filtered) event.id: <String>{},
-    };
-
-    for (int minute = 0; minute <= maxTime; minute++) {
-      for (final event in startEvents[minute]) {
-        for (final activeEvent in activeEvents) {
-          overlaps[event.id]!.add(activeEvent.id);
-          overlaps[activeEvent.id]!.add(event.id);
-        }
-        activeEvents.add(event);
-      }
-
-      for (final event in endEvents[minute]) {
-        activeEvents.remove(event);
-      }
-    }
-
-    final Set<String> visited = <String>{};
-    final List<List<Event>> result = [];
-    final Map<String, Event> eventById = {for (Event event in filtered) event.id: event};
-
-    for (final event in filtered) {
-      if (!visited.contains(event.id)) {
-        final List<String> queue = [event.id];
-        final List<Event> group = <Event>[];
-
-        while (queue.isNotEmpty) {
-          final String current = queue.removeLast();
-          if (visited.contains(current)) continue;
-
-          visited.add(current);
-          group.add(eventById[current]!);
-
-          for (final neighbor in overlaps[current]!) {
-            if (!visited.contains(neighbor)) {
-              queue.add(neighbor);
-            }
-          }
-        }
-        result.add(group);
-      }
-    }
-
-    return result;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -244,29 +182,27 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                                       width: 20,
                                     ),
                                     Expanded(
-                                      child: LayoutBuilder(
-                                        builder: (context, constraints) =>
-                                            Stack(
-                                          children: _buildBubbles(
-                                              constraints.maxWidth,
-                                              items,true),
-                                        ),
-                                      ),
-                                    ),
+                                        child: _BubbleSection(
+                                      items: items,
+                                      isLeft: true,
+                                    )),
                                     _buildTimeLines(),
-                                    Expanded(child: LayoutBuilder(
-                                        builder: (context, constraints) {
-                                      return Stack(
-                                        children: _buildBubbles(
-                                            constraints.maxWidth, items, false),
-                                      );
-                                    })),
+                                    Expanded(
+                                        child: _BubbleSection(
+                                      items: items,
+                                      isLeft: false,
+                                    )),
                                     const SizedBox(
                                       width: 20,
                                     ),
                                   ],
                                 ),
-                              ))),
+                              ),
+                          firstPageErrorIndicatorBuilder: (context) {
+                            return const Center(
+                              child: Text("일정을 불러오는 데에 실패했습니다"),
+                            );
+                          })),
                   PagedSliverList<DateTime, List<Event>>(
                       key: downListKey,
                       nextPageStrategy: () {
@@ -289,29 +225,27 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                                       width: 20,
                                     ),
                                     Expanded(
-                                      child: LayoutBuilder(
-                                          builder: (context, constraints) {
-                                        return Stack(
-                                          children: _buildBubbles(
-                                              constraints.maxWidth,
-                                              items, true),
-                                        );
-                                      }),
-                                    ),
+                                        child: _BubbleSection(
+                                      items: items,
+                                      isLeft: true,
+                                    )),
                                     _buildTimeLines(),
                                     Expanded(
-                                        child: LayoutBuilder(
-                                      builder: (context, constraints) => Stack(
-                                        children: _buildBubbles(
-                                            constraints.maxWidth, items, false),
-                                      ),
+                                        child: _BubbleSection(
+                                      items: items,
+                                      isLeft: false,
                                     )),
                                     const SizedBox(
                                       width: 20,
                                     ),
                                   ],
                                 ),
-                              ))),
+                              ),
+                          firstPageErrorIndicatorBuilder: (context) {
+                            return const Center(
+                              child: Text("일정을 불러오는 데에 실패했습니다"),
+                            );
+                          })),
                 ],
               );
             },
@@ -418,222 +352,11 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     );
   }
 
-  List<Widget> _buildBubbles(double maxWidth, List<Event> events, bool isLeft) {
-    List<Widget> widgets = [];
-
-    List<List<Event>> overlapGrouped = groupOverlappingEvents(events, isMine: isLeft);
-
-    for (final List<Event> overlapEvents in overlapGrouped) {
-      int overlapCount = overlapEvents.length;;
-
-      for (int i = 0 ; i < overlapCount ; i++) {
-        Event event = overlapEvents[i];
-        // 이벤트 위치 계산
-        double yPosition =
-            event.startDateTime.hour * hourHeight + event.startDateTime.minute;
-        double xPosition = maxWidth * (i + 1) / overlapCount;
-        if (!isLeft) {
-          xPosition = maxWidth - xPosition;
-        }
-        // 이벤트 높이 계산, 1분 = 1px
-        double height =
-            event.endDateTime.difference(event.startDateTime).inMinutes *
-                hourHeight /
-                60.toDouble();
-        // 이벤트 너비 계산
-        double width = maxWidth / overlapCount;
-
-        Widget? bubble = _buildBubble(event, isLeft, width, height);
-        if (bubble != null) {
-          double left = isLeft ? maxWidth - xPosition : xPosition;
-          widgets.add(Positioned(
-            left: left,
-            top: yPosition,
-            child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              EventDetailsScreen(event: event)));
-                },
-                child: bubble),
-          ));
-        }
-      }
-    }
-
-    return widgets;
-  }
-
-  Widget? _buildBubble(Event event, bool isLeft, double width, double height) {
-    // 일정 내용
-    String time =
-        "${DateFormat("hh:mm").format(event.startDateTime)} - ${DateFormat("hh:mm").format(event.endDateTime)}";
-    Character character =
-        event.isTogether ? Character.together : event.member.character!;
-    Widget content = Padding(
-      padding: isLeft
-          ? const EdgeInsets.fromLTRB(16, 8, 29, 8)
-          : const EdgeInsets.fromLTRB(29, 8, 16, 8),
-      child: Column(
-        crossAxisAlignment:
-            isLeft ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Text(
-            time,
-            style: TextStyle(
-                color: character.fontColor,
-                fontSize: 11,
-                fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(
-            height: 4,
-          ),
-          Text(
-            event.title,
-            textAlign: isLeft ? TextAlign.end : null,
-            style: TextStyle(
-                color: character.fontBlackColor,
-                fontSize: 13,
-                height: 1.1,
-                fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-    );
-
-    // draw bubble
-    late Widget bubble;
-    late Widget characterImage;
-    if (event.isTogether) {
-      if (isLeft) {
-        characterImage = const Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Yellow(
-              width: 39,
-              height: 39,
-              opacity: 0.2,
-            ),
-            Blue(
-              width: 39,
-              height: 67,
-              opacity: 0.2,
-            ),
-          ],
-        );
-      } else {
-        characterImage = const Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Blue(
-              width: 39,
-              height: 67,
-              opacity: 0.2,
-            ),
-            Yellow(
-              width: 39,
-              height: 39,
-              opacity: 0.2,
-            ),
-          ],
-        );
-      }
-    } else if (event.member.character == Character.blue) {
-      characterImage = const Blue(
-        width: 39,
-        height: 67,
-        opacity: 0.2,
-      );
-    } else {
-      characterImage = const Yellow(
-        width: 39,
-        height: 39,
-        opacity: 0.2,
-      );
-    }
-    if (event.isTogether) {
-      if (isLeft) {
-        bubble = SizedBox(
-          width: width,
-          height: height,
-          child: CustomPaint(
-            painter: SpeechBubblePainter(isLeft: isLeft, character: character),
-            child: ClipPath(
-              clipper: RightBottomRoundedClipper(),
-              child: Stack(
-                children: [
-                  content,
-                  Positioned(bottom: -21, right: 13, child: characterImage)
-                ],
-              ),
-            ),
-          ),
-        );
-      } else {
-        bubble = SizedBox(
-          width: width,
-          height: height,
-          child: CustomPaint(
-            painter: SpeechBubblePainter(isLeft: isLeft, character: character),
-            child: ClipPath(
-              clipper: LeftBottomRoundedClipper(),
-              child: Stack(
-                children: [
-                  content,
-                  Positioned(bottom: -21, left: 13, child: characterImage)
-                ],
-              ),
-            ),
-          ),
-        );
-      }
-    } else if (isLeft && event.createdBy == _duaryContext.me.value!.socialId) {
-      bubble = SizedBox(
-        width: width,
-        height: height,
-        child: CustomPaint(
-          painter: SpeechBubblePainter(isLeft: isLeft, character: character),
-          child: ClipPath(
-            clipper: RightBottomRoundedClipper(),
-            child: Stack(
-              children: [
-                content,
-                Positioned(bottom: -21, right: 13, child: characterImage)
-              ],
-            ),
-          ),
-        ),
-      );
-    } else if (!isLeft && event.createdBy != _duaryContext.me.value!.socialId) {
-      bubble = SizedBox(
-        width: width,
-        height: height,
-        child: CustomPaint(
-          painter: SpeechBubblePainter(isLeft: isLeft, character: character),
-          child: ClipPath(
-            clipper: LeftBottomRoundedClipper(),
-            child: Stack(
-              children: [
-                content,
-                Positioned(bottom: -21, left: 13, child: characterImage)
-              ],
-            ),
-          ),
-        ),
-      );
-    } else {
-      return null;
-    }
-    return bubble;
-  }
-
   Widget _buildTimeLines() {
     return Column(
       children: List.generate(24, (index) {
         return Container(
+          margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
           color: const Color(0xFFFBFBFB),
           width: _timelineLength,
           height: hourHeight,
@@ -651,11 +374,344 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
       }),
     );
   }
+}
+
+class _BubbleSection extends StatefulWidget {
+  const _BubbleSection({super.key, required this.items, required this.isLeft});
+
+  final List<Event> items;
+
+  final bool isLeft;
 
   @override
-  void dispose() {
-    super.dispose();
-    _pagingDownController.dispose();
-    _pagingUpController.dispose();
+  State<_BubbleSection> createState() => _BubbleSectionState();
+}
+
+class _BubbleSectionState extends State<_BubbleSection> {
+  final DuaryContext _duaryContext = DuaryContext();
+
+  static const hourHeight = _DuaryTimetableState.hourHeight;
+
+  late final List<Event> items;
+
+  @override
+  void initState() {
+    items = widget.items;
+    super.initState();
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      return Stack(
+        children: _buildBubbles(constraints.maxWidth, items, widget.isLeft),
+      );
+    });
+  }
+
+  List<Widget> _buildBubbles(double maxWidth, List<Event> events, bool isLeft) {
+    List<Widget> widgets = [];
+
+    List<List<Event>> overlapGrouped =
+        groupOverlappingEvents(events, isMine: isLeft);
+
+    for (final List<Event> overlapEvents in overlapGrouped) {
+      int overlapCount = overlapEvents.length;
+
+      for (int i = 0; i < overlapCount; i++) {
+        Event event = overlapEvents[i];
+        // 이벤트 위치 계산
+        double yPosition = event.startDateTime.hour * hourHeight +
+            (event.startDateTime.minute * 3 / 2);
+        double xPosition = isLeft ? i * 20 : (overlapCount - i - 1) * 20;
+
+        // 이벤트 높이 계산, 1분 = 1px
+        double height =
+            event.endDateTime.difference(event.startDateTime).inMinutes *
+                hourHeight /
+                60.toDouble();
+
+        // 이벤트 너비 계산
+        double width = maxWidth - (overlapCount - 1) * 20;
+
+        Widget? bubble = _buildBubble(event, isLeft, width, height);
+        if (bubble != null) {
+          double left = xPosition;
+          widgets.add(Positioned(
+            left: left,
+            top: yPosition,
+            child: GestureDetector(
+                onTap: () {
+                  int zIndex = items.indexOf(event);
+                  if (zIndex != items.length -1) {
+                    setState(() {
+                      items.remove(event);
+                      items.add(event);
+                    });
+                  } else {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                EventDetailsScreen(event: event)));
+                  }
+                },
+                child: bubble),
+          ));
+        }
+      }
+    }
+
+    return widgets;
+  }
+
+  Widget? _buildBubble(Event event, bool isLeft, double width, double height) {
+    // 일정 내용
+    String time =
+        "${DateFormat("hh:mm").format(event.startDateTime)} - ${DateFormat("hh:mm").format(event.endDateTime)}";
+    Character character =
+        event.isTogether ? Character.together : event.member.character!;
+
+    Widget content = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            time,
+            style: TextStyle(
+                color: character.fontColor,
+                fontSize: 11,
+                fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(
+            height: 4,
+          ),
+          Text(
+            event.title,
+            textAlign: TextAlign.start,
+            style: TextStyle(
+                color: character.fontBlackColor,
+                fontSize: 13,
+                height: 1.1,
+                fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+
+    return _Bubble(
+      character: character,
+      width: width,
+      height: height,
+      isLeft: isLeft,
+      content: content,
+    );
+  }
+
+  List<List<Event>> groupOverlappingEvents(List<Event> events,
+      {required bool isMine}) {
+    const int maxTime = 1440;
+    final List<List<Event>> startEvents = List.generate(maxTime + 2, (_) => []);
+    final List<List<Event>> endEvents = List.generate(maxTime + 2, (_) => []);
+
+    List<Event> filtered = events.where((event) {
+      if (isMine) {
+        return _duaryContext.me.value!.getId() == event.member.getId() ||
+            event.isTogether;
+      } else {
+        return _duaryContext.me.value!.getId() != event.member.getId() ||
+            event.isTogether;
+      }
+    }).toList();
+
+    for (final event in filtered) {
+      int start = event.startDateTime.hour * 60 + event.startDateTime.minute;
+      int end = event.endDateTime.hour * 60 + event.endDateTime.minute;
+
+      startEvents[start].add(event);
+      endEvents[end].add(event);
+    }
+
+    final Set<Event> activeEvents = <Event>{};
+    final Map<String, Set<String>> overlaps = {
+      for (var event in filtered) event.id: <String>{},
+    };
+
+    for (int minute = 0; minute <= maxTime; minute++) {
+      for (final event in startEvents[minute]) {
+        for (final activeEvent in activeEvents) {
+          overlaps[event.id]!.add(activeEvent.id);
+          overlaps[activeEvent.id]!.add(event.id);
+        }
+        activeEvents.add(event);
+      }
+
+      for (final event in endEvents[minute]) {
+        activeEvents.remove(event);
+      }
+    }
+
+    final Set<String> visited = <String>{};
+    final List<List<Event>> result = [];
+    final Map<String, Event> eventById = {
+      for (Event event in filtered) event.id: event
+    };
+
+    for (final event in filtered) {
+      if (!visited.contains(event.id)) {
+        final List<String> queue = [event.id];
+        final List<Event> group = <Event>[];
+
+        while (queue.isNotEmpty) {
+          final String current = queue.removeLast();
+          if (visited.contains(current)) continue;
+
+          visited.add(current);
+          group.add(eventById[current]!);
+
+          for (final neighbor in overlaps[current]!) {
+            if (!visited.contains(neighbor)) {
+              queue.add(neighbor);
+            }
+          }
+        }
+        result.add(group);
+      }
+    }
+
+    return result;
+  }
+}
+
+class _Bubble extends StatelessWidget {
+  const _Bubble(
+      {super.key,
+      required this.character,
+      required this.width,
+      required this.height,
+      required this.isLeft,
+      required this.content});
+
+  final double width;
+
+  final double height;
+
+  final Character character;
+
+  final Widget content;
+
+  final bool isLeft;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: character.bubbleColor,
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 3,
+                offset: const Offset(2, 2))
+          ]),
+      child: ClipPath(
+        clipper: RoundedClipper(),
+        child: Stack(
+          children: [
+            content,
+            Positioned(
+                bottom: -21,
+                right: isLeft ? 5 : null,
+                left: isLeft ? null : 5,
+                child: _CharacterImage(
+                    isTogether: character == Character.together,
+                    isLeft: isLeft,
+                    character: character))
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CharacterImage extends StatelessWidget {
+  const _CharacterImage(
+      {required this.isTogether,
+      required this.isLeft,
+      required this.character});
+
+  final bool isTogether;
+
+  final bool isLeft;
+
+  final Character character;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isTogether) {
+      if (isLeft) {
+        return const Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Yellow(
+              width: 39,
+              height: 39,
+              opacity: 0.2,
+            ),
+            Blue(
+              width: 39,
+              height: 67,
+              opacity: 0.2,
+            ),
+          ],
+        );
+      } else {
+        return const Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Blue(
+              width: 39,
+              height: 67,
+              opacity: 0.2,
+            ),
+            Yellow(
+              width: 39,
+              height: 39,
+              opacity: 0.2,
+            ),
+          ],
+        );
+      }
+    } else if (character == Character.blue) {
+      return const Blue(
+        width: 39,
+        height: 67,
+        opacity: 0.2,
+      );
+    } else {
+      return const Yellow(
+        width: 39,
+        height: 39,
+        opacity: 0.2,
+      );
+    }
+  }
+}
+
+class RoundedClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    const double radius = 20;
+
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final rRect = RRect.fromRectAndRadius(rect, const Radius.circular(radius));
+    return Path()..addRRect(rRect);
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

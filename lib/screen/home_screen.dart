@@ -7,7 +7,7 @@ import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/event_details_screen.dart';
 import 'package:duary/screen/my_page_screen.dart';
-import 'package:duary/screen/schedule_screen.dart';
+import 'package:duary/screen/timetable_screen.dart';
 
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/button_base.dart';

@@ -9,7 +9,7 @@ class EventProvider {
   final EventRepository _eventRepository;
 
   // 이벤트 캐싱
-  final Map<DateTime, List<Event>> _event = {};
+  final Map<DateTime, List<Event>> eventMap = {};
 
   // Future caching : 같은 인자로 호출된 비동기 작업이 진행 중이면, 그 작업의 결과를 기다렸다가 반환
   final Map<DateTime, Future<List<Event>>> _eventRequest = {};
@@ -59,8 +59,8 @@ class EventProvider {
 
   Future<List<Event>> getEventByDay(DateTime date) async {
     // 캐싱된 이벤트가 있으면 반환
-    if (_event.containsKey(date)) {
-      return _event[date]!;
+    if (eventMap.containsKey(date)) {
+      return eventMap[date]!;
     }
 
     // 현재 요청 진행 중이면 그 요청의 결과 기다리고 반환
@@ -74,10 +74,18 @@ class EventProvider {
     final Future<List<Event>> future =
     _eventRepository.getEvent(myCouple!.id, startDate, endDate).then((events) {
       // 멤버 정보를 이벤트 데이터에 넣어줌
-      _initMemberInEvents(events);
+      events = _initMemberInEvents(events);
 
-      _event[date] = events; // 이벤트 캐싱
+      // 이벤트 정렬
+      events.sort((e1, e2) {
+        return e1.startDateTime.compareTo(e2.startDateTime);
+      });
+
+      eventMap[date] = events; // 이벤트 캐싱
       return events;
+    }).catchError((e) {
+      print(e);
+      throw e;
     }).whenComplete(() {
       // 요청이 완료되면 Future cache 에서 제거
       _eventRequest.remove(date);
@@ -125,10 +133,17 @@ class EventProvider {
     return afterNow;
   }
 
-  void _initMemberInEvents(List<Event> events) {
+  List<Event> _initMemberInEvents(List<Event> events) {
+    List<Event> temp = [];
     for (Event event in events) {
-      event.member = myCouple!.members
-          .firstWhere((member) => member.socialId == event.createdBy);
+      try {
+        event.member = myCouple!.members
+            .firstWhere((member) => member.getId() == event.createdBy);
+        temp.add(event);
+      } catch (_) {
+        // createdby 와 member 가 매핑되는 event가 없으면 잘못된 데이터로 간주하고 무시
+      }
     }
+    return temp;
   }
 }

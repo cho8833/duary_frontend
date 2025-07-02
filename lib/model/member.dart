@@ -14,6 +14,9 @@ class Member {
   String socialId;
   String provider;
 
+  String getId() {
+    return "$socialId-$provider";
+  }
 
   Member(this.name, this.character, this.coupleId, this.birthday, this.socialId,
       this.provider);
