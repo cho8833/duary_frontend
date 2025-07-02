@@ -501,10 +501,14 @@ class _BubbleSectionState extends State<_BubbleSection> {
       }
     }).toList();
 
+    // ID -> index 맵으로 원래 정렬 순서 추적
+    final Map<String, int> eventOrder = {
+      for (int i = 0; i < filtered.length; i++) filtered[i].id: i
+    };
+
     for (final event in filtered) {
       int start = event.startDateTime.hour * 60 + event.startDateTime.minute;
       int end = event.endDateTime.hour * 60 + event.endDateTime.minute;
-
       startEvents[start].add(event);
       endEvents[end].add(event);
     }
@@ -537,21 +541,33 @@ class _BubbleSectionState extends State<_BubbleSection> {
     for (final event in filtered) {
       if (!visited.contains(event.id)) {
         final List<String> queue = [event.id];
-        final List<Event> group = <Event>[];
+        final Set<String> groupIds = <String>{};
 
         while (queue.isNotEmpty) {
           final String current = queue.removeLast();
           if (visited.contains(current)) continue;
 
           visited.add(current);
-          group.add(eventById[current]!);
+          groupIds.add(current);
 
-          for (final neighbor in overlaps[current]!) {
+          // queue에 추가할 때 정렬된 순서 기준으로 우선순위 지정
+          final neighbors = overlaps[current]!.toList()
+            ..sort((a, b) => eventOrder[a]!.compareTo(eventOrder[b]!));
+
+          for (final neighbor in neighbors) {
             if (!visited.contains(neighbor)) {
               queue.add(neighbor);
             }
           }
         }
+
+        // 그룹 내부도 입력 순서 유지
+        final group = groupIds
+            .map((id) => eventById[id]!)
+            .toList()
+          ..sort((a, b) =>
+              eventOrder[a.id]!.compareTo(eventOrder[b.id]!));
+
         result.add(group);
       }
     }
