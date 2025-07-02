@@ -174,30 +174,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                       },
                       pagingController: _pagingUpController,
                       builderDelegate: PagedChildBuilderDelegate(
-                          itemBuilder: (context, items, index) => SizedBox(
-                                height: hourHeight * 24,
-                                child: Row(
-                                  children: [
-                                    const SizedBox(
-                                      width: 20,
-                                    ),
-                                    Expanded(
-                                        child: _BubbleSection(
-                                      items: items,
-                                      isLeft: true,
-                                    )),
-                                    _buildTimeLines(),
-                                    Expanded(
-                                        child: _BubbleSection(
-                                      items: items,
-                                      isLeft: false,
-                                    )),
-                                    const SizedBox(
-                                      width: 20,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                          itemBuilder: (context, items, index) => _BubbleSection(items: items),
                           firstPageErrorIndicatorBuilder: (context) {
                             return const Center(
                               child: Text("일정을 불러오는 데에 실패했습니다"),
@@ -216,31 +193,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                       },
                       pagingController: _pagingDownController,
                       builderDelegate: PagedChildBuilderDelegate(
-                          itemBuilder: (context, items, index) => SizedBox(
-                                height: hourHeight * 24,
-                                // 60px per hour, 24 hour = 60 * 24 = 1440 px
-                                child: Row(
-                                  children: [
-                                    const SizedBox(
-                                      width: 20,
-                                    ),
-                                    Expanded(
-                                        child: _BubbleSection(
-                                      items: items,
-                                      isLeft: true,
-                                    )),
-                                    _buildTimeLines(),
-                                    Expanded(
-                                        child: _BubbleSection(
-                                      items: items,
-                                      isLeft: false,
-                                    )),
-                                    const SizedBox(
-                                      width: 20,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                          itemBuilder: (context, items, index) => _BubbleSection(items: items),
                           firstPageErrorIndicatorBuilder: (context) {
                             return const Center(
                               child: Text("일정을 불러오는 데에 실패했습니다"),
@@ -351,6 +304,60 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
       ),
     );
   }
+}
+
+class _BubbleSection extends StatefulWidget {
+  const _BubbleSection({required this.items});
+
+  final List<Event> items;
+
+  @override
+  State<_BubbleSection> createState() => _BubbleSectionState();
+}
+
+class _BubbleSectionState extends State<_BubbleSection> {
+  final DuaryContext _duaryContext = DuaryContext();
+
+  static const hourHeight = _DuaryTimetableState.hourHeight;
+  static const _timelineLength = _DuaryTimetableState._timelineLength;
+
+  late final List<Event> items;
+
+  @override
+  void initState() {
+    items = widget.items;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: hourHeight * 24,
+      child: Row(
+        children: [
+          const SizedBox(
+            width: 20,
+          ),
+          Expanded(
+              child: LayoutBuilder(builder: (context, constraints) {
+                return Stack(
+                  children: _buildBubbles(constraints.maxWidth, items, true),
+                );
+              })),
+          _buildTimeLines(),
+          Expanded(
+              child: LayoutBuilder(builder: (context, constraints) {
+                return Stack(
+                  children: _buildBubbles(constraints.maxWidth, items, false),
+                );
+              })),
+          const SizedBox(
+            width: 20,
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildTimeLines() {
     return Column(
@@ -373,40 +380,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
         );
       }),
     );
-  }
-}
-
-class _BubbleSection extends StatefulWidget {
-  const _BubbleSection({super.key, required this.items, required this.isLeft});
-
-  final List<Event> items;
-
-  final bool isLeft;
-
-  @override
-  State<_BubbleSection> createState() => _BubbleSectionState();
-}
-
-class _BubbleSectionState extends State<_BubbleSection> {
-  final DuaryContext _duaryContext = DuaryContext();
-
-  static const hourHeight = _DuaryTimetableState.hourHeight;
-
-  late final List<Event> items;
-
-  @override
-  void initState() {
-    items = widget.items;
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      return Stack(
-        children: _buildBubbles(constraints.maxWidth, items, widget.isLeft),
-      );
-    });
   }
 
   List<Widget> _buildBubbles(double maxWidth, List<Event> events, bool isLeft) {
@@ -443,11 +416,13 @@ class _BubbleSectionState extends State<_BubbleSection> {
             child: GestureDetector(
                 onTap: () {
                   int zIndex = items.indexOf(event);
+                  // Bubble 이 맨 위로 올라와 있지 않으면 맨 위로 올림
                   if (zIndex != items.length -1) {
                     setState(() {
                       items.remove(event);
                       items.add(event);
                     });
+                    // Bubble 이 맨 위로 올라와 있으면 Detail Screen 으로 route
                   } else {
                     Navigator.push(
                         context,
