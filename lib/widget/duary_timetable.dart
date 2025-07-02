@@ -5,7 +5,7 @@ import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/edit_event_screen.dart';
 import 'package:duary/screen/event_details_screen.dart';
 import 'package:duary/support/custom_page_route.dart';
-import 'package:duary/widget/characters.dart';
+import 'package:duary/widget/character_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';

@@ -4,7 +4,7 @@ import 'package:duary/screen/home_screen.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/screen/start_duary_screen.dart';
 import 'package:duary/support/asset_path.dart';
-import 'package:duary/widget/characters.dart';
+import 'package:duary/widget/character_widget.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';

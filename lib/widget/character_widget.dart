@@ -44,8 +44,40 @@ class Blue extends StatelessWidget {
   }
 }
 
+class CircleBlue extends StatelessWidget {
+  const CircleBlue({super.key, required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Image.asset(AssetPath.blueCircle),
+    );
+  }
+}
+
+class CircleClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    final radius = size.shortestSide / 2;
+    path.addOval(Rect.fromCircle(
+      center: Offset(size.width / 2, size.height / 2),
+      radius: radius,
+    ));
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
 class AnimatingBlue extends StatefulWidget {
-  const AnimatingBlue({super.key, required this.width, required this.height, this.opacity});
+  const AnimatingBlue(
+      {super.key, required this.width, required this.height, this.opacity});
 
   final double width;
   final double height;

@@ -6,7 +6,7 @@ import 'package:duary/screen/login_screen.dart';
 import 'package:duary/support/repository_container.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/button_base.dart';
-import 'package:duary/widget/characters.dart';
+import 'package:duary/widget/character_widget.dart';
 import 'package:duary/widget/duary_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';

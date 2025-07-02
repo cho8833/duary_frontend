@@ -11,7 +11,7 @@ import 'package:duary/screen/timetable_screen.dart';
 
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/button_base.dart';
-import 'package:duary/widget/characters.dart';
+import 'package:duary/widget/character_widget.dart';
 import 'package:duary/widget/set_character.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -112,8 +112,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         width: 41,
                         child: ClipRRect(
                             borderRadius: BorderRadius.circular(99),
-                            child: Character.characterWidget(me.character!,
-                                width: 41, height: 63, opacity: 1)),
+                            child: Character.characterCircleWidget(me.character!,
+                                size: 40)),
                       ),
                       const SizedBox(
                         width: 10,
@@ -239,9 +239,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         width: 41,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(99),
-                          child: const Yellow(
-                            width: 41,
-                            height: 41,
+                          child: Character.characterCircleWidget(
+                            lover.character!,
+                            size: 40
                           ),
                         ),
                       ),

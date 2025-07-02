@@ -11,6 +11,7 @@ Map<String, dynamic> _$UpdateMemberReqToJson(UpdateMemberReq instance) =>
       'name': instance.name,
       'birthday': _$JsonConverterToJson<String, DateTime>(
           instance.birthday, const ISO8601TimeZoneFormatter().toJson),
+      'character': instance.character,
     };
 
 Json? _$JsonConverterToJson<Json, Value>(

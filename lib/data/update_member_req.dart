@@ -1,3 +1,4 @@
+import 'package:duary/model/enums/character.dart';
 import 'package:duary/support/iso8601_time_zone_formatter.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -10,7 +11,9 @@ class UpdateMemberReq {
   @ISO8601TimeZoneFormatter()
   DateTime? birthday;
 
-  UpdateMemberReq(this.name, this.birthday);
+  Character? character;
+
+  UpdateMemberReq(this.name, this.birthday, this.character);
 
   Map<String, dynamic> toJson() => _$UpdateMemberReqToJson(this);
 }

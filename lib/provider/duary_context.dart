@@ -227,7 +227,7 @@ class DuaryContext {
     }
   }
 
-  Future<void> updateMember({String? name, DateTime? birthday}) async {
+  Future<void> updateMember({String? name, DateTime? birthday, Character? character}) async {
     if (name != null) {
       validateName(name);
     }
@@ -235,7 +235,7 @@ class DuaryContext {
       validateBirthday(birthday);
     }
 
-    UpdateMemberReq req = UpdateMemberReq(name, birthday);
+    UpdateMemberReq req = UpdateMemberReq(name, birthday, character);
     await _memberRepository.updateMember(req).then((res) {
       me.value = res.member;
       myCouple.value = res.couple;

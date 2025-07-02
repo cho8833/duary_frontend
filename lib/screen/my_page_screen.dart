@@ -1,15 +1,16 @@
 import 'package:duary/model/couple.dart';
+import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/screen/change_character_screen.dart';
 import 'package:duary/screen/edit_birthday_screen.dart';
 import 'package:duary/screen/edit_name_screen.dart';
 import 'package:duary/screen/edit_relation_date_screen.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/base_app_bar.dart';
-import 'package:duary/widget/characters.dart';
+import 'package:duary/widget/character_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class MyPageScreen extends StatefulWidget {
@@ -84,9 +85,38 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 padding: const EdgeInsets.only(top: 24.0),
                 child: Row(
                   children: [
-                    // TODO: 아이콘 변경
-                    const Yellow(
-                      width: 85,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const ChangeCharacterScreen()));
+                      },
+                      child: ClipOval(
+                        child: Stack(
+                          children: [
+                            Character.characterCircleWidget(me.character!,
+                                size: 85),
+                            Positioned(
+                                bottom: 0,
+                                child: Container(
+                                  width: 85,
+                                  height: 22,
+                                  decoration: BoxDecoration(
+                                      color: const Color(0xFFB4B4B4)
+                                          .withAlpha(200)),
+                                  child: const Center(
+                                      child: Text(
+                                    "바꾸기",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700),
+                                  )),
+                                ))
+                          ],
+                        ),
+                      ),
                     ),
                     const SizedBox(
                       width: 15,

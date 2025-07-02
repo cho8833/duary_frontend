@@ -3,6 +3,7 @@ class AssetPath {
   static const String duarySet = "asset/duary_set.png";
   static const String duarySplashLogo = "asset/duary_logo_splash.svg";
   static const String blue = "asset/blue.png";
+  static const String blueCircle = "asset/blue_circle.png";
   static const String yellow = "asset/yellow.png";
   static const String coupleStamp = "asset/couple_stamp.png";
   static const String newSchedule = "asset/new_schedule.png";
