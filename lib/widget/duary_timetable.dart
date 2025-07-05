@@ -41,12 +41,18 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
   // 오늘 날짜 index 를 0으로, 내일 index 는 1, 어제 index 는 -1
   // if fetchFlag[0] == true, already fetched
   // else if fetchFlag[-2] == null, noy fetched yet
-  final Map<int, bool> fetchFlag = {};
+  Map<int, bool> fetchFlag = {};
 
   final Key downListKey = UniqueKey();
 
   static const double hourHeight = DuaryTimetable.hourHeight;
   static const double _timelineLength = 22;
+
+  late DateTime nextUpPageKey;
+
+  late DateTime nextDownPageKey;
+
+  DuaryContext duaryContext = DuaryContext();
 
   @override
   void initState() {
@@ -56,24 +62,30 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     initialDayIndex = (dayFocus.difference(DateTime.now()).inHours / 24).ceil();
     dayIndex = initialDayIndex;
 
+    nextUpPageKey = dayFocus.subtract(const Duration(days: 1));
+    nextDownPageKey = dayFocus;
+
     _eventProvider = context.read<EventProvider>();
 
-    _pagingUpController = PagingController(
-        firstPageKey: dayFocus.subtract(const Duration(days: 1)));
-    _pagingDownController = PagingController(firstPageKey: dayFocus);
-    _pagingUpController.addPageRequestListener((pageKey) {
-      _fetchUpPage(pageKey);
+    _pagingUpController = PagingController(getNextPageKey: (state) {
+      return nextUpPageKey;
+    }, fetchPage: (pageKey) {
+      return _fetchUpPage(pageKey);
     });
-    _pagingDownController.addPageRequestListener((pageKey) {
-      _fetchDownPage(pageKey);
+    _pagingDownController = PagingController(getNextPageKey: (state) {
+      return nextDownPageKey;
+    }, fetchPage: (pageKey) {
+      return _fetchDownPage(pageKey);
     });
-
-    // 초기 로딩 시 firstPageKey 에 대한 데이터를 fetch 하기 때문에 해당 Flag 세움
-    fetchFlag[0] = true;
-    fetchFlag[-1] = true;
 
     _scrollController = ScrollController();
     _scrollController.addListener(updateDayIndex);
+
+    duaryContext.me.addListener(() {
+      _pagingDownController.refresh();
+      _pagingUpController.refresh();
+      fetchFlag = {};
+    });
   }
 
   @override
@@ -115,32 +127,28 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     }
   }
 
-  Future<void> _fetchDownPage(DateTime pageKey) async {
-    try {
-      // 하루동안의 event 불러옴
-      DateTime startDate = DateTime(pageKey.year, pageKey.month, pageKey.day);
-      final newItems = await _eventProvider.getEventByDay(startDate);
+  Future<List<List<Event>>> _fetchDownPage(DateTime pageKey) async {
+    // 하루동안의 event 불러옴
+    DateTime startDate = DateTime(pageKey.year, pageKey.month, pageKey.day);
+    final newItems = await _eventProvider.getEventByDay(startDate);
 
-      final DateTime nextPageKey = pageKey.add(const Duration(days: 1));
+    fetchFlag[dayIndex] = true;
 
-      _pagingDownController.appendPage([newItems], nextPageKey);
-    } catch (error) {
-      _pagingDownController.error = error;
-    }
+    nextDownPageKey = pageKey.add(const Duration(days: 1));
+
+    return [newItems];
   }
 
-  Future<void> _fetchUpPage(DateTime pageKey) async {
-    try {
-      // 하루동안의 event 불러옴
-      DateTime startDate = DateTime(pageKey.year, pageKey.month, pageKey.day);
-      final newItems = await _eventProvider.getEventByDay(startDate);
+  Future<List<List<Event>>> _fetchUpPage(DateTime pageKey) async {
+    // 하루동안의 event 불러옴
+    DateTime startDate = DateTime(pageKey.year, pageKey.month, pageKey.day);
+    final newItems = await _eventProvider.getEventByDay(startDate);
 
-      final DateTime nextPageKey = pageKey.subtract(const Duration(days: 1));
+    fetchFlag[dayIndex] = true;
 
-      _pagingUpController.appendPage([newItems], nextPageKey);
-    } catch (error) {
-      _pagingUpController.error = error;
-    }
+    nextUpPageKey = pageKey.subtract(const Duration(days: 1));
+
+    return [newItems];
   }
 
   @override
@@ -162,43 +170,55 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                 offset: position,
                 center: downListKey,
                 slivers: [
-                  PagedSliverList<DateTime, List<Event>>(
-                      nextPageStrategy: () {
-                        if (dayIndex < initialDayIndex &&
-                            fetchFlag[dayIndex] == null) {
-                          fetchFlag[dayIndex] = true;
-                          return true;
-                        } else {
-                          return false;
-                        }
-                      },
-                      pagingController: _pagingUpController,
+                  PagingListener(
+                    controller: _pagingUpController,
+                    builder: (context, state, fetchNextPage) =>
+                        PagedSliverList<DateTime, List<Event>>(
+                          nextPageStrategy: () {
+                            if (dayIndex < initialDayIndex &&
+                                fetchFlag[dayIndex] == null) {
+                              return true;
+                            } else {
+                              return false;
+                            }
+                          },
                       builderDelegate: PagedChildBuilderDelegate(
-                          itemBuilder: (context, items, index) => _BubbleSection(items: items),
+                          itemBuilder: (context, items, index) =>
+                              _BubbleSection(items: items),
                           firstPageErrorIndicatorBuilder: (context) {
                             return const Center(
                               child: Text("일정을 불러오는 데에 실패했습니다"),
                             );
-                          })),
-                  PagedSliverList<DateTime, List<Event>>(
+                          }),
+                      state: state,
+                      fetchNextPage: fetchNextPage,
+                    ),
+                  ),
+                  PagingListener(
                       key: downListKey,
-                      nextPageStrategy: () {
-                        if (dayIndex >= initialDayIndex &&
-                            fetchFlag[dayIndex] == null) {
-                          fetchFlag[dayIndex] = true;
-                          return true;
-                        } else {
-                          return false;
-                        }
-                      },
-                      pagingController: _pagingDownController,
-                      builderDelegate: PagedChildBuilderDelegate(
-                          itemBuilder: (context, items, index) => _BubbleSection(items: items),
-                          firstPageErrorIndicatorBuilder: (context) {
-                            return const Center(
-                              child: Text("일정을 불러오는 데에 실패했습니다"),
-                            );
-                          })),
+                      controller: _pagingDownController,
+                      builder: (context, state, fetchNextPage) {
+                        return PagedSliverList<DateTime, List<Event>>(
+                          nextPageStrategy: () {
+                            if (dayIndex >= initialDayIndex &&
+                                fetchFlag[dayIndex] == null) {
+                              return true;
+                            } else {
+                              return false;
+                            }
+                          },
+                            key: downListKey,
+                            state: state,
+                            fetchNextPage: fetchNextPage,
+                            builderDelegate: PagedChildBuilderDelegate(
+                                itemBuilder: (context, items, index) =>
+                                    _BubbleSection(items: items),
+                                firstPageErrorIndicatorBuilder: (context) {
+                                  return const Center(
+                                    child: Text("일정을 불러오는 데에 실패했습니다"),
+                                  );
+                                }));
+                      }),
                 ],
               );
             },
@@ -338,19 +358,17 @@ class _BubbleSectionState extends State<_BubbleSection> {
           const SizedBox(
             width: 20,
           ),
-          Expanded(
-              child: LayoutBuilder(builder: (context, constraints) {
-                return Stack(
-                  children: _buildBubbles(constraints.maxWidth, items, true),
-                );
-              })),
+          Expanded(child: LayoutBuilder(builder: (context, constraints) {
+            return Stack(
+              children: _buildBubbles(constraints.maxWidth, items, true),
+            );
+          })),
           _buildTimeLines(),
-          Expanded(
-              child: LayoutBuilder(builder: (context, constraints) {
-                return Stack(
-                  children: _buildBubbles(constraints.maxWidth, items, false),
-                );
-              })),
+          Expanded(child: LayoutBuilder(builder: (context, constraints) {
+            return Stack(
+              children: _buildBubbles(constraints.maxWidth, items, false),
+            );
+          })),
           const SizedBox(
             width: 20,
           ),
@@ -417,7 +435,7 @@ class _BubbleSectionState extends State<_BubbleSection> {
                 onTap: () {
                   int zIndex = items.indexOf(event);
                   // Bubble 이 맨 위로 올라와 있지 않으면 맨 위로 올림
-                  if (zIndex != items.length -1) {
+                  if (zIndex != items.length - 1) {
                     setState(() {
                       items.remove(event);
                       items.add(event);
@@ -562,11 +580,8 @@ class _BubbleSectionState extends State<_BubbleSection> {
         }
 
         // 그룹 내부도 입력 순서 유지
-        final group = groupIds
-            .map((id) => eventById[id]!)
-            .toList()
-          ..sort((a, b) =>
-              eventOrder[a.id]!.compareTo(eventOrder[b.id]!));
+        final group = groupIds.map((id) => eventById[id]!).toList()
+          ..sort((a, b) => eventOrder[a.id]!.compareTo(eventOrder[b.id]!));
 
         result.add(group);
       }

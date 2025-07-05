@@ -108,6 +108,36 @@ class EventRepositoryMock implements EventRepository {
       );
     }
 
+    Event dummy7(DateTime date) {
+      return Event(
+        "9~10-me1",
+        "coupleId",
+        me.getId(),
+        date.copyWith(hour: 9, minute: 0),
+        date.copyWith(hour: 10, minute: 0),
+        "${date.month}/${date.day} 응가가방 챙기기",
+        Frequency.oneTime,
+        false,
+        false,
+        content: "${date.month}/${date.day} 은동이랑 셋이서 산책하기 🐶",
+      );
+    }
+
+    Event dummy8(DateTime date) {
+      return Event(
+        "9~10-me2",
+        "coupleId",
+        me.getId(),
+        date.copyWith(hour: 9, minute: 0),
+        date.copyWith(hour: 10, minute: 0),
+        "${date.month}/${date.day} 응가가방 챙기기",
+        Frequency.oneTime,
+        false,
+        false,
+        content: "${date.month}/${date.day} 은동이랑 셋이서 산책하기 🐶",
+      );
+    }
+
     Future.delayed(const Duration(seconds: 1));
     return [
       dummy1(date),
@@ -116,6 +146,8 @@ class EventRepositoryMock implements EventRepository {
       dummy4(date),
       dummy5(date),
       dummy6(date),
+      dummy7(date),
+      dummy8(date)
     ];
   }
 }

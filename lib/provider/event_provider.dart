@@ -18,12 +18,15 @@ class EventProvider {
     DuaryContext duaryContext = DuaryContext();
     duaryContext.me.addListener(() {
       me = duaryContext.me.value;
+      eventMap.clear();
     });
     duaryContext.lover.addListener(() {
       lover = duaryContext.lover.value;
+      eventMap.clear();
     });
     duaryContext.myCouple.addListener(() {
       myCouple = duaryContext.myCouple.value;
+      eventMap.clear();
     });
   }
 
