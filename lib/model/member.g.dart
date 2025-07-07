@@ -16,6 +16,8 @@ Member _$MemberFromJson(Map<String, dynamic> json) => Member(
           json['birthday'], const ISO8601TimeZoneFormatter().fromJson),
       json['socialId'] as String,
       json['provider'] as String,
+      AlarmOffset.fromJson(json['myAlarm'] as String),
+      AlarmOffset.fromJson(json['loverAlarm'] as String),
     );
 
 Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
@@ -26,6 +28,8 @@ Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
           instance.birthday, const ISO8601TimeZoneFormatter().toJson),
       'socialId': instance.socialId,
       'provider': instance.provider,
+      'myAlarm': instance.myAlarm,
+      'loverAlarm': instance.loverAlarm,
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

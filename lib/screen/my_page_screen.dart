@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:duary/model/couple.dart';
+import 'package:duary/model/enums/alarm_offset.dart';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
@@ -168,9 +171,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 height: 8,
               ),
               // TODO: 일정 알림 설정값
-              ButtonBase(
-                  onTap: () async {},
-                  child: infoBox(labelText: "내 일정 알림", currentValue: "30분 전")),
+              AlarmOffsetDropdownButton(initialValue: me.myAlarm, onSelect: (value) {
+
+              }),
               const SizedBox(
                 height: 10,
               ),
@@ -310,6 +313,49 @@ class _MyPageScreenState extends State<MyPageScreen> {
     duaryContext.me.removeListener(meListener);
     duaryContext.myCouple.removeListener(coupleListener);
     super.dispose();
+  }
+}
+
+class AlarmOffsetDropdownButton extends StatefulWidget {
+  const AlarmOffsetDropdownButton({super.key, required this.initialValue, required this.onSelect});
+
+  final AlarmOffset initialValue;
+
+  final Function(AlarmOffset) onSelect;
+
+  @override
+  State<AlarmOffsetDropdownButton> createState() =>
+      _AlarmOffsetDropdownButtonState();
+}
+
+class _AlarmOffsetDropdownButtonState extends State<AlarmOffsetDropdownButton> {
+  static const List<AlarmOffset> alarmOffsets = AlarmOffset.values;
+
+  static final List<DropdownMenuEntry<AlarmOffset>> menuEntries = UnmodifiableListView(
+      alarmOffsets.map(
+          (offset) => DropdownMenuEntry(value: offset, label: offset.title)));
+
+  late AlarmOffset selected;
+
+  @override
+  void initState() {
+    selected = widget.initialValue;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownMenu<AlarmOffset>(
+      dropdownMenuEntries: menuEntries,
+      initialSelection: selected,
+      onSelected: (AlarmOffset? value) {
+        if (value != null) {
+          setState(() {
+            selected = value;
+          });
+        }
+      },
+    );
   }
 }
 

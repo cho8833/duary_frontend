@@ -52,7 +52,11 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
 
   late DateTime nextDownPageKey;
 
-  DuaryContext duaryContext = DuaryContext();
+  final DuaryContext duaryContext = DuaryContext();
+
+  late void Function() meListener;
+  late void Function() loverListener;
+  late void Function() coupleListener;
 
   @override
   void initState() {
@@ -81,11 +85,18 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     _scrollController = ScrollController();
     _scrollController.addListener(updateDayIndex);
 
-    duaryContext.me.addListener(() {
+    // 유저 정보나 커플 정보가 바뀌면 다시 event 불러오기
+    meListener = refresh;
+    loverListener = refresh;
+    coupleListener = refresh;
+    duaryContext.me.addListener(meListener);
+    duaryContext.lover.addListener(loverListener);
+    duaryContext.myCouple.addListener(coupleListener);
+  }
+  void refresh() {
       _pagingDownController.refresh();
       _pagingUpController.refresh();
       fetchFlag = {};
-    });
   }
 
   @override
@@ -93,6 +104,9 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     super.dispose();
     _pagingDownController.dispose();
     _pagingUpController.dispose();
+     duaryContext.me.removeListener(meListener);
+     duaryContext.lover.removeListener(loverListener);
+     duaryContext.myCouple.removeListener(coupleListener);
   }
 
   String _formatDate(DateTime date) {

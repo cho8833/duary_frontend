@@ -1,5 +1,4 @@
 import 'package:duary/model/enums/frequency.dart';
-import 'package:duary/model/enums/repeat_frequency.dart';
 import 'package:duary/model/enums/weekday.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/support/iso8601_time_zone_formatter.dart';

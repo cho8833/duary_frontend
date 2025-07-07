@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:duary/widget/character_widget.dart';
 import 'package:flutter/material.dart';
 
