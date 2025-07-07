@@ -1,3 +1,4 @@
+import 'package:duary/model/enums/alarm_offset.dart';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/support/iso8601_time_zone_formatter.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -13,7 +14,11 @@ class UpdateMemberReq {
 
   Character? character;
 
-  UpdateMemberReq(this.name, this.birthday, this.character);
+  AlarmOffset? myAlarm;
+
+  AlarmOffset? loverAlarm;
+
+  UpdateMemberReq(this.name, this.birthday, this.character, this.myAlarm, this.loverAlarm);
 
   Map<String, dynamic> toJson() => _$UpdateMemberReqToJson(this);
 }

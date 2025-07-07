@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:duary/model/couple.dart';
 import 'package:duary/model/enums/alarm_offset.dart';
 import 'package:duary/model/enums/character.dart';
@@ -14,6 +15,7 @@ import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/character_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
 class MyPageScreen extends StatefulWidget {
@@ -170,16 +172,29 @@ class _MyPageScreenState extends State<MyPageScreen> {
               const SizedBox(
                 height: 8,
               ),
-              // TODO: 일정 알림 설정값
-              AlarmOffsetDropdownButton(initialValue: me.myAlarm, onSelect: (value) {
-
-              }),
+              AlarmOffsetDropdownButton(
+                  title: "내 일정 알림",
+                  initialValue: me.myAlarm,
+                  onSelect: (value) async {
+                    await duaryContext.updateMember(myAlarm: value).then((_) {
+                      Fluttertoast.showToast(msg: "설정되었습니다");
+                    }).catchError((e) {
+                      Fluttertoast.showToast(msg: e.toString());
+                    });
+                  }),
               const SizedBox(
                 height: 10,
               ),
-              ButtonBase(
-                  onTap: () async {},
-                  child: infoBox(labelText: "연인 일정 알림", currentValue: "30분 전")),
+              AlarmOffsetDropdownButton(
+                  initialValue: me.loverAlarm,
+                  onSelect: (value) async {
+                    await duaryContext.updateMember(loverAlarm: value).then((_) {
+                      Fluttertoast.showToast(msg: "설정되었습니다");
+                    }).catchError((e) {
+                      Fluttertoast.showToast(msg: e.toString());
+                    });
+                  },
+                  title: "연인 일정 알림"),
               const SizedBox(
                 height: 27,
               ),
@@ -317,44 +332,63 @@ class _MyPageScreenState extends State<MyPageScreen> {
 }
 
 class AlarmOffsetDropdownButton extends StatefulWidget {
-  const AlarmOffsetDropdownButton({super.key, required this.initialValue, required this.onSelect});
+  const AlarmOffsetDropdownButton(
+      {super.key,
+      required this.initialValue,
+      required this.onSelect,
+      required this.title});
+
+  final String title;
 
   final AlarmOffset initialValue;
 
-  final Function(AlarmOffset) onSelect;
+  final Future<void> Function(AlarmOffset) onSelect;
+
+  static const List<AlarmOffset> alarmOffsets = AlarmOffset.values;
+
+  static final List<DropdownMenuItem<AlarmOffset>> items = alarmOffsets
+      .map((offset) =>
+          DropdownMenuItem(value: offset, child: Text(offset.title)))
+      .toList();
 
   @override
-  State<AlarmOffsetDropdownButton> createState() =>
-      _AlarmOffsetDropdownButtonState();
+  State<AlarmOffsetDropdownButton> createState() => _AlarmOffsetDropdownButtonState();
 }
 
 class _AlarmOffsetDropdownButtonState extends State<AlarmOffsetDropdownButton> {
-  static const List<AlarmOffset> alarmOffsets = AlarmOffset.values;
 
-  static final List<DropdownMenuEntry<AlarmOffset>> menuEntries = UnmodifiableListView(
-      alarmOffsets.map(
-          (offset) => DropdownMenuEntry(value: offset, label: offset.title)));
-
-  late AlarmOffset selected;
-
-  @override
-  void initState() {
-    selected = widget.initialValue;
-    super.initState();
-  }
+  // Future 캐싱을 통해 중복 호출 방지
+  Future<void>? _ongoingFuture;
 
   @override
   Widget build(BuildContext context) {
-    return DropdownMenu<AlarmOffset>(
-      dropdownMenuEntries: menuEntries,
-      initialSelection: selected,
-      onSelected: (AlarmOffset? value) {
-        if (value != null) {
-          setState(() {
-            selected = value;
-          });
-        }
-      },
+    return DropdownButtonHideUnderline(
+      child: DropdownButton2(
+          items: AlarmOffsetDropdownButton.items,
+          isExpanded: true,
+          value: widget.initialValue,
+          customButton:
+              InfoBox(labelText: widget.title, currentValue: widget.initialValue.title),
+          onChanged: _ongoingFuture != null ? null : (value) async {
+            if (value != null) {
+              if (_ongoingFuture != null) {
+                return _ongoingFuture;
+              }
+
+              setState(() {
+                _ongoingFuture = widget.onSelect(value as AlarmOffset);
+              });
+
+              _ongoingFuture!.whenComplete(() {
+                setState(() {
+                  _ongoingFuture = null;
+                });
+              });
+
+              return _ongoingFuture;
+
+            }
+          }),
     );
   }
 }
@@ -372,6 +406,59 @@ class SectionTitle extends StatelessWidget {
         color: Color(0xFF323232),
         fontSize: 18,
         fontWeight: FontWeight.w700,
+      ),
+    );
+  }
+}
+
+class InfoBox extends StatelessWidget {
+  const InfoBox(
+      {super.key, required this.labelText, required this.currentValue});
+
+  final String labelText;
+  final String currentValue;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      // width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F3F3),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16, right: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              labelText,
+              style: const TextStyle(
+                color: Color(0xFF000000),
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Row(
+              children: [
+                Text(
+                  currentValue,
+                  style: const TextStyle(
+                    color: Color(0xFFB6B6B6),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right,
+                  color: Color(0xFFB6B6B6),
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

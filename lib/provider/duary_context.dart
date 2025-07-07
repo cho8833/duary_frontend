@@ -6,6 +6,7 @@ import 'package:duary/data/input_couple_code_req.dart';
 import 'package:duary/data/update_couple_req.dart';
 import 'package:duary/data/update_member_req.dart';
 import 'package:duary/model/couple.dart';
+import 'package:duary/model/enums/alarm_offset.dart';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/token_provider.dart';
@@ -227,7 +228,12 @@ class DuaryContext {
     }
   }
 
-  Future<void> updateMember({String? name, DateTime? birthday, Character? character}) async {
+  Future<void> updateMember(
+      {String? name,
+      DateTime? birthday,
+      Character? character,
+      AlarmOffset? myAlarm,
+      AlarmOffset? loverAlarm}) async {
     if (name != null) {
       validateName(name);
     }
@@ -235,7 +241,8 @@ class DuaryContext {
       validateBirthday(birthday);
     }
 
-    UpdateMemberReq req = UpdateMemberReq(name, birthday, character);
+    UpdateMemberReq req =
+        UpdateMemberReq(name, birthday, character, myAlarm, loverAlarm);
     await _memberRepository.updateMember(req).then((res) {
       me.value = res.member;
       myCouple.value = res.couple;
