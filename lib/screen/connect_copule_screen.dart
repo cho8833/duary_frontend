@@ -9,6 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pulling_manager/pulling_manager.dart';
+import 'package:kakao_flutter_sdk_share/kakao_flutter_sdk_share.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:duary/model/member.dart';
 
 class ConnectCoupleScreen extends StatefulWidget {
   const ConnectCoupleScreen({super.key});
@@ -22,9 +25,12 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
 
   late final PullingManager<void> pullingManager;
 
+  late final Member me;
+
   @override
   void initState() {
     super.initState();
+    me = duaryContext.me.value!;
     pullingManager = PullingManager(
         fetchData: () async {
           duaryContext.getMyCouple().then((_) {
@@ -111,7 +117,30 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                   child: Column(
                     children: [
                       ButtonBase(
-                          onTap: () async {},
+                            onTap: () async{
+                            bool isKAkaoTalkSharingAvailable = await ShareClient.instance.isKakaoTalkSharingAvailable();
+
+                            String cleandCode = duaryContext.myCouple.value!.code.replaceAll(RegExp(r'[\n\r\u2028\u2029]'), '')
+                                .replaceAll(RegExp(r'\s{2,}'), ' ')
+                                .trim();
+
+                            TextTemplate template = TextTemplate(
+                              text: "${me.name}님이 초대장을 보냈어요!",
+                              link: Link(
+                                androidExecutionParams: {"cleandCode": cleandCode},
+                                iosExecutionParams: {"cleandCode": cleandCode},
+                              ),
+                              buttonTitle: "커플 연결하기",
+                            );
+
+                            if (!isKAkaoTalkSharingAvailable) {
+                              SharePlus.instance.share(ShareParams(text: cleandCode),);
+                            }
+                            else{ try {Uri uri = await ShareClient.instance.shareDefault(template: template);
+                            await ShareClient.instance.launchKakaoTalk(uri); }
+                            catch (e) {
+                              print("카카오톡 공유 실패 : $e");
+                            }}},
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),

@@ -24,6 +24,29 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="myapp"
+                    android:host="open"/>
+            </intent-filter>
+
+
+            <!-- 카카오톡 공유, 카카오톡 메시지 커스텀 URL 스킴 설정 -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- "kakao${YOUR_NATIVE_APP_KEY}://${PRODUCT_NAME}" 형식의 앱 실행 스킴 설정 -->
+                <!-- 카카오톡 공유, 카카오톡 메시지 -->
+                <data android:host="kakaolink"
+                    android:scheme="kakao${KAKAO_NATIVE_APP_KEY}" />
+            </intent-filter>
         </activity>
 
         <!-- 카카오 로그인 커스텀 URL 스킴 설정 -->
@@ -59,6 +82,7 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+            <package android:name="com.kakao.talk" />
         </intent>
     </queries>
 </manifest>
