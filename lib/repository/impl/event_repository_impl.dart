@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:duary/data/save_event_req.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/repository/event_repository.dart';
 import 'package:duary/support/http_response_handler.dart';
@@ -25,4 +28,12 @@ class EventRepositoryImpl with UriProvider, HttpResponseHandler implements Event
     return getListData(response, (p0) => Event.fromJson(p0)).data;
   }
 
+  @override
+  Future<Event> saveEvent(SaveEventReq req) async {
+    Uri uri = getUri("/event");
+
+    Response response = await interceptedClient.post(uri, body: jsonEncode(req.toJson()));
+
+    return getData(response, (p) => Event.fromJson(p)).data;
+  }
 }

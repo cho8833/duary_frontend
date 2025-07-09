@@ -1,9 +1,9 @@
 enum Frequency {
   oneTime("None", "반복 안함"),
-  daily("DAILY", "일 반복"),
-  weekly("WEEKLY", "주 반복"),
-  monthly("MONTHLY", "월 반복"),
-  yearly("YEARLY", "년 반복");
+  daily("DAILY", "매일"),
+  weekly("WEEKLY", "매주"),
+  monthly("MONTHLY", "매월"),
+  yearly("YEARLY", "매년");
 
   final String name;
 

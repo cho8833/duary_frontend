@@ -1,3 +1,4 @@
+import 'package:duary/data/save_event_req.dart';
 import 'package:duary/model/enums/frequency.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
@@ -99,7 +100,7 @@ class EventRepositoryMock implements EventRepository {
         "coupleId",
         lover.getId(),
         date.copyWith(hour: 9, minute: 0),
-        date.copyWith(hour: 10, minute: 0),
+        date.copyWith(day: date.day + 1, hour: 10, minute: 0),
         "${date.month}/${date.day} 응가가방 챙기기",
         Frequency.oneTime,
         false,
@@ -149,5 +150,11 @@ class EventRepositoryMock implements EventRepository {
       dummy7(date),
       dummy8(date)
     ];
+  }
+
+  @override
+  Future<Event> saveEvent(SaveEventReq req) {
+    // TODO: implement saveEvent
+    throw UnimplementedError();
   }
 }

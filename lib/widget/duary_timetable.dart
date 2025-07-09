@@ -318,8 +318,14 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
             right: 16,
             child: GestureDetector(
               onTap: () {
+                // 일정을 생성하고 pop 하면 hasCreated == true, 일정을 생성하지 않고 pop 하면 hasCreated == false
                 Navigator.of(context)
-                    .push(SlideDownRoute(page: const EditEventScreen()));
+                    .push(SlideDownRoute(page: const EditEventScreen())).then((hasCreated) {
+                      if (hasCreated != null && hasCreated as bool) {
+                        // 일정을 생성하면 일정을 다시 불러오기
+                        refresh();
+                      }
+                });
               },
               child: const Icon(
                 Icons.add,

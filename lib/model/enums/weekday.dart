@@ -1,21 +1,23 @@
 enum Weekday {
-  sunday("SUN", 7),
-  monday("MON", 1),
-  tuesday("TUE", 2),
-  wednesday("WED", 3),
-  thursday("THU", 4),
-  friday("FRI", 5),
-  saturday("SAT", 6);
+  sunday("SUN", "일", 0),
+  monday("MON", "월", 1),
+  tuesday("TUE", "화", 2),
+  wednesday("WED", "수", 3),
+  thursday("THU", "목", 4),
+  friday("FRI", "금", 5),
+  saturday("SAT", "토", 6);
 
   final String name;
 
+  final String title;
+
   final int value;
 
-  const Weekday(this.name, this.value);
+  const Weekday(this.name, this.title, this.value);
 
   @override
   String toString() {
-    return name;
+    return title;
   }
 
   String toJson() {

@@ -1,8 +1,11 @@
+import 'package:duary/data/save_event_req.dart';
 import 'package:duary/model/couple.dart';
+import 'package:duary/model/enums/frequency.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/repository/event_repository.dart';
+import 'package:duary/support/custom_exception.dart';
 
 class EventProvider {
 
@@ -148,5 +151,23 @@ class EventProvider {
       }
     }
     return temp;
+  }
+
+  Future<void> saveEvent(SaveEventReq req) async {
+    validate(req);
+    if (req.frequency == Frequency.yearly) {
+      req.yearly = YearlyRecurrence(req.startDateTime.month, req.startDateTime.day);
+    }
+    await _eventRepository.saveEvent(req).then((event) {
+      eventMap.clear();
+    }).catchError((e) {
+      throw ServerResponseException(e);
+    });
+  }
+
+  void validate(SaveEventReq req) {
+    if (req.title.isEmpty) {
+      throw ValidationException("제목을 입력해주세요");
+    }
   }
 }

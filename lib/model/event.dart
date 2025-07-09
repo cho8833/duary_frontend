@@ -24,7 +24,7 @@ class Event {
   DailyRecurrence? daily;
   WeeklyRecurrence? weekly;
   MonthlyRecurrence? monthly;
-  YearlyRecurrence? Yearly;
+  YearlyRecurrence? yearly;
 
   String title;
   String? content;
@@ -50,7 +50,7 @@ class Event {
     this.daily,
     this.weekly,
     this.monthly,
-    this.Yearly,
+    this.yearly,
     this.content,
     this.location,
     this.hangOutWith,

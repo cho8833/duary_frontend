@@ -30,9 +30,9 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
       monthly: json['monthly'] == null
           ? null
           : MonthlyRecurrence.fromJson(json['monthly'] as Map<String, dynamic>),
-      Yearly: json['Yearly'] == null
+      yearly: json['yearly'] == null
           ? null
-          : YearlyRecurrence.fromJson(json['Yearly'] as Map<String, dynamic>),
+          : YearlyRecurrence.fromJson(json['yearly'] as Map<String, dynamic>),
       content: json['content'] as String?,
       location: json['location'] as String?,
       hangOutWith: json['hangOutWith'] as String?,
@@ -54,7 +54,7 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'daily': instance.daily,
       'weekly': instance.weekly,
       'monthly': instance.monthly,
-      'Yearly': instance.Yearly,
+      'Yearly': instance.yearly,
       'title': instance.title,
       'content': instance.content,
       'location': instance.location,
