@@ -62,6 +62,7 @@ dependencies:
   pulling_manager: ^0.1.6
   share_plus: ^11.0.0
   kakao_flutter_sdk_share: ^1.9.7+3
+  app_links: ^6.4.0
     
 
 dev_dependencies:
