@@ -1,10 +1,12 @@
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/provider/link_state_manager.dart';
 import 'package:duary/screen/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 
 class InputCodeScreen extends StatefulWidget {
   const InputCodeScreen({super.key});
@@ -14,8 +16,30 @@ class InputCodeScreen extends StatefulWidget {
 }
 
 class _InputCodeScreenState extends State<InputCodeScreen> {
+  late TextEditingController _controller;
   final DuaryContext duaryContext = DuaryContext();
   String coupleCode = "";
+
+  late final LinkStateManager linkStateManager;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: coupleCode);
+
+    linkStateManager = context.read<LinkStateManager>();
+    if (linkStateManager.coupleCode.value != null) {
+      _controller.text = linkStateManager.coupleCode.value!;
+    }
+    linkStateManager.coupleCode.addListener(codeListener);
+  }
+
+  void codeListener() {
+    String? temp = linkStateManager.coupleCode.value;
+    if (temp != null) {
+      _controller.text = temp;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +51,10 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
         leadingBuilder: (context) => GestureDetector(
           onTap: () {
             Navigator.pop(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ConnectCoupleScreen(),
-                ));
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const ConnectCoupleScreen()),
+            );
           },
           child: const Icon(Icons.chevron_left),
         ),
@@ -67,6 +91,7 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
                   ),
                   height: 45,
                   child: TextField(
+                    controller: _controller,
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
                     ],
@@ -103,11 +128,14 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
                       Fluttertoast.showToast(msg: "코드를 입력해주세요");
                     } else {
                       await duaryContext.inputCoupleCode(coupleCode).then((_) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const HomeScreen()),
-                        );
+                        context.read<LinkStateManager>().cancelSubscription();
+                        context.read<LinkStateManager>().coupleCode.value =
+                            null;
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const HomeScreen()),
+                            (p) => false);
                       }).catchError((e) {
                         Fluttertoast.showToast(msg: e.toString());
                       });
@@ -143,5 +171,11 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

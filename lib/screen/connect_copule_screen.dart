@@ -1,4 +1,7 @@
+import 'package:app_links/app_links.dart';
+import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/provider/link_state_manager.dart';
 import 'package:duary/screen/home_screen.dart';
 import 'package:duary/screen/input_code_screen.dart';
 import 'package:duary/screen/login_screen.dart';
@@ -8,7 +11,10 @@ import 'package:duary/widget/button_base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kakao_flutter_sdk_share/kakao_flutter_sdk_share.dart';
+import 'package:provider/provider.dart';
 import 'package:pulling_manager/pulling_manager.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ConnectCoupleScreen extends StatefulWidget {
   const ConnectCoupleScreen({super.key});
@@ -22,9 +28,44 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
 
   late final PullingManager<void> pullingManager;
 
+  late final Member me;
+
+  String? coupleCode;
+
+  late LinkStateManager linkStateManager;
+
+  bool isPushed = false;
+
+  void codeListener() {
+    if (linkStateManager.coupleCode.value != null && !isPushed ) {
+      pushInputCodeScreen();
+    }
+  }
+
+  void pushInputCodeScreen() {
+    isPushed = true;
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => const InputCodeScreen())).then((_) =>
+    isPushed = false);
+  }
+
   @override
   void initState() {
     super.initState();
+
+    linkStateManager = context.read<LinkStateManager>();
+
+    linkStateManager.handleUri().then((_) {
+      if (linkStateManager.coupleCode.value != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          pushInputCodeScreen();
+        });
+      }
+      linkStateManager.listenToLinkStream(AppLinks());
+      linkStateManager.coupleCode.addListener(codeListener);
+    });
+    me = duaryContext.me.value!;
+
     pullingManager = PullingManager(
         fetchData: () async {
           duaryContext.getMyCouple().then((_) {
@@ -111,7 +152,45 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                   child: Column(
                     children: [
                       ButtonBase(
-                          onTap: () async {},
+                          onTap: () async {
+                            bool isKAkaoTalkSharingAvailable =
+                                await ShareClient.instance
+                                    .isKakaoTalkSharingAvailable();
+
+                            String cleandCode = duaryContext
+                                .myCouple.value!.code
+                                .replaceAll(RegExp(r'[\n\r\u2028\u2029]'), '')
+                                .replaceAll(RegExp(r'\s{2,}'), ' ')
+                                .trim();
+
+                            TextTemplate template = TextTemplate(
+                              text: "${me.name}님이 초대장을 보냈어요!",
+                              link: Link(
+                                androidExecutionParams: {
+                                  "cleandCode": cleandCode
+                                },
+                                iosExecutionParams: {
+                                  "cleandCode": cleandCode
+                                },
+                              ),
+                              buttonTitle: "커플 연결하기",
+                            );
+
+                            if (!isKAkaoTalkSharingAvailable) {
+                              SharePlus.instance.share(
+                                ShareParams(text: cleandCode),
+                              );
+                            } else {
+                              try {
+                                Uri uri = await ShareClient.instance
+                                    .shareDefault(template: template);
+                                await ShareClient.instance
+                                    .launchKakaoTalk(uri);
+                              } catch (e) {
+                                print("카카오톡 공유 실패 : $e");
+                              }
+                            }
+                          },
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
@@ -159,14 +238,17 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                       ButtonBase(
                           onTap: () async {
                             pullingManager.pause();
-                            Navigator.push(
+                            if ( !isPushed ) {
+                              isPushed = true;
+                              Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
                                         const InputCodeScreen())).then((_) {
                               pullingManager.resume();
+                              isPushed = false;
                             });
-                          },
+                          }},
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
@@ -174,7 +256,8 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(5),
                                 border: Border.all(
-                                    color: const Color(0xFFFFbd64), width: 2)),
+                                    color: const Color(0xFFFFbd64),
+                                    width: 2)),
                             child: const Text(
                               "상대방 코드로 연결하기",
                               style: TextStyle(
@@ -219,6 +302,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
   void dispose() {
     pullingManager.pause();
     pullingManager.dispose();
+    linkStateManager.cancelSubscription();
     super.dispose();
   }
 }
