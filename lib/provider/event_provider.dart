@@ -13,7 +13,7 @@ class EventProvider {
   final EventRepository _eventRepository;
 
   // 이벤트 캐싱
-  final Map<DateTime, List<Event>> eventMap = {};
+  final EventData eventData = EventData();
 
   // Future caching : 같은 인자로 호출된 비동기 작업이 진행 중이면, 그 작업의 결과를 기다렸다가 반환
   final Map<DateTime, Future<List<Event>>> _eventRequest = {};
@@ -22,15 +22,15 @@ class EventProvider {
     DuaryContext duaryContext = DuaryContext();
     duaryContext.me.addListener(() {
       me = duaryContext.me.value;
-      eventMap.clear();
+      eventData.clear();
     });
     duaryContext.lover.addListener(() {
       lover = duaryContext.lover.value;
-      eventMap.clear();
+      eventData.clear();
     });
     duaryContext.myCouple.addListener(() {
       myCouple = duaryContext.myCouple.value;
-      eventMap.clear();
+      eventData.clear();
     });
   }
 
@@ -66,8 +66,8 @@ class EventProvider {
 
   Future<List<Event>> getEventByDay(DateTime date) async {
     // 캐싱된 이벤트가 있으면 반환
-    if (eventMap.containsKey(date)) {
-      return eventMap[date]!;
+    if (eventData.contains(date)) {
+      return eventData.get(date)!;
     }
 
     // 현재 요청 진행 중이면 그 요청의 결과 기다리고 반환
@@ -88,7 +88,7 @@ class EventProvider {
         return e1.startDateTime.compareTo(e2.startDateTime);
       });
 
-      eventMap[date] = events; // 이벤트 캐싱
+      eventData.set(date, events); // 이벤트 캐싱
       return events;
     }).catchError((e) {
       print(e);
@@ -160,7 +160,7 @@ class EventProvider {
       req.yearly = YearlyRecurrence(req.startDateTime.month, req.startDateTime.day);
     }
     await _eventRepository.saveEvent(req).then((event) {
-      eventMap.clear();
+      eventData.clear();
     }).catchError((e) {
       throw ServerResponseException(e);
     });
@@ -170,5 +170,28 @@ class EventProvider {
     if (req.title.isEmpty) {
       throw ValidationException("제목을 입력해주세요");
     }
+  }
+}
+
+
+class EventData extends ChangeNotifier {
+  final Map<DateTime, List<Event>> eventMap = {};
+
+  List<Event>? get(DateTime date) {
+    return eventMap[date];
+  }
+
+  void set(DateTime date, List<Event> events) {
+    eventMap[date] = events;
+    notifyListeners();
+  }
+
+  void clear() {
+    eventMap.clear();
+    notifyListeners();
+  }
+
+  bool contains(DateTime date) {
+    return eventMap.containsKey(date);
   }
 }

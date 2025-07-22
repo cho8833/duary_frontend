@@ -203,11 +203,11 @@ class _DayViewState extends State<DayView> {
 
     List<Event> filtered = events.where((event) {
       if (isMine) {
-        return _duaryContext.me.value!.getId() == event.member.getId() ||
-            event.isTogether;
+        return (_duaryContext.me.value!.getId() == event.member.getId() ||
+            event.isTogether) && !event.isAllDay;
       } else {
-        return _duaryContext.me.value!.getId() != event.member.getId() ||
-            event.isTogether;
+        return (_duaryContext.lover.value!.getId() == event.member.getId() ||
+            event.isTogether) && !event.isAllDay;
       }
     }).toList();
 

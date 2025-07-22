@@ -30,7 +30,7 @@ class EventRepositoryMock implements EventRepository {
         "${date.month}/${date.day} 사상 타건샵 '몬스터기어매장",
         Frequency.oneTime,
         false,
-        false,
+        true,
         content: '${date.month}/${date.day} 타건샵 방문 후 키보드 수령 🤩',
       );
     }
@@ -45,7 +45,7 @@ class EventRepositoryMock implements EventRepository {
         "송상현 광장 / 응가가방 챙기기",
         Frequency.oneTime,
         true,
-        false,
+        true,
         content: "${date.month}/${date.day} 은동이랑 셋이서 산책하기 🐶",
       );
     }

@@ -10,12 +10,13 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class TitleBar extends StatefulWidget {
-  const TitleBar(
-      {super.key,
-      required this.dayIndex,
-      required this.dayFocus,
-      required this.onDateTap,
-      required this.refresh,});
+  const TitleBar({
+    super.key,
+    required this.dayIndex,
+    required this.dayFocus,
+    required this.onDateTap,
+    required this.refresh,
+  });
 
   final int dayIndex;
 
@@ -30,7 +31,6 @@ class TitleBar extends StatefulWidget {
 }
 
 class _TitleBarState extends State<TitleBar> {
-
   final DuaryContext duaryContext = DuaryContext();
 
   late final EventProvider _eventProvider;
@@ -43,8 +43,6 @@ class _TitleBarState extends State<TitleBar> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Event> events = _eventProvider.eventMap[widget.dayFocus]!;
-
     late String title;
 
     switch (widget.dayIndex) {
@@ -141,11 +139,28 @@ class _TitleBarState extends State<TitleBar> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               titleWidget,
-              Row(children: [
-                Expanded(child: myAllDay(events)),
-                const SizedBox(width: 22,),
-                Expanded(child: loverAllDay(events))
-              ],)
+              ListenableBuilder(
+                  listenable: _eventProvider.eventData,
+                  builder: (context, _) {
+                    final List<Event> events =
+                        _eventProvider.eventData.get(widget.dayFocus) ?? [];
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        Expanded(child: myAllDay(events)),
+                        const SizedBox(
+                          width: 22,
+                        ),
+                        Expanded(child: loverAllDay(events)),
+                        const SizedBox(
+                          width: 20,
+                        ),
+                      ],
+                    );
+                  }),
             ],
           )),
         ],
@@ -161,28 +176,33 @@ class _TitleBarState extends State<TitleBar> {
     }).toList();
 
     if (my.isEmpty) {
-      return const SizedBox(height: 8,);
+      return const SizedBox(
+        height: 8,
+      );
     } else {
       List<Widget> widgets = my.map((e) {
         return Column(
           children: [
             GestureDetector(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            EventDetailsScreen(event: e)));
-              },
-                child: _AllDayBox(title: e.title, character: e.member.character!)),
-            const SizedBox(height: 8,)
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => EventDetailsScreen(event: e)));
+                },
+                child: _AllDayBox(
+                    title: e.title,
+                    character: e.isTogether
+                        ? Character.together
+                        : e.member.character!)),
+            const SizedBox(
+              height: 4,
+            )
           ],
         );
       }).toList();
 
-      return Column(
-        children: widgets
-      );
+      return Column(children: widgets);
     }
   }
 
@@ -194,20 +214,33 @@ class _TitleBarState extends State<TitleBar> {
     }).toList();
 
     if (lovers.isEmpty) {
-      return const SizedBox(height: 8,);
+      return const SizedBox(
+        height: 8,
+      );
     } else {
       List<Widget> widgets = lovers.map((e) {
         return Column(
           children: [
-            _AllDayBox(title: e.title, character: e.member.character!),
-            const SizedBox(height: 8,)
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => EventDetailsScreen(event: e)));
+              },
+              child: _AllDayBox(
+                  title: e.title,
+                  character:
+                      e.isTogether ? Character.together : e.member.character!),
+            ),
+            const SizedBox(
+              height: 4,
+            )
           ],
         );
       }).toList();
 
-      return Column(
-          children: widgets
-      );
+      return Column(children: widgets);
     }
   }
 
@@ -232,6 +265,8 @@ class _AllDayBox extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       child: Text(
         title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
             color: character.fontBlackColor,
             fontWeight: FontWeight.w500,

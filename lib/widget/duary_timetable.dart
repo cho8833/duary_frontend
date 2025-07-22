@@ -1,14 +1,11 @@
-import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
-import 'package:duary/widget/character_widget.dart';
 import 'package:duary/widget/time_table/day_view.dart';
 import 'package:duary/widget/time_table/title_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class DuaryTimetable extends StatefulWidget {
@@ -135,7 +132,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     if (dayIndex != index) {
       dayIndex = index;
       setState(() {
-        dayFocus = DateTime.now().add(Duration(days: dayIndex));
+        dayFocus = DateUtils.dateOnly(DateTime.now()).add(Duration(days: dayIndex));
       });
     }
   }
