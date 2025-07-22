@@ -57,6 +57,7 @@ dependencies:
   pulling_manager: ^0.1.6
   dropdown_button2: ^2.3.9
   bottom_picker: ^3.2.1
+  scrollable_positioned_list: ^0.3.8
 
 dev_dependencies:
   flutter_test:

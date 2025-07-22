@@ -15,7 +15,7 @@ class TimetableScreen extends StatefulWidget {
 
 class _TimetableScreenState extends State<TimetableScreen> {
 
-  DateTime focus = DateTime.now();
+  DateTime focus = DateUtils.dateOnly(DateTime.now());
 
   late final PageController _pageController;
 

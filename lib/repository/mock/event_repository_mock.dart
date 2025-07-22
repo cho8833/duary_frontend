@@ -37,11 +37,11 @@ class EventRepositoryMock implements EventRepository {
 
      Event dummy3(DateTime date) {
       return Event(
-        "13~14-lover",
+        "10:30~11:30-lover",
         "coupleId",
         lover.getId(),
-        date.copyWith(hour: 13),
-        date.copyWith(hour: 14),
+        date.copyWith(hour: 10, minute: 30),
+        date.copyWith(hour: 11, minute: 30),
         "송상현 광장 / 응가가방 챙기기",
         Frequency.oneTime,
         true,
@@ -96,11 +96,26 @@ class EventRepositoryMock implements EventRepository {
 
     Event dummy6(DateTime date) {
       return Event(
-        "9~10-lover2",
+        "9~다음날9-lover2${date.toString()}",
         "coupleId",
         lover.getId(),
+        date.copyWith(hour: 12, minute: 0),
+        date.copyWith(day: date.day + 1, hour: 9, minute: 0),
+        "${date.month}/${date.day} 응가가방 챙기기",
+        Frequency.oneTime,
+        false,
+        false,
+        content: "${date.month}/${date.day} 은동이랑 셋이서 산책하기 🐶",
+      );
+    }
+
+    Event dummy9(DateTime date) {
+      return Event(
+        "전날9~10-lover2${date.toString()}",
+        "coupleId",
+        lover.getId(),
+        date.copyWith(day: date.day -1, hour: 12, minute: 0),
         date.copyWith(hour: 9, minute: 0),
-        date.copyWith(day: date.day + 1, hour: 10, minute: 0),
         "${date.month}/${date.day} 응가가방 챙기기",
         Frequency.oneTime,
         false,
@@ -148,7 +163,8 @@ class EventRepositoryMock implements EventRepository {
       dummy5(date),
       dummy6(date),
       dummy7(date),
-      dummy8(date)
+      dummy8(date),
+      dummy9(date)
     ];
   }
 

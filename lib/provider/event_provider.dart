@@ -6,6 +6,7 @@ import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/repository/event_repository.dart';
 import 'package:duary/support/custom_exception.dart';
+import 'package:flutter/material.dart';
 
 class EventProvider {
 
