@@ -7,4 +7,6 @@ abstract interface class EventRepository {
 
   Future<Event> saveEvent(SaveEventReq req);
 
+  Future<void> deleteEvent(String eventId);
+
 }

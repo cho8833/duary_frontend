@@ -36,4 +36,15 @@ class EventRepositoryImpl with UriProvider, HttpResponseHandler implements Event
 
     return getData(response, (p) => Event.fromJson(p)).data;
   }
+
+  @override
+  Future<void> deleteEvent(String eventId) async {
+    Uri uri = getUri("/event", queryParameters: {
+      "id": eventId
+    });
+
+    Response response = await interceptedClient.delete(uri);
+
+    checkResponse(response);
+  }
 }

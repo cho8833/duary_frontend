@@ -1,9 +1,7 @@
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/provider/duary_context.dart';
-import 'package:duary/repository/couple_repository.dart';
-import 'package:duary/screen/connect_copule_screen.dart';
+import 'package:duary/screen/start/connect_copule_screen.dart';
 import 'package:duary/screen/login_screen.dart';
-import 'package:duary/support/repository_container.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/character_widget.dart';

@@ -12,6 +12,10 @@ class ServerResponseException implements Exception {
 
   ServerResponseException(this.message);
 
+  factory ServerResponseException.fromException(Exception e) {
+    return ServerResponseException(e.toString());
+  }
+
   @override
   String toString() => message;
 }

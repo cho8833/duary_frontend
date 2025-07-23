@@ -47,6 +47,11 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
   late EventProvider eventProvider;
 
+  bool isEndTimeEnabled = true;
+  bool isEndDateEnabled = true;
+  bool isStartTimeEnabled = true;
+  bool isStartDateEnabled = true;
+
   @override
   void initState() {
     super.initState();
@@ -62,11 +67,40 @@ class _EditEventScreenState extends State<EditEventScreen> {
       isAllDay = event.isAllDay;
       frequency = event.frequency;
     }
-    startDateTime = widget.event?.startDateTime ?? DateTime.now();
+    startDateTime = widget.event?.startDateTime ?? removeSeconds(DateTime.now());
+
     endDateTime = widget.event?.endDateTime ??
-        DateTime.now().add(const Duration(days: 1));
+        DateTime.now().add(const Duration(hours: 1));
 
     eventProvider = context.read<EventProvider>();
+  }
+
+  void setAllDay(bool value) {
+    setState(() {
+      isAllDay = value;
+      isStartTimeEnabled = !value;
+      isEndTimeEnabled = !value;
+    });
+  }
+
+  void setFrequency(Frequency value) {
+    setState(() {
+      frequency = value;
+      if (value == Frequency.oneTime || value == Frequency.yearly) {
+        isStartDateEnabled = true;
+        isEndDateEnabled = true;
+      }
+      else if (value == Frequency.daily || value == Frequency.weekly || value == Frequency.monthly) {
+        isEndDateEnabled = false;
+        isStartDateEnabled = true;
+        if (startDateTime.isBefore(endDateTime) || startDateTime.difference(endDateTime).inDays > 0) {
+          endDateTime = _changeDate(endDateTime, startDateTime);
+          if (startDateTime.isAfter(endDateTime)) {
+            endDateTime = endDateTime.add(const Duration(days:1));
+          }
+        }
+      }
+    });
   }
 
   @override
@@ -158,7 +192,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
                             setState(() {
-                              isAllDay = !isAllDay;
+                              setAllDay(!isAllDay);
                             });
                           },
                           child: Row(
@@ -208,13 +242,21 @@ class _EditEventScreenState extends State<EditEventScreen> {
                                       await showDuaryCalendarPicker(
                                           true, context, []);
                                   if (value != null) {
+                                    DateTime selected = value.first!;
                                     setState(() {
                                       startDateTime =
-                                          DateUtils.dateOnly(value.first!);
+                                          _changeDate(startDateTime, selected);
+                                      if (selected.isAfter(endDateTime)) {
+                                        endDateTime =
+                                            _changeDate(endDateTime, selected);
+                                      }
+                                      if (frequency != Frequency.oneTime) {
+                                        recurStartDate = DateUtils.dateOnly(startDateTime);
+                                      }
                                     });
                                   }
                                 },
-                                isEnabled: true),
+                                isEnabled: isStartDateEnabled),
                             const SizedBox(
                               width: 5,
                             ),
@@ -223,15 +265,19 @@ class _EditEventScreenState extends State<EditEventScreen> {
                                 onTap: () async {
                                   showDuaryTimePicker(context, (time) {
                                     setState(() {
-                                      startDateTime = startDateTime.copyWith(
-                                          hour: time.hour, minute: time.minute);
+                                      startDateTime =
+                                          _changeTime(startDateTime, time);
+                                      if (startDateTime.isAfter(endDateTime)) {
+                                        endDateTime = _changeTime(endDateTime,
+                                            time.add(const Duration(hours: 1)));
+                                      }
                                     });
                                   },
                                       Time(
                                           hours: startDateTime.hour,
                                           minutes: startDateTime.minute));
                                 },
-                                isEnabled: !isAllDay)
+                                isEnabled: isStartTimeEnabled)
                           ],
                         )
                       ],
@@ -254,26 +300,21 @@ class _EditEventScreenState extends State<EditEventScreen> {
                             _TimeBox(
                                 text: _formatDate(endDateTime),
                                 onTap: () async {
-                                  // final List<DateTime?>? value =
-                                  //     await showDuaryCalendarPicker(
-                                  //         true, context, [],
-                                  //         firstDate: startDateTime);
-                                  // if (value != null) {
-                                  //   setState(() {
-                                  //     endDateTime =
-                                  //         DateUtils.dateOnly(value.first!);
-                                  //   });
-                                  // }
-                                  showDuaryCalendarPicker2(context, (date) {
+                                  final List<DateTime?>? value =
+                                      await showDuaryCalendarPicker(
+                                          true, context, [],
+                                          firstDate: startDateTime);
+                                  if (value != null) {
+                                    DateTime selected = value.first!;
                                     setState(() {
-                                      startDateTime = startDateTime.copyWith(
-                                          year: date.year,
-                                          month: date.month,
-                                          day: date.day);
+                                      endDateTime = _changeDate(endDateTime, selected);
+                                      if (startDateTime.isAfter(endDateTime)) {
+                                        startDateTime = endDateTime.subtract(const Duration(hours: 1));
+                                      }
                                     });
-                                  }, startDateTime);
+                                  }
                                 },
-                                isEnabled: true),
+                                isEnabled: isEndDateEnabled),
                             const SizedBox(
                               width: 5,
                             ),
@@ -284,13 +325,19 @@ class _EditEventScreenState extends State<EditEventScreen> {
                                     setState(() {
                                       endDateTime = endDateTime.copyWith(
                                           hour: time.hour, minute: time.minute);
+                                      if (endDateTime.isBefore(startDateTime)) {
+                                        endDateTime = endDateTime.add(const Duration(days: 1));
+                                      }
+                                      else if (endDateTime.isAfter(startDateTime) && (frequency == Frequency.daily || frequency == Frequency.weekly || frequency  == Frequency.monthly)) {
+                                        endDateTime = _changeDate(endDateTime, startDateTime);
+                                      }
                                     });
                                   },
                                       Time(
                                           hours: endDateTime.hour,
                                           minutes: endDateTime.minute));
                                 },
-                                isEnabled: !isAllDay)
+                                isEnabled: isEndTimeEnabled)
                           ],
                         )
                       ],
@@ -307,7 +354,25 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
                     _RecurSection(
                       frequency: frequency,
-                      onChange: (frequency, recurStartDate, recurEndDate) {},
+                      onChange: (frequency, recurEndDate, recurrence) {
+                        setFrequency(frequency);
+                        recurEndDate = recurEndDate;
+                        if (frequency != Frequency.oneTime) {
+                          recurStartDate = DateUtils.dateOnly(startDateTime);
+                        }
+                        switch (frequency) {
+                          case Frequency.daily:
+                            daily = recurrence as DailyRecurrence?;
+                          case Frequency.weekly:
+                            weekly = recurrence as WeeklyRecurrence?;
+                          case Frequency.monthly:
+                            monthly = recurrence as MonthlyRecurrence?;
+                          case Frequency.yearly:
+                            yearly = recurrence as YearlyRecurrence?;
+                          default:
+                            recurStartDate = null;
+                        }
+                      },
                       startDateTime: startDateTime,
                       endDateTime: endDateTime,
                     ),
@@ -351,7 +416,9 @@ class _EditEventScreenState extends State<EditEventScreen> {
                         hintText: "메모를 입력해주세요",
                         onChange: (text) => content = text,
                         maxLines: 4),
-                    const SizedBox(height: 30,),
+                    const SizedBox(
+                      height: 30,
+                    ),
                   ],
                 ),
               ),
@@ -360,12 +427,16 @@ class _EditEventScreenState extends State<EditEventScreen> {
               children: [
                 ButtonBase(
                   onTap: () async {
-                    SaveEventReq req = getSaveReq();
-                    await eventProvider.saveEvent(req).then((_) {
-                      Navigator.pop(context, true);
-                    }).catchError((e) {
-                      Fluttertoast.showToast(msg: e.toString());
-                    });
+                    if (isEdit) {
+                      // TODO: Edit 구현
+                    } else {
+                      SaveEventReq req = getSaveReq();
+                      await eventProvider.saveEvent(req).then((_) {
+                        Navigator.pop(context, true);
+                      }).catchError((e) {
+                        Fluttertoast.showToast(msg: e.toString());
+                      });
+                    }
                   },
                   child: Container(
                     // margin: const EdgeInsets.fromLTRB(0, 30, 0, 30),
@@ -386,7 +457,9 @@ class _EditEventScreenState extends State<EditEventScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 30,)
+                const SizedBox(
+                  height: 30,
+                )
               ],
             ),
           ],
@@ -397,6 +470,19 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
   String _formatTime(DateTime time) {
     return DateFormat("aa hh:mm", "ko").format(time);
+  }
+
+  DateTime _changeDate(DateTime target, DateTime refer) {
+    return target.copyWith(
+        year: refer.year, month: refer.month, day: refer.day);
+  }
+
+  DateTime _changeTime(DateTime target, DateTime refer) {
+    return target.copyWith(hour: refer.hour, minute: refer.minute);
+  }
+
+  DateTime removeSeconds(DateTime date) {
+    return DateTime(date.year, date.month, date.day, date.hour, date.minute);
   }
 
   SaveEventReq getSaveReq() {
@@ -433,7 +519,11 @@ class _TimeBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        if (isEnabled) {
+          onTap();
+        }
+      },
       child: Container(
         padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
         decoration: BoxDecoration(
@@ -527,7 +617,7 @@ class _RecurSection extends StatefulWidget {
 
   final Frequency frequency;
 
-  final Function(Frequency, DateTime?, DateTime?) onChange;
+  final void Function(Frequency, DateTime?, Recurrence?) onChange;
 
   final DateTime startDateTime;
   final DateTime endDateTime;
@@ -549,8 +639,9 @@ class _RecurSectionState extends State<_RecurSection> {
   WeeklyRecurrence? weekly;
   MonthlyRecurrence? monthly;
   YearlyRecurrence? yearly;
+  Recurrence? recurrence;
 
-  DateTime recurStartDate = DateUtils.dateOnly(DateTime.now());
+
   DateTime? recurEndDate;
 
   bool hasRecurEndDate = false;
@@ -581,6 +672,20 @@ class _RecurSectionState extends State<_RecurSection> {
                 setState(() {
                   frequency = value;
                   hasRecurEndDate = false;
+                  switch (frequency) {
+                    case Frequency.oneTime:
+                      recurrence = null;
+                    case Frequency.daily:
+                      recurrence = daily;
+                    case Frequency.weekly:
+                      recurrence = weekly;
+                    case Frequency.monthly:
+                      recurrence = monthly;
+                    case Frequency.yearly:
+                      recurrence = yearly;
+                  }
+
+                  widget.onChange(value, recurEndDate, recurrence);
                 });
               }
             },
@@ -634,8 +739,8 @@ class _RecurSectionState extends State<_RecurSection> {
                           onTap: () {
                             setState(() {
                               hasRecurEndDate = !hasRecurEndDate;
-                              recurEndDate ??= DateTime.now()
-                                    .add(const Duration(days: 90));
+                              recurEndDate ??=
+                                  DateTime.now().add(const Duration(days: 90));
                             });
                           },
                           isEnabled: true),
@@ -676,22 +781,27 @@ class _RecurSectionState extends State<_RecurSection> {
       case Frequency.daily:
         return _DailyRecurSection(
           onChange: (interval) {
-            daily = DailyRecurrence(interval);
+            recurrence = DailyRecurrence(interval);
+            widget.onChange(frequency, recurEndDate, recurrence);
           },
         );
       case Frequency.weekly:
         return _WeeklyRecurSection(
           onSelect: (selected) {
-            weekly = WeeklyRecurrence(selected);
+            recurrence = WeeklyRecurrence(selected);
+            widget.onChange(frequency, recurEndDate, recurrence);
           },
         );
       case Frequency.monthly:
         return _MonthlyRecurSection(
           onSelect: (days) {
-            monthly = MonthlyRecurrence(days);
+            recurrence = MonthlyRecurrence(days);
+            widget.onChange(frequency, recurEndDate, recurrence);
           },
         );
       case Frequency.yearly:
+        recurrence = YearlyRecurrence(startDateTime.month, startDateTime.day);
+        widget.onChange(frequency, recurEndDate, recurrence);
         return _YearlyRecurSection(recurDate: startDateTime);
     }
   }
@@ -713,7 +823,6 @@ class _DailyRecurSectionState extends State<_DailyRecurSection> {
 
   @override
   void initState() {
-    widget.onChange(1);
     super.initState();
   }
 

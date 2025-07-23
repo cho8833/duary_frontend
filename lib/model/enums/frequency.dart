@@ -1,5 +1,5 @@
 enum Frequency {
-  oneTime("None", "반복 안함"),
+  oneTime("NONE", "반복 안함"),
   daily("DAILY", "매일"),
   weekly("WEEKLY", "매주"),
   monthly("MONTHLY", "매월"),

@@ -2,8 +2,8 @@ import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
-import 'package:duary/screen/edit_event_screen.dart';
-import 'package:duary/screen/event_details_screen.dart';
+import 'package:duary/screen/event/edit_event_screen.dart';
+import 'package:duary/screen/event/event_details_screen.dart';
 import 'package:duary/support/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -140,10 +140,10 @@ class _TitleBarState extends State<TitleBar> {
             children: [
               titleWidget,
               ListenableBuilder(
-                  listenable: _eventProvider.eventData,
+                  listenable: _eventProvider.eventDataNotifier,
                   builder: (context, _) {
                     final List<Event> events =
-                        _eventProvider.eventData.get(widget.dayFocus) ?? [];
+                        _eventProvider.eventDataNotifier.get(widget.dayFocus) ?? [];
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -185,10 +185,14 @@ class _TitleBarState extends State<TitleBar> {
           children: [
             GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => EventDetailsScreen(event: e)));
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(
+                          builder: (context) => EventDetailsScreen(event: e)))
+                      .then((needRefresh) {
+                    if (needRefresh != null && needRefresh as bool) {
+                      widget.refresh();
+                    }
+                  });
                 },
                 child: _AllDayBox(
                     title: e.title,
@@ -224,9 +228,14 @@ class _TitleBarState extends State<TitleBar> {
             GestureDetector(
               onTap: () {
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => EventDetailsScreen(event: e)));
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => EventDetailsScreen(event: e)))
+                    .then((needRefresh) {
+                  if (needRefresh != null && needRefresh as bool) {
+                    widget.refresh();
+                  }
+                });
               },
               child: _AllDayBox(
                   title: e.title,

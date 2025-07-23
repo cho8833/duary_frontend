@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:duary/model/enums/character.dart';
@@ -5,8 +6,8 @@ import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
-import 'package:duary/screen/event_details_screen.dart';
-import 'package:duary/screen/my_page_screen.dart';
+import 'package:duary/screen/event/event_details_screen.dart';
+import 'package:duary/screen/my_page/my_page_screen.dart';
 import 'package:duary/screen/timetable_screen.dart';
 
 import 'package:duary/widget/base_app_bar.dart';
@@ -30,7 +31,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static const String _noOngoingEventMent = "쉬는 중이야";
 
-  late Future<Map<Member, Event?>> getOngoingEventRequest;
+  Event? myOnGoingEvent;
+  Event? loverOnGoingEvent;
+  List<Event> comingEvents = [];
+
+  DateTime now = DateTime.now();
+  late DateTime today;
 
   static const double _minSheetSize = 0.12;
 
@@ -41,13 +47,17 @@ class _HomeScreenState extends State<HomeScreen> {
   late final void Function() meListener;
   late final void Function() loverListener;
 
-  DraggableScrollableController sheetController = DraggableScrollableController(
+  DraggableScrollableController sheetController =
+      DraggableScrollableController();
 
-  );
+  late final void Function() eventDataListener;
+
+  late final Timer refreshTimer;
 
   @override
   void initState() {
     super.initState();
+    today = DateUtils.dateOnly(now);
     _eventProvider = context.read<EventProvider>();
 
     me = duaryContext.me.value!;
@@ -67,10 +77,65 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     };
+
     duaryContext.me.addListener(meListener);
     duaryContext.lover.addListener(loverListener);
 
-    getOngoingEventRequest = _eventProvider.getOngoingEvent();
+    eventDataListener = () {
+      List<Event>? todayEvents =
+          _eventProvider.eventDataNotifier.eventMap[today];
+      if (todayEvents != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          refreshOnGoing();
+          refreshComingEvents();
+        });
+      }
+    };
+    _eventProvider.eventDataNotifier.addListener(eventDataListener);
+
+    refreshTimer = Timer.periodic(const Duration(seconds: 10), (t) {
+      now = DateTime.now();
+      today = DateUtils.dateOnly(now);
+      refreshOnGoing();
+      refreshComingEvents();
+    });
+  }
+
+  void refreshOnGoing() {
+    List<Event>? todayEvents =
+    _eventProvider.eventDataNotifier.eventMap[today];
+    if (todayEvents != null) {
+      try {
+        setState(() {
+          myOnGoingEvent = todayEvents.lastWhere((e) =>
+          (e.createdBy == me.getId() || e.isTogether) &&
+              e.startDateTime.isBefore(now) &&
+              e.endDateTime.isAfter(now));
+        });
+      } catch (_) {}
+
+      try {
+        setState(() {
+          loverOnGoingEvent = todayEvents.lastWhere((e) =>
+          (e.createdBy == lover.getId() || e.isTogether) &&
+              e.startDateTime.isBefore(now) &&
+              e.endDateTime.isAfter(now));
+        });
+      } catch (_) {}
+    }
+  }
+
+  void refreshComingEvents() {
+    List<Event>? todayEvents =
+    _eventProvider.eventDataNotifier.eventMap[today];
+    if (todayEvents != null) {
+      setState(() {
+        comingEvents =
+            todayEvents.where((e) => e.startDateTime.isAfter(now)).toList();
+        comingEvents
+            .sort((e1, e2) => e1.startDateTime.compareTo(e2.startDateTime));
+      });
+    }
   }
 
   @override
@@ -112,7 +177,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         width: 41,
                         child: ClipRRect(
                             borderRadius: BorderRadius.circular(99),
-                            child: Character.characterCircleWidget(me.character!,
+                            child: Character.characterCircleWidget(
+                                me.character!,
                                 size: 40)),
                       ),
                       const SizedBox(
@@ -151,22 +217,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(
                               width: 5,
                             ),
-                            FutureBuilder(
-                                future: getOngoingEventRequest,
-                                builder: (context, snapshot) {
-                                  String title = _noOngoingEventMent;
-                                  if (snapshot.hasData) {
-                                    title = snapshot.data![me]?.title ??
-                                        _noOngoingEventMent;
-                                  }
-                                  return Text(
-                                    title,
-                                    style: const TextStyle(
-                                        color: Color(0xFF111111),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 15),
-                                  );
-                                })
+                            Text(
+                              myOnGoingEvent?.title ?? _noOngoingEventMent,
+                              style: const TextStyle(
+                                  color: Color(0xFF111111),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15),
+                            ),
                           ],
                         ),
                       ),
@@ -193,23 +250,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             ]),
                         child: Row(
                           children: [
-                            FutureBuilder(
-                                future: getOngoingEventRequest,
-                                builder: (context, snapshot) {
-                                  String title = _noOngoingEventMent;
-                                  if (snapshot.hasData) {
-                                    title = snapshot.data![lover]?.title ??
-                                        _noOngoingEventMent;
-                                  }
-                                  return Text(
-                                    title,
-                                    textAlign: TextAlign.end,
-                                    style: const TextStyle(
-                                        color: Color(0xFF111111),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 15),
-                                  );
-                                }),
+                            Text(
+                              loverOnGoingEvent?.title ?? _noOngoingEventMent,
+                              textAlign: TextAlign.end,
+                              style: const TextStyle(
+                                  color: Color(0xFF111111),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15),
+                            ),
                             const SizedBox(
                               width: 5,
                             ),
@@ -240,9 +288,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(99),
                           child: Character.characterCircleWidget(
-                            lover.character!,
-                            size: 40
-                          ),
+                              lover.character!,
+                              size: 40),
                         ),
                       ),
                     ],
@@ -250,67 +297,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(
                     height: 24,
                   ),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.end,
-                  //   children: [
-                  //     ButtonBase(
-                  //         onTap: () {},
-                  //         child: const Row(
-                  //           crossAxisAlignment: CrossAxisAlignment.center,
-                  //           children: [
-                  //             Text(
-                  //               "오늘 일정 보기",
-                  //               style: TextStyle(
-                  //                   fontWeight: FontWeight.w400,
-                  //                   fontSize: 11,
-                  //                   color: Color(0xFF939393)),
-                  //             ),
-                  //             Icon(
-                  //               Icons.chevron_right,
-                  //               color: Color(0xFF939393),
-                  //               size: 14,
-                  //             )
-                  //           ],
-                  //         )),
-                  //   ],
-                  // ),
-                  // const SizedBox(
-                  //   height: 10,
-                  // ),
-
-                  FutureBuilder(
-                      future: _eventProvider.getComingEvent(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          List<Event> comingEvents = snapshot.data!;
-                          return ListView.separated(
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(
-                              height: 10,
-                            ),
-                            shrinkWrap: true,
-                            itemCount: comingEvents.length,
-                            itemBuilder: (context, index) {
-                              return ComingEventCard(
-                                  event: comingEvents[index]);
-                            },
-                          );
-                        } else {
-                          return Container();
-                        }
-                      }),
+                  ListView.separated(
+                    separatorBuilder: (context, index) => const SizedBox(
+                      height: 10,
+                    ),
+                    shrinkWrap: true,
+                    itemCount: comingEvents.length,
+                    itemBuilder: (context, index) {
+                      return ComingEventCard(event: comingEvents[index]);
+                    },
+                  ),
                 ],
               ),
             ),
             DraggableScrollableSheet(
-              controller: sheetController,
+                controller: sheetController,
                 minChildSize: _minSheetSize,
                 initialChildSize: _minSheetSize,
                 snap: true,
                 builder: (ctx, controller) {
                   return ButtonBase(
                     onTap: () async {
-                     sheetController.animateTo(1, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+                      sheetController.animateTo(1,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut);
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -376,7 +386,7 @@ class ComingEventCard extends StatelessWidget {
         child: Transform(
           alignment: Alignment.center,
           transform: Matrix4.rotationY(pi),
-          child: Blue(
+          child: const Blue(
             width: 114,
             height: 196,
             opacity: 0.2,

@@ -3,7 +3,7 @@ import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/link_state_manager.dart';
 import 'package:duary/screen/home_screen.dart';
-import 'package:duary/screen/input_code_screen.dart';
+import 'package:duary/screen/start/input_code_screen.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/widget/base_app_bar.dart';

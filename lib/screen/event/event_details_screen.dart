@@ -1,10 +1,13 @@
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
-import 'package:duary/screen/edit_event_screen.dart';
+import 'package:duary/provider/event_provider.dart';
+import 'package:duary/screen/event/edit_event_screen.dart';
 import 'package:duary/support/custom_page_route.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class EventDetailsScreen extends StatefulWidget {
   const EventDetailsScreen({super.key, required this.event});
@@ -16,6 +19,15 @@ class EventDetailsScreen extends StatefulWidget {
 }
 
 class _EventDetailsScreenState extends State<EventDetailsScreen> {
+
+  late final EventProvider _eventProvider;
+
+  @override
+  void initState() {
+    _eventProvider = context.read<EventProvider>();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     Event event = widget.event;
@@ -162,7 +174,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
             ),
             GestureDetector(
               onTap: () {
-                // TODO: 일정 삭제하기
+                _eventProvider.deleteEvent(event.id).then((_) {
+                  Navigator.pop(context, true);
+                }).catchError((e) {
+                  Fluttertoast.showToast(msg: e.toString());
+                });
               },
               child: Container(
                 width: double.infinity,

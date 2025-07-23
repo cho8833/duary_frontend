@@ -36,7 +36,7 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
       content: json['content'] as String?,
       location: json['location'] as String?,
       hangOutWith: json['hangOutWith'] as String?,
-    )..member = Member.fromJson(json['member'] as Map<String, dynamic>);
+    );
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'id': instance.id,
@@ -54,14 +54,13 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'daily': instance.daily,
       'weekly': instance.weekly,
       'monthly': instance.monthly,
-      'Yearly': instance.yearly,
+      'yearly': instance.yearly,
       'title': instance.title,
       'content': instance.content,
       'location': instance.location,
       'hangOutWith': instance.hangOutWith,
       'isTogether': instance.isTogether,
       'isAllDay': instance.isAllDay,
-      'member': instance.member,
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

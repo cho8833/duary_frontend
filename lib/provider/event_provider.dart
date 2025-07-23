@@ -13,7 +13,7 @@ class EventProvider {
   final EventRepository _eventRepository;
 
   // 이벤트 캐싱
-  final EventData eventData = EventData();
+  final EventDataNotifier eventDataNotifier = EventDataNotifier();
 
   // Future caching : 같은 인자로 호출된 비동기 작업이 진행 중이면, 그 작업의 결과를 기다렸다가 반환
   final Map<DateTime, Future<List<Event>>> _eventRequest = {};
@@ -22,15 +22,15 @@ class EventProvider {
     DuaryContext duaryContext = DuaryContext();
     duaryContext.me.addListener(() {
       me = duaryContext.me.value;
-      eventData.clear();
+      eventDataNotifier.clear();
     });
     duaryContext.lover.addListener(() {
       lover = duaryContext.lover.value;
-      eventData.clear();
+      eventDataNotifier.clear();
     });
     duaryContext.myCouple.addListener(() {
       myCouple = duaryContext.myCouple.value;
-      eventData.clear();
+      eventDataNotifier.clear();
     });
   }
 
@@ -39,35 +39,10 @@ class EventProvider {
   Member? lover;
   Couple? myCouple;
 
-  Future<Map<Member, Event?>> getOngoingEvent() async {
-    DateTime now = DateTime.now();
-    DateTime today = DateTime(now.year, now.month, now.day);
-    List<Event> todayEvents = await getEventByDay(today);
-
-    Event? myEvent;
-
-    try {
-      myEvent = todayEvents.firstWhere((e) =>
-      e.createdBy == me!.socialId &&
-          e.startDateTime.isBefore(now) &&
-          e.endDateTime.isAfter(now));
-    } catch (_) {}
-
-    Event? loverEvent;
-    try {
-      loverEvent = todayEvents.firstWhere((e) =>
-      e.createdBy == lover!.socialId &&
-          e.startDateTime.isBefore(now) &&
-          e.endDateTime.isAfter(now));
-    } catch (_) {}
-
-    return {me!: myEvent, lover!: loverEvent};
-  }
-
   Future<List<Event>> getEventByDay(DateTime date) async {
     // 캐싱된 이벤트가 있으면 반환
-    if (eventData.contains(date)) {
-      return eventData.get(date)!;
+    if (eventDataNotifier.contains(date)) {
+      return eventDataNotifier.get(date)!;
     }
 
     // 현재 요청 진행 중이면 그 요청의 결과 기다리고 반환
@@ -88,7 +63,7 @@ class EventProvider {
         return e1.startDateTime.compareTo(e2.startDateTime);
       });
 
-      eventData.set(date, events); // 이벤트 캐싱
+      eventDataNotifier.set(date, events); // 이벤트 캐싱
       return events;
     }).catchError((e) {
       print(e);
@@ -116,30 +91,6 @@ class EventProvider {
     return events;
   }
 
-  Future<List<Event>> getComingEvent() async {
-    final DateTime now = DateTime.now();
-    DateTime today = DateTime(now.year, now.month, now.day);
-
-    // 오늘 이벤트들을 불러와서 시작 시간 기준으로 정렬 후, 현재 시간보다 뒤인 이벤트 3개를 고름
-    List<Event> todayEvents = await getEventByDay(today);
-    List<Event> afterNow =
-    todayEvents.where((e) => e.startDateTime.isAfter(now)).toList();
-    afterNow.sort((e1, e2) => e1.startDateTime.compareTo(e2.startDateTime));
-
-    // 골랐을 때 3개 보다 적으면 내일 이벤트까지 불러옴
-    // 내일 이벤트까지 불러왔는데도 3개보다 적으면 어쩔 수 없음
-    if (afterNow.length < 3) {
-      int need = 3 - afterNow.length;
-      DateTime tomorrow = today.add(const Duration(days: 1));
-      List<Event> tomorrowEvents = await getEventByDay(tomorrow);
-      tomorrowEvents
-          .sort((e1, e2) => e1.startDateTime.compareTo(e2.startDateTime));
-      afterNow.addAll(tomorrowEvents.take(need));
-    }
-
-    return afterNow;
-  }
-
   List<Event> _initMemberInEvents(List<Event> events) {
     List<Event> temp = [];
     for (Event event in events) {
@@ -156,13 +107,18 @@ class EventProvider {
 
   Future<void> saveEvent(SaveEventReq req) async {
     validate(req);
-    if (req.frequency == Frequency.yearly) {
-      req.yearly = YearlyRecurrence(req.startDateTime.month, req.startDateTime.day);
-    }
     await _eventRepository.saveEvent(req).then((event) {
-      eventData.clear();
+      eventDataNotifier.clear();
     }).catchError((e) {
-      throw ServerResponseException(e);
+      throw ServerResponseException(e.toString());
+    });
+  }
+
+  Future<void> deleteEvent(String eventId) async {
+    await _eventRepository.deleteEvent(eventId).then((_) {
+      eventDataNotifier.clear();
+    }).catchError((e) {
+      throw ServerResponseException(e.toString());
     });
   }
 
@@ -170,11 +126,37 @@ class EventProvider {
     if (req.title.isEmpty) {
       throw ValidationException("제목을 입력해주세요");
     }
+    if (req.startDateTime.isAfter(req.endDateTime)) {
+      throw ValidationException("시작 시간은 종료 시간 보다 이전일 수 없습니다");
+    }
+    switch (req.frequency) {
+      case Frequency.daily:
+        req.weekly = null;
+        req.monthly = null;
+        req.yearly = null;
+      case Frequency.weekly:
+        req.daily = null;
+        req.monthly = null;
+        req.yearly = null;
+      case Frequency.monthly:
+        req.daily = null;
+        req.weekly = null;
+        req.yearly = null;
+      case Frequency.yearly:
+        req.daily = null;
+        req.weekly = null;
+        req.monthly = null;
+      case Frequency.oneTime:
+        req.daily = null;
+        req.weekly = null;
+        req.monthly = null;
+        req.yearly = null;
+    }
   }
 }
 
 
-class EventData extends ChangeNotifier {
+class EventDataNotifier extends ChangeNotifier {
   final Map<DateTime, List<Event>> eventMap = {};
 
   List<Event>? get(DateTime date) {

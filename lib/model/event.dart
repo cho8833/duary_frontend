@@ -33,6 +33,7 @@ class Event {
   bool isTogether;
   bool isAllDay;
 
+  @JsonKey(includeToJson: false, includeFromJson: false)
   late Member member;
 
   Event(
@@ -59,8 +60,12 @@ class Event {
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
 }
 
+class Recurrence {
+
+}
+
 @JsonSerializable()
-class DailyRecurrence {
+class DailyRecurrence extends Recurrence {
   int interval;
 
   DailyRecurrence(this.interval);
@@ -72,7 +77,7 @@ class DailyRecurrence {
 }
 
 @JsonSerializable()
-class WeeklyRecurrence {
+class WeeklyRecurrence extends Recurrence{
   List<Weekday> weekdays;
 
   WeeklyRecurrence(this.weekdays);
@@ -84,7 +89,7 @@ class WeeklyRecurrence {
 }
 
 @JsonSerializable()
-class MonthlyRecurrence {
+class MonthlyRecurrence extends Recurrence{
   List<int> days;
 
   MonthlyRecurrence(this.days);
@@ -96,7 +101,7 @@ class MonthlyRecurrence {
 }
 
 @JsonSerializable()
-class YearlyRecurrence {
+class YearlyRecurrence extends Recurrence {
   int month;
 
   int day;

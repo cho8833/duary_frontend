@@ -173,4 +173,10 @@ class EventRepositoryMock implements EventRepository {
     // TODO: implement saveEvent
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> deleteEvent(String eventId) {
+    // TODO: implement deleteEvent
+    throw UnimplementedError();
+  }
 }

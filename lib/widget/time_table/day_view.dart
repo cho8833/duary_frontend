@@ -1,18 +1,22 @@
+import 'dart:math';
+
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/duary_context.dart';
-import 'package:duary/screen/event_details_screen.dart';
-import 'package:duary/widget/duary_timetable.dart';
+import 'package:duary/screen/event/event_details_screen.dart';
+import 'package:duary/widget/time_table/duary_timetable.dart';
 import 'package:duary/widget/time_table/bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DayView extends StatefulWidget {
-  const DayView({super.key, required this.items, required this.currentDate});
+  const DayView({super.key, required this.items, required this.currentDate, required this.refresh});
 
   final List<Event> items;
 
   final DateTime currentDate;
+
+  final void Function() refresh;
 
   @override
   State<DayView> createState() => _DayViewState();
@@ -106,7 +110,7 @@ class _DayViewState extends State<DayView> {
             event.startDateTime.hour * hourHeight +
             (event.startDateTime.minute * 3 / 2);
         double xPosition = isLeft ? i * 20 : (overlapCount - i - 1) * 20;
-
+        xPosition = min(maxWidth - 20 , xPosition);
         // 이벤트 높이 계산, 1분 = 1px
         double height =
             event.endDateTime.difference(event.startDateTime).inMinutes *
@@ -115,7 +119,7 @@ class _DayViewState extends State<DayView> {
 
         // 이벤트 너비 계산
         double width = maxWidth - (overlapCount - 1) * 20;
-
+        width = max(20, width);
         Widget? bubble = _buildBubble(event, isLeft, width, height);
         if (bubble != null) {
           double left = xPosition;
@@ -137,7 +141,11 @@ class _DayViewState extends State<DayView> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                EventDetailsScreen(event: event)));
+                                EventDetailsScreen(event: event))).then((needRefresh) {
+                                  if (needRefresh != null && needRefresh as bool) {
+                                    widget.refresh();
+                                  }
+                    });
                   }
                 },
                 child: bubble),

@@ -1,6 +1,6 @@
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/link_state_manager.dart';
-import 'package:duary/screen/connect_copule_screen.dart';
+import 'package:duary/screen/start/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:flutter/material.dart';

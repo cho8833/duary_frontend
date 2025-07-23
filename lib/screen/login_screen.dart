@@ -1,14 +1,12 @@
-import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
-import 'package:duary/screen/connect_copule_screen.dart';
+import 'package:duary/screen/start/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
-import 'package:duary/screen/start_duary_screen.dart';
+import 'package:duary/screen/start/start_duary_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

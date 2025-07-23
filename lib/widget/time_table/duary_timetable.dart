@@ -27,7 +27,7 @@ class DuaryTimetable extends StatefulWidget {
 class _DuaryTimetableState extends State<DuaryTimetable> {
   late DateTime dayFocus;
   late int dayIndex;
-  late final int initialDayIndex;
+  late int initialDayIndex;
 
   late final PagingController<DateTime, Map<DateTime, List<Event>>>
       _pagingUpController;
@@ -94,9 +94,16 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
   }
 
   void refresh() {
+    dayFocus = DateUtils.dateOnly(DateTime.now());
+    initialDayIndex = (dayFocus.difference(DateTime.now()).inHours / 24).ceil();
+    dayIndex = initialDayIndex;
+
+    nextUpPageKey = dayFocus.subtract(const Duration(days: 1));
+    nextDownPageKey = dayFocus;
+
     _pagingDownController.refresh();
     _pagingUpController.refresh();
-    fetchFlag = {};
+    fetchFlag.clear();
   }
 
   @override
@@ -206,7 +213,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                           itemBuilder: (context, items, index) {
                         DateTime date = items.keys.first;
                         final List<Event> events = items[date]!;
-                        return DayView(currentDate: date, items: events);
+                        return DayView(currentDate: date, items: events, refresh: refresh,);
                       }, firstPageErrorIndicatorBuilder: (context) {
                         return const Center(
                           child: Text("일정을 불러오는 데에 실패했습니다"),
@@ -238,7 +245,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                               DateTime date = items.keys.first;
                               final List<Event> events = items[date]!;
                               return DayView(
-                                  currentDate: date, items: events);
+                                  currentDate: date, items: events, refresh:  refresh,);
                             }, firstPageErrorIndicatorBuilder: (context) {
                               return const Center(
                                 child: Text("일정을 불러오는 데에 실패했습니다"),
