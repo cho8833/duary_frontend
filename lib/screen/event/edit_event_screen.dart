@@ -70,7 +70,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
     startDateTime = widget.event?.startDateTime ?? removeSeconds(DateTime.now());
 
     endDateTime = widget.event?.endDateTime ??
-        DateTime.now().add(const Duration(hours: 1));
+        startDateTime.add(const Duration(hours: 1));
 
     eventProvider = context.read<EventProvider>();
   }
@@ -801,7 +801,6 @@ class _RecurSectionState extends State<_RecurSection> {
         );
       case Frequency.yearly:
         recurrence = YearlyRecurrence(startDateTime.month, startDateTime.day);
-        widget.onChange(frequency, recurEndDate, recurrence);
         return _YearlyRecurSection(recurDate: startDateTime);
     }
   }

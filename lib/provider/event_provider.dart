@@ -146,6 +146,7 @@ class EventProvider {
         req.daily = null;
         req.weekly = null;
         req.monthly = null;
+        req.yearly = YearlyRecurrence(req.startDateTime.month, req.startDateTime.day);
       case Frequency.oneTime:
         req.daily = null;
         req.weekly = null;
