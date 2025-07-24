@@ -4,6 +4,7 @@ import 'package:duary/firebase_options.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/provider/link_state_manager.dart';
+import 'package:duary/provider/time_manager.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/screen/splash_screen.dart';
 import 'package:duary/support/asset_path.dart';
@@ -67,6 +68,7 @@ class Main extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => LinkStateManager()),
+        ChangeNotifierProvider(create: (_) => TimeManager()),
         Provider.value(value: eventProvider)
       ],
       builder: (context, _) =>

@@ -6,6 +6,7 @@ import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
+import 'package:duary/provider/time_manager.dart';
 import 'package:duary/screen/event/event_details_screen.dart';
 import 'package:duary/screen/my_page/my_page_screen.dart';
 import 'package:duary/screen/timetable_screen.dart';
@@ -27,6 +28,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final EventProvider _eventProvider;
+  late final TimeManager _timeManager;
   final DuaryContext duaryContext = DuaryContext();
 
   static const String _noOngoingEventMent = "쉬는 중이야";
@@ -51,8 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
       DraggableScrollableController();
 
   late final void Function() eventDataListener;
-
-  late final Timer refreshTimer;
 
   @override
   void initState() {
@@ -93,12 +93,17 @@ class _HomeScreenState extends State<HomeScreen> {
     };
     _eventProvider.eventDataNotifier.addListener(eventDataListener);
 
-    refreshTimer = Timer.periodic(const Duration(seconds: 10), (t) {
-      now = DateTime.now();
+    _timeManager = context.read<TimeManager>();
+    _timeManager.addListener(_changeTime);
+  }
+
+  void _changeTime() {
+    if (now.minute != _timeManager.now.minute) {
+      now = _timeManager.now;
       today = DateUtils.dateOnly(now);
       refreshOnGoing();
       refreshComingEvents();
-    });
+    }
   }
 
   void refreshOnGoing() {
@@ -142,6 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     duaryContext.me.removeListener(meListener);
     duaryContext.lover.removeListener(loverListener);
+    _timeManager.removeListener(_changeTime);
     super.dispose();
   }
 

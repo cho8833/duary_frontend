@@ -1,13 +1,16 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/provider/time_manager.dart';
 import 'package:duary/screen/event/event_details_screen.dart';
 import 'package:duary/widget/time_table/duary_timetable.dart';
 import 'package:duary/widget/time_table/bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class DayView extends StatefulWidget {
   const DayView({super.key, required this.items, required this.currentDate, required this.refresh, required this.width});
@@ -26,23 +29,46 @@ class DayView extends StatefulWidget {
 
 class _DayViewState extends State<DayView> {
   final DuaryContext _duaryContext = DuaryContext();
+  late final TimeManager _timeManager;
 
   static const hourHeight = DuaryTimetable.hourHeight;
   static const _timelineLength = DuaryTimetable.timelineLength;
 
   late final List<Event> items;
 
+  DateTime? now;
+
   @override
   void initState() {
+    _timeManager = context.read<TimeManager>();
     items = widget.items;
+    DateTime temp = DateTime.now();
+    if (DateUtils.isSameDay(temp, widget.currentDate)) {
+      now = DateTime.now();
+      _timeManager.addListener(_changeTime);
+    }
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _timeManager.removeListener(_changeTime);
+    super.dispose();
+  }
+
+  void _changeTime() {
+    DateTime refer = _timeManager.now;
+    if (now!.minute != refer.minute) {
+      setState(() {
+        now = refer;
+      });
+    }
+  }
+
   Widget currentTimeBar() {
-    DateTime now = DateTime.now();
-    if (DateUtils.isSameDay(now, widget.currentDate)) {
+    if (now != null) {
       return Positioned(
-        top: hourHeight * now.hour + (hourHeight / 60) * now.minute,
+        top: hourHeight * now!.hour + (hourHeight / 60) * now!.minute,
           child: Container(
             width: widget.width,
                   color: Colors.orange,
