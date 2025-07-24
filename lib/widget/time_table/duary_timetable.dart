@@ -57,6 +57,8 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
   late void Function() loverListener;
   late void Function() coupleListener;
 
+  bool _isInitialScrollHandled = false;
+
   @override
   void initState() {
     super.initState();
@@ -83,6 +85,21 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
 
     _scrollController = ScrollController();
     _scrollController.addListener(updateDayIndex);
+
+    // initialDay 가 오늘인 경우 현재 시간으로 스크롤 위치 이동
+    if (initialDayIndex == 0) {
+      _pagingDownController.addListener(() {
+        if (_pagingDownController.status == PagingStatus.ongoing && !_isInitialScrollHandled) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            DateTime now = DateTime.now();
+            _scrollController.jumpTo(now.hour * DuaryTimetable.hourHeight);
+          });
+
+          _isInitialScrollHandled = true;
+        }
+      });
+    }
+
 
     // 유저 정보나 커플 정보가 바뀌면 다시 event 불러오기
     meListener = refresh;
@@ -139,7 +156,8 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     if (dayIndex != index) {
       dayIndex = index;
       setState(() {
-        dayFocus = DateUtils.dateOnly(DateTime.now()).add(Duration(days: dayIndex));
+        dayFocus =
+            DateUtils.dateOnly(DateTime.now()).add(Duration(days: dayIndex));
       });
     }
   }
@@ -199,29 +217,43 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                 slivers: [
                   PagingListener(
                     controller: _pagingUpController,
-                    builder: (context, state, fetchNextPage) =>
-                        PagedSliverList<DateTime, Map<DateTime, List<Event>>>(
-                      nextPageStrategy: () {
-                        if (dayIndex < initialDayIndex &&
-                            fetchFlag[dayIndex] == null) {
-                          return true;
-                        } else {
-                          return false;
-                        }
-                      },
-                      builderDelegate: PagedChildBuilderDelegate(
-                          itemBuilder: (context, items, index) {
-                        DateTime date = items.keys.first;
-                        final List<Event> events = items[date]!;
-                        return DayView(currentDate: date, items: events, refresh: refresh,);
-                      }, firstPageErrorIndicatorBuilder: (context) {
-                        return const Center(
-                          child: Text("일정을 불러오는 데에 실패했습니다"),
-                        );
-                      }),
-                      state: state,
-                      fetchNextPage: fetchNextPage,
-                    ),
+                    builder: (context, state, fetchNextPage) {
+                      return PagedSliverList<DateTime,
+                          Map<DateTime, List<Event>>>(
+                        nextPageStrategy: () {
+                          if (dayIndex < initialDayIndex &&
+                              fetchFlag[dayIndex] == null) {
+                            return true;
+                          } else {
+                            return false;
+                          }
+                        },
+                        builderDelegate: PagedChildBuilderDelegate(
+                            animateTransitions: true,
+                            transitionDuration:
+                                const Duration(milliseconds: 250),
+                            itemBuilder: (context, items, index) {
+                              DateTime date = items.keys.first;
+                              final List<Event> events = items[date]!;
+                              return LayoutBuilder(   // width 전달 목적
+                                  builder: (context, constraints) {
+                                return DayView(
+                                  currentDate: date,
+                                  items: events,
+                                  refresh: refresh,
+                                  width: constraints.maxWidth,
+                                );
+                              });
+                            },
+                            firstPageErrorIndicatorBuilder: (context) {
+                              return const Center(
+                                child: Text("일정을 불러오는 데에 실패했습니다"),
+                              );
+                            }),
+                        state: state,
+                        fetchNextPage: fetchNextPage,
+                      );
+                    },
                   ),
                   PagingListener(
                       key: downListKey,
@@ -241,16 +273,28 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                             state: state,
                             fetchNextPage: fetchNextPage,
                             builderDelegate: PagedChildBuilderDelegate(
+                                animateTransitions: true,
+                                transitionDuration:
+                                    const Duration(milliseconds: 250),
                                 itemBuilder: (context, items, index) {
-                              DateTime date = items.keys.first;
-                              final List<Event> events = items[date]!;
-                              return DayView(
-                                  currentDate: date, items: events, refresh:  refresh,);
-                            }, firstPageErrorIndicatorBuilder: (context) {
-                              return const Center(
-                                child: Text("일정을 불러오는 데에 실패했습니다"),
-                              );
-                            }));
+                                  DateTime date = items.keys.first;
+                                  final List<Event> events = items[date]!;
+                                  return LayoutBuilder(     // width 전달 목적
+                                    builder: (context, constraints) {
+                                      return DayView(
+                                        width: constraints.maxWidth,
+                                        currentDate: date,
+                                        items: events,
+                                        refresh: refresh,
+                                      );
+                                    }
+                                  );
+                                },
+                                firstPageErrorIndicatorBuilder: (context) {
+                                  return const Center(
+                                    child: Text("일정을 불러오는 데에 실패했습니다"),
+                                  );
+                                }));
                       }),
                 ],
               );

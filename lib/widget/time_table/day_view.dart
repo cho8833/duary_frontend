@@ -10,11 +10,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DayView extends StatefulWidget {
-  const DayView({super.key, required this.items, required this.currentDate, required this.refresh});
+  const DayView({super.key, required this.items, required this.currentDate, required this.refresh, required this.width});
 
   final List<Event> items;
 
   final DateTime currentDate;
+
+  final double width;
 
   final void Function() refresh;
 
@@ -36,28 +38,48 @@ class _DayViewState extends State<DayView> {
     super.initState();
   }
 
+  Widget currentTimeBar() {
+    DateTime now = DateTime.now();
+    if (DateUtils.isSameDay(now, widget.currentDate)) {
+      return Positioned(
+        top: hourHeight * now.hour + (hourHeight / 60) * now.minute,
+          child: Container(
+            width: widget.width,
+                  color: Colors.orange,
+                  height: 1,
+                ));
+    } else {
+      return Container();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: hourHeight * 24,
-      child: Row(
+      child: Stack(
         children: [
-          const SizedBox(
-            width: 20,
-          ),
-          Expanded(child: LayoutBuilder(builder: (context, constraints) {
-            return Stack(
-              children: _buildBubbles(constraints.maxWidth, items, true),
-            );
-          })),
-          _buildTimeLines(),
-          Expanded(child: LayoutBuilder(builder: (context, constraints) {
-            return Stack(
-              children: _buildBubbles(constraints.maxWidth, items, false),
-            );
-          })),
-          const SizedBox(
-            width: 20,
+          currentTimeBar(),
+          Row(
+            children: [
+              const SizedBox(
+                width: 20,
+              ),
+              Expanded(child: LayoutBuilder(builder: (context, constraints) {
+                return Stack(
+                  children: _buildBubbles(constraints.maxWidth, items, true),
+                );
+              })),
+              _buildTimeLines(),
+              Expanded(child: LayoutBuilder(builder: (context, constraints) {
+                return Stack(
+                  children: _buildBubbles(constraints.maxWidth, items, false),
+                );
+              })),
+              const SizedBox(
+                width: 20,
+              ),
+            ],
           ),
         ],
       ),
