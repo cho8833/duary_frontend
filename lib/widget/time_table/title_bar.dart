@@ -194,11 +194,17 @@ class _TitleBarState extends State<TitleBar> {
                     }
                   });
                 },
-                child: _AllDayBox(
-                    title: e.title,
-                    character: e.isTogether
-                        ? Character.together
-                        : e.member.character!)),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _AllDayBox(
+                          title: e.title,
+                          character: e.isTogether
+                              ? Character.together
+                              : e.member.character!),
+                    ),
+                  ],
+                )),
             const SizedBox(
               height: 4,
             )
@@ -237,10 +243,16 @@ class _TitleBarState extends State<TitleBar> {
                   }
                 });
               },
-              child: _AllDayBox(
-                  title: e.title,
-                  character:
-                      e.isTogether ? Character.together : e.member.character!),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _AllDayBox(
+                        title: e.title,
+                        character:
+                            e.isTogether ? Character.together : e.member.character!),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(
               height: 4,
@@ -272,14 +284,16 @@ class _AllDayBox extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: character.allDayColor)),
       padding: const EdgeInsets.all(8),
-      child: Text(
-        title,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-            color: character.fontBlackColor,
-            fontWeight: FontWeight.w500,
-            fontSize: 12),
+      child: Center(
+        child: Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+              color: character.fontBlackColor,
+              fontWeight: FontWeight.w500,
+              fontSize: 12),
+        ),
       ),
     );
   }

@@ -217,11 +217,11 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
                   List<int> dotIndex = [-1, -1, -1];
                   // 해당 날짜에 함께하는 일정이 아니고, 내 일정이 있는 경우 내 점 찍기
                   dotIndex[0] = dayEvents.indexWhere((event) =>
-                      event.createdBy == _duaryContext.me.value!.socialId &&
+                      event.createdBy == _duaryContext.me.value!.getId() &&
                       !event.isTogether);
                   // 해당 날짜에 함께하는 일정이 아니고, 상대방 일정이 있는 경우 상대방 점 찍기
                   dotIndex[1] = dayEvents.indexWhere((event) =>
-                      event.createdBy != _duaryContext.me.value!.socialId &&
+                      event.createdBy == _duaryContext.lover.value!.getId() &&
                       !event.isTogether);
                   // 해당 날짜에 함께하는 일정이 있으면 분홍색 점 찍기
                   dotIndex[2] =
@@ -233,7 +233,7 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
                     shrinkWrap: true,
                     itemCount: dotIndex.length,
                     itemBuilder: (context, index) {
-                      Event event = events[dotIndex[index]];
+                      Event event = dayEvents[dotIndex[index]];
                       if (event.isTogether) {
                         return _CalendarDot(
                             color: Character.together.characterColor);

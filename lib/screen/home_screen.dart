@@ -86,8 +86,8 @@ class _HomeScreenState extends State<HomeScreen> {
           _eventProvider.eventDataNotifier.eventMap[today];
       if (todayEvents != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          refreshOnGoing();
-          refreshComingEvents();
+          refreshOnGoing(todayEvents);
+          refreshComingEvents(todayEvents);
         });
       }
     };
@@ -101,15 +101,16 @@ class _HomeScreenState extends State<HomeScreen> {
     if (now.minute != _timeManager.now.minute) {
       now = _timeManager.now;
       today = DateUtils.dateOnly(now);
-      refreshOnGoing();
-      refreshComingEvents();
+      List<Event>? todayEvents = _eventProvider.eventDataNotifier.get(today);
+      if (todayEvents != null) {
+        refreshOnGoing(todayEvents);
+        refreshComingEvents(todayEvents);
+      }
     }
   }
 
-  void refreshOnGoing() {
-    List<Event>? todayEvents =
-    _eventProvider.eventDataNotifier.eventMap[today];
-    if (todayEvents != null) {
+  void refreshOnGoing(List<Event> todayEvents) {
+
       try {
         setState(() {
           myOnGoingEvent = todayEvents.lastWhere((e) =>
@@ -127,20 +128,17 @@ class _HomeScreenState extends State<HomeScreen> {
               e.endDateTime.isAfter(now));
         });
       } catch (_) {}
-    }
+
   }
 
-  void refreshComingEvents() {
-    List<Event>? todayEvents =
-    _eventProvider.eventDataNotifier.eventMap[today];
-    if (todayEvents != null) {
+  void refreshComingEvents(List<Event> todayEvents) {
       setState(() {
         comingEvents =
             todayEvents.where((e) => e.startDateTime.isAfter(now)).toList();
         comingEvents
             .sort((e1, e2) => e1.startDateTime.compareTo(e2.startDateTime));
       });
-    }
+
   }
 
   @override
@@ -148,6 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
     duaryContext.me.removeListener(meListener);
     duaryContext.lover.removeListener(loverListener);
     _timeManager.removeListener(_changeTime);
+    _eventProvider.eventDataNotifier.removeListener(eventDataListener);
     super.dispose();
   }
 

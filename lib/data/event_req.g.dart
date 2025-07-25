@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'save_event_req.dart';
+part of 'event_req.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
@@ -26,7 +26,7 @@ Map<String, dynamic> _$SaveEventReqToJson(SaveEventReq instance) =>
       'location': instance.location,
       'hangOutWith': instance.hangOutWith,
       'isTogether': instance.isTogether,
-      'isAllday': instance.isAllday,
+      'isAllDay': instance.isAllDay,
     };
 
 Json? _$JsonConverterToJson<Json, Value>(

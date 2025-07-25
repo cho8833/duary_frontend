@@ -22,6 +22,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
   late final EventProvider _eventProvider;
 
+  late Event event = widget.event;
+
   @override
   void initState() {
     _eventProvider = context.read<EventProvider>();
@@ -30,7 +32,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Event event = widget.event;
     return Scaffold(
       appBar: AppBarBase(
           appBarObj: AppBar(),
@@ -150,7 +151,15 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
             GestureDetector(
               onTap: () {
                 Navigator.of(context)
-                    .push(SlideDownRoute(page: EditEventScreen(event: event,)));
+                    .push(SlideDownRoute(page: EditEventScreen(event: event,))).then((updated) {
+                      try {
+                        if ((updated as Event?) != null) {
+                          setState(() {
+                            event = updated!;
+                          });
+                        }
+                      } catch (_) {}
+                });
               },
               child: Container(
                 width: double.infinity,

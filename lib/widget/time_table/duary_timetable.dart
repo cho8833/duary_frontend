@@ -53,10 +53,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
 
   final DuaryContext duaryContext = DuaryContext();
 
-  late void Function() meListener;
-  late void Function() loverListener;
-  late void Function() coupleListener;
-
   bool _isInitialScrollHandled = false;
 
   @override
@@ -71,6 +67,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     nextDownPageKey = dayFocus;
 
     _eventProvider = context.read<EventProvider>();
+    _eventProvider.eventDataNotifier.addListener(eventDataListener);
 
     _pagingUpController = PagingController(getNextPageKey: (state) {
       return nextUpPageKey;
@@ -84,7 +81,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     });
 
     _scrollController = ScrollController();
-    _scrollController.addListener(updateDayIndex);
 
     // initialDay 가 오늘인 경우 현재 시간으로 스크롤 위치 이동
     if (initialDayIndex == 0) {
@@ -93,21 +89,39 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             DateTime now = DateTime.now();
             _scrollController.jumpTo(now.hour * DuaryTimetable.hourHeight);
-          });
 
+            // 처음 스크롤이 끝난 후 update index 수행
+            _scrollController.addListener(updateDayIndex);
+          });
           _isInitialScrollHandled = true;
         }
       });
+    } else {
+      _scrollController.addListener(updateDayIndex);
     }
 
 
     // 유저 정보나 커플 정보가 바뀌면 다시 event 불러오기
-    meListener = refresh;
-    loverListener = refresh;
-    coupleListener = refresh;
-    duaryContext.me.addListener(meListener);
-    duaryContext.lover.addListener(loverListener);
-    duaryContext.myCouple.addListener(coupleListener);
+    duaryContext.me.addListener(refresh);
+    duaryContext.lover.addListener(refresh);
+    duaryContext.myCouple.addListener(refresh);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _pagingDownController.dispose();
+    _pagingUpController.dispose();
+    _eventProvider.eventDataNotifier.removeListener(eventDataListener);
+    duaryContext.me.removeListener(refresh);
+    duaryContext.lover.removeListener(refresh);
+    duaryContext.myCouple.removeListener(refresh);
+  }
+
+  void eventDataListener() {
+    if (_eventProvider.eventDataNotifier.isClear()) {
+      refresh();
+    }
   }
 
   void refresh() {
@@ -123,15 +137,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     fetchFlag.clear();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _pagingDownController.dispose();
-    _pagingUpController.dispose();
-    duaryContext.me.removeListener(meListener);
-    duaryContext.lover.removeListener(loverListener);
-    duaryContext.myCouple.removeListener(coupleListener);
-  }
 
   void updateDayIndex() {
     // 현재 어느 날짜 블록에 해당하는지 인덱스 구함

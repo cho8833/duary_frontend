@@ -1,6 +1,5 @@
-import 'package:duary/data/save_event_req.dart';
+import 'package:duary/data/event_req.dart';
 import 'package:duary/model/couple.dart';
-import 'package:duary/model/enums/frequency.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
@@ -64,7 +63,7 @@ class EventProvider {
       });
 
       eventDataNotifier.set(date, events); // 이벤트 캐싱
-      return events;
+      return eventDataNotifier.get(date) ?? List<Event>.empty();
     }).catchError((e) {
       print(e);
       throw e;
@@ -106,9 +105,20 @@ class EventProvider {
   }
 
   Future<void> saveEvent(SaveEventReq req) async {
-    validate(req);
+    req.validate();
     await _eventRepository.saveEvent(req).then((event) {
       eventDataNotifier.clear();
+    }).catchError((e) {
+      throw ServerResponseException(e.toString());
+    });
+  }
+
+  Future<Event?> editEvent(String id, SaveEventReq req) async {
+    req.validate();
+    return await _eventRepository.editEvent(id, req).then((event) {
+      _initMemberInEvents([event]);
+      eventDataNotifier.clear();
+      return event;
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
@@ -120,39 +130,6 @@ class EventProvider {
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
-  }
-
-  void validate(SaveEventReq req) {
-    if (req.title.isEmpty) {
-      throw ValidationException("제목을 입력해주세요");
-    }
-    if (req.startDateTime.isAfter(req.endDateTime)) {
-      throw ValidationException("시작 시간은 종료 시간 보다 이전일 수 없습니다");
-    }
-    switch (req.frequency) {
-      case Frequency.daily:
-        req.weekly = null;
-        req.monthly = null;
-        req.yearly = null;
-      case Frequency.weekly:
-        req.daily = null;
-        req.monthly = null;
-        req.yearly = null;
-      case Frequency.monthly:
-        req.daily = null;
-        req.weekly = null;
-        req.yearly = null;
-      case Frequency.yearly:
-        req.daily = null;
-        req.weekly = null;
-        req.monthly = null;
-        req.yearly = YearlyRecurrence(req.startDateTime.month, req.startDateTime.day);
-      case Frequency.oneTime:
-        req.daily = null;
-        req.weekly = null;
-        req.monthly = null;
-        req.yearly = null;
-    }
   }
 }
 
@@ -172,6 +149,10 @@ class EventDataNotifier extends ChangeNotifier {
   void clear() {
     eventMap.clear();
     notifyListeners();
+  }
+
+  bool isClear() {
+    return eventMap.isEmpty;
   }
 
   bool contains(DateTime date) {

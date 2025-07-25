@@ -1,4 +1,4 @@
-import 'package:duary/data/save_event_req.dart';
+import 'package:duary/data/event_req.dart';
 import 'package:duary/model/enums/frequency.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
@@ -6,11 +6,11 @@ import 'package:duary/provider/duary_context.dart';
 import 'package:duary/repository/event_repository.dart';
 
 class EventRepositoryMock implements EventRepository {
-
   static final DateTime now = DateTime.now();
 
   @override
-  Future<List<Event>> getEvent(String coupleId, DateTime startDate, DateTime endDate) async {
+  Future<List<Event>> getEvent(
+      String coupleId, DateTime startDate, DateTime endDate) async {
     final DateTime date =
         DateTime(startDate.year, startDate.month, startDate.day);
 
@@ -20,7 +20,7 @@ class EventRepositoryMock implements EventRepository {
 
     Member lover = duaryContext.lover.value!;
 
-     Event dummy2(DateTime date) {
+    Event dummy2(DateTime date) {
       return Event(
         "12~16-me",
         "coupleId",
@@ -35,7 +35,7 @@ class EventRepositoryMock implements EventRepository {
       );
     }
 
-     Event dummy3(DateTime date) {
+    Event dummy3(DateTime date) {
       return Event(
         "10:30~11:30-lover",
         "coupleId",
@@ -49,7 +49,8 @@ class EventRepositoryMock implements EventRepository {
         content: "${date.month}/${date.day} 은동이랑 셋이서 산책하기 🐶",
       );
     }
-     Event dummy4(DateTime date) {
+
+    Event dummy4(DateTime date) {
       return Event(
         "9~10-me",
         "coupleId",
@@ -64,7 +65,7 @@ class EventRepositoryMock implements EventRepository {
       );
     }
 
-     Event dummy1(DateTime date) {
+    Event dummy1(DateTime date) {
       return Event(
         "8:45~10:00-lover",
         "coupleId",
@@ -79,7 +80,7 @@ class EventRepositoryMock implements EventRepository {
       );
     }
 
-     Event dummy5(DateTime date) {
+    Event dummy5(DateTime date) {
       return Event(
         "9~10-lover1",
         "coupleId",
@@ -114,7 +115,7 @@ class EventRepositoryMock implements EventRepository {
         "전날9~10-lover2${date.toString()}",
         "coupleId",
         lover.getId(),
-        date.copyWith(day: date.day -1, hour: 12, minute: 0),
+        date.copyWith(day: date.day - 1, hour: 12, minute: 0),
         date.copyWith(hour: 9, minute: 0),
         "${date.month}/${date.day} 응가가방 챙기기",
         Frequency.oneTime,
@@ -177,6 +178,12 @@ class EventRepositoryMock implements EventRepository {
   @override
   Future<void> deleteEvent(String eventId) {
     // TODO: implement deleteEvent
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Event> editEvent(String id, SaveEventReq req) {
+    // TODO: implement editEvent
     throw UnimplementedError();
   }
 }

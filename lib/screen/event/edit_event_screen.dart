@@ -1,6 +1,6 @@
 import 'package:bottom_picker/bottom_picker.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:duary/data/save_event_req.dart';
+import 'package:duary/data/event_req.dart';
 import 'package:duary/model/enums/frequency.dart';
 import 'package:duary/model/enums/weekday.dart';
 import 'package:duary/model/event.dart';
@@ -43,9 +43,15 @@ class _EditEventScreenState extends State<EditEventScreen> {
   bool isAllDay = false;
   late DateTime startDateTime;
   late DateTime endDateTime;
+
+  DateTime? startDateTimeTemp;
+  DateTime? endDateTimeTemp;
+
   Frequency frequency = Frequency.oneTime;
 
   late EventProvider eventProvider;
+
+  bool didUpdateStartDateTime = false;
 
   bool isEndTimeEnabled = true;
   bool isEndDateEnabled = true;
@@ -64,43 +70,61 @@ class _EditEventScreenState extends State<EditEventScreen> {
       hangOutWith = event.hangOutWith;
       content = event.content;
       isTogether = event.isTogether;
-      isAllDay = event.isAllDay;
-      frequency = event.frequency;
+      startDateTime = event.startDateTime;
+      endDateTime = event.endDateTime;
+      setAllDay(event.isAllDay);
+      setFrequency(event.frequency);
+      recurStartDate = event.recurStartDate;
+      recurEndDate = event.recurEndDate;
+      daily = event.daily;
+      weekly = event.weekly;
+      monthly = event.monthly;
+      yearly = event.yearly;
+    } else {
+      startDateTime = removeSeconds(DateTime.now());
+      endDateTime = startDateTime.add(const Duration(hours: 1));
     }
-    startDateTime = widget.event?.startDateTime ?? removeSeconds(DateTime.now());
-
-    endDateTime = widget.event?.endDateTime ??
-        startDateTime.add(const Duration(hours: 1));
 
     eventProvider = context.read<EventProvider>();
   }
 
   void setAllDay(bool value) {
-    setState(() {
-      isAllDay = value;
-      isStartTimeEnabled = !value;
-      isEndTimeEnabled = !value;
-    });
+    isAllDay = value;
+    if (value) {
+      startDateTimeTemp = startDateTime;
+      endDateTimeTemp = endDateTime;
+      startDateTime = DateUtils.dateOnly(startDateTime);
+      endDateTime = DateUtils.dateOnly(endDateTime);
+    } else {
+      startDateTime = startDateTimeTemp ??
+          widget.event?.startDateTime ??
+          removeSeconds(DateTime.now());
+      endDateTime = endDateTimeTemp ??
+          widget.event?.endDateTime ??
+          startDateTime.add(const Duration(hours: 1));
+    }
+    isStartTimeEnabled = !value;
+    isEndTimeEnabled = !value;
   }
 
   void setFrequency(Frequency value) {
-    setState(() {
-      frequency = value;
-      if (value == Frequency.oneTime || value == Frequency.yearly) {
-        isStartDateEnabled = true;
-        isEndDateEnabled = true;
-      }
-      else if (value == Frequency.daily || value == Frequency.weekly || value == Frequency.monthly) {
-        isEndDateEnabled = false;
-        isStartDateEnabled = true;
-        if (startDateTime.isBefore(endDateTime) || startDateTime.difference(endDateTime).inDays > 0) {
-          endDateTime = _changeDate(endDateTime, startDateTime);
-          if (startDateTime.isAfter(endDateTime)) {
-            endDateTime = endDateTime.add(const Duration(days:1));
-          }
+    frequency = value;
+    if (value == Frequency.oneTime || value == Frequency.yearly) {
+      isStartDateEnabled = true;
+      isEndDateEnabled = true;
+    } else if (value == Frequency.daily ||
+        value == Frequency.weekly ||
+        value == Frequency.monthly) {
+      isEndDateEnabled = false;
+      isStartDateEnabled = true;
+      if (startDateTime.isBefore(endDateTime) ||
+          startDateTime.difference(endDateTime).inDays > 0) {
+        endDateTime = _changeDate(endDateTime, startDateTime);
+        if (startDateTime.isAfter(endDateTime)) {
+          endDateTime = endDateTime.add(const Duration(days: 1));
         }
       }
-    });
+    }
   }
 
   @override
@@ -251,7 +275,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
                                             _changeDate(endDateTime, selected);
                                       }
                                       if (frequency != Frequency.oneTime) {
-                                        recurStartDate = DateUtils.dateOnly(startDateTime);
+                                        recurStartDate =
+                                            DateUtils.dateOnly(startDateTime);
                                       }
                                     });
                                   }
@@ -307,9 +332,11 @@ class _EditEventScreenState extends State<EditEventScreen> {
                                   if (value != null) {
                                     DateTime selected = value.first!;
                                     setState(() {
-                                      endDateTime = _changeDate(endDateTime, selected);
+                                      endDateTime =
+                                          _changeDate(endDateTime, selected);
                                       if (startDateTime.isAfter(endDateTime)) {
-                                        startDateTime = endDateTime.subtract(const Duration(hours: 1));
+                                        startDateTime = endDateTime
+                                            .subtract(const Duration(hours: 1));
                                       }
                                     });
                                   }
@@ -326,10 +353,15 @@ class _EditEventScreenState extends State<EditEventScreen> {
                                       endDateTime = endDateTime.copyWith(
                                           hour: time.hour, minute: time.minute);
                                       if (endDateTime.isBefore(startDateTime)) {
-                                        endDateTime = endDateTime.add(const Duration(days: 1));
-                                      }
-                                      else if (endDateTime.isAfter(startDateTime) && (frequency == Frequency.daily || frequency == Frequency.weekly || frequency  == Frequency.monthly)) {
-                                        endDateTime = _changeDate(endDateTime, startDateTime);
+                                        endDateTime = endDateTime
+                                            .add(const Duration(days: 1));
+                                      } else if (endDateTime
+                                              .isAfter(startDateTime) &&
+                                          (frequency == Frequency.daily ||
+                                              frequency == Frequency.weekly ||
+                                              frequency == Frequency.monthly)) {
+                                        endDateTime = _changeDate(
+                                            endDateTime, startDateTime);
                                       }
                                     });
                                   },
@@ -353,10 +385,27 @@ class _EditEventScreenState extends State<EditEventScreen> {
                     ),
 
                     _RecurSection(
+                      recurEndDate: recurEndDate,
+                      recurrence: () {
+                        switch (frequency) {
+                          case Frequency.daily:
+                            return daily;
+                          case Frequency.weekly:
+                            return weekly;
+                          case Frequency.monthly:
+                            return monthly;
+                          case Frequency.yearly:
+                            return yearly;
+                          default:
+                            return null;
+                        }
+                      }(),
                       frequency: frequency,
                       onChange: (frequency, recurEndDate, recurrence) {
-                        setFrequency(frequency);
-                        recurEndDate = recurEndDate;
+                        setState(() {
+                          setFrequency(frequency);
+                        });
+                        this.recurEndDate = recurEndDate;
                         if (frequency != Frequency.oneTime) {
                           recurStartDate = DateUtils.dateOnly(startDateTime);
                         }
@@ -428,7 +477,14 @@ class _EditEventScreenState extends State<EditEventScreen> {
                 ButtonBase(
                   onTap: () async {
                     if (isEdit) {
-                      // TODO: Edit 구현
+                      SaveEventReq req = getSaveReq();
+                      await eventProvider
+                          .editEvent(widget.event!.id, req)
+                          .then((updated) {
+                        Navigator.pop(context, updated);
+                      }).catchError((e) {
+                        Fluttertoast.showToast(msg: e.toString());
+                      });
                     } else {
                       SaveEventReq req = getSaveReq();
                       await eventProvider.saveEvent(req).then((_) {
@@ -613,7 +669,9 @@ class _RecurSection extends StatefulWidget {
       {required this.frequency,
       required this.onChange,
       required this.startDateTime,
-      required this.endDateTime});
+      required this.endDateTime,
+      this.recurrence,
+      this.recurEndDate});
 
   final Frequency frequency;
 
@@ -621,6 +679,10 @@ class _RecurSection extends StatefulWidget {
 
   final DateTime startDateTime;
   final DateTime endDateTime;
+
+  final Recurrence? recurrence;
+
+  final DateTime? recurEndDate;
 
   @override
   State<_RecurSection> createState() => _RecurSectionState();
@@ -641,7 +703,6 @@ class _RecurSectionState extends State<_RecurSection> {
   YearlyRecurrence? yearly;
   Recurrence? recurrence;
 
-
   DateTime? recurEndDate;
 
   bool hasRecurEndDate = false;
@@ -649,11 +710,18 @@ class _RecurSectionState extends State<_RecurSection> {
   late final DateTime startDateTime;
   late final DateTime endDateTime;
 
+  void setRecurEndDate(DateTime? value) {
+    recurEndDate = value;
+    hasRecurEndDate = value != null;
+  }
+
   @override
   void initState() {
     frequency = widget.frequency;
     startDateTime = widget.startDateTime;
     endDateTime = widget.endDateTime;
+    recurrence = widget.recurrence;
+    setRecurEndDate(widget.recurEndDate);
     super.initState();
   }
 
@@ -738,17 +806,23 @@ class _RecurSectionState extends State<_RecurSection> {
                           text: hasRecurEndDate ? "날짜" : "안 함",
                           onTap: () {
                             setState(() {
-                              hasRecurEndDate = !hasRecurEndDate;
-                              recurEndDate ??=
-                                  DateTime.now().add(const Duration(days: 90));
+                              if (!hasRecurEndDate) {
+                                setRecurEndDate(DateUtils.dateOnly(
+                                    DateTime.now()
+                                        .add(const Duration(days: 30))));
+                              } else {
+                                setRecurEndDate(null);
+                              }
                             });
+                            widget.onChange(
+                                frequency, recurEndDate, recurrence);
                           },
                           isEnabled: true),
                       const SizedBox(
                         width: 8,
                       ),
                       _TimeBox(
-                          text: recurEndDate != null
+                          text: hasRecurEndDate
                               ? _formatDate(recurEndDate!)
                               : "설정해주세요",
                           onTap: () {
@@ -758,8 +832,10 @@ class _RecurSectionState extends State<_RecurSection> {
                                   .then((selected) {
                                 if (selected != null) {
                                   setState(() {
-                                    recurEndDate = selected.first!;
+                                    setRecurEndDate(selected.first);
                                   });
+                                  widget.onChange(
+                                      frequency, recurEndDate, recurrence);
                                 }
                               });
                             }
@@ -780,6 +856,7 @@ class _RecurSectionState extends State<_RecurSection> {
         return Container();
       case Frequency.daily:
         return _DailyRecurSection(
+          initialRecurrence: widget.recurrence as DailyRecurrence?,
           onChange: (interval) {
             recurrence = DailyRecurrence(interval);
             widget.onChange(frequency, recurEndDate, recurrence);
@@ -787,6 +864,7 @@ class _RecurSectionState extends State<_RecurSection> {
         );
       case Frequency.weekly:
         return _WeeklyRecurSection(
+          initialRecurrence: widget.recurrence as WeeklyRecurrence?,
           onSelect: (selected) {
             recurrence = WeeklyRecurrence(selected);
             widget.onChange(frequency, recurEndDate, recurrence);
@@ -794,6 +872,7 @@ class _RecurSectionState extends State<_RecurSection> {
         );
       case Frequency.monthly:
         return _MonthlyRecurSection(
+          initialRecurrence: widget.recurrence as MonthlyRecurrence?,
           onSelect: (days) {
             recurrence = MonthlyRecurrence(days);
             widget.onChange(frequency, recurEndDate, recurrence);
@@ -807,21 +886,29 @@ class _RecurSectionState extends State<_RecurSection> {
 }
 
 class _DailyRecurSection extends StatefulWidget {
-  const _DailyRecurSection({super.key, required this.onChange});
+  const _DailyRecurSection(
+      {super.key, required this.onChange, this.initialRecurrence});
 
   final Function(int) onChange;
+
+  final DailyRecurrence? initialRecurrence;
 
   @override
   State<_DailyRecurSection> createState() => _DailyRecurSectionState();
 }
 
 class _DailyRecurSectionState extends State<_DailyRecurSection> {
-  final TextEditingController controller = TextEditingController();
+  late final TextEditingController controller;
 
-  int interval = 1;
+  int? interval;
 
   @override
   void initState() {
+    if (widget.initialRecurrence != null) {
+      interval = widget.initialRecurrence!.interval;
+    }
+
+    controller = TextEditingController(text: interval?.toString() ?? "");
     super.initState();
   }
 
@@ -847,7 +934,7 @@ class _DailyRecurSectionState extends State<_DailyRecurSection> {
               setState(() {
                 interval = temp;
               });
-              widget.onChange(interval);
+              widget.onChange(interval!);
             },
             maxLines: 1,
           ),
@@ -859,16 +946,26 @@ class _DailyRecurSectionState extends State<_DailyRecurSection> {
 }
 
 class _WeeklyRecurSection extends StatefulWidget {
-  const _WeeklyRecurSection({required this.onSelect});
+  const _WeeklyRecurSection({required this.onSelect, this.initialRecurrence});
 
   final Function(List<Weekday>) onSelect;
+
+  final WeeklyRecurrence? initialRecurrence;
 
   @override
   State<_WeeklyRecurSection> createState() => _WeeklyRecurSectionState();
 }
 
 class _WeeklyRecurSectionState extends State<_WeeklyRecurSection> {
-  final List<Weekday> selected = [];
+  List<Weekday> selected = [];
+
+  @override
+  void initState() {
+    if (widget.initialRecurrence != null) {
+      selected = widget.initialRecurrence!.weekdays;
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -913,16 +1010,26 @@ class _WeeklyRecurSectionState extends State<_WeeklyRecurSection> {
 }
 
 class _MonthlyRecurSection extends StatefulWidget {
-  const _MonthlyRecurSection({required this.onSelect});
+  const _MonthlyRecurSection({required this.onSelect, this.initialRecurrence});
 
   final Function(List<int>) onSelect;
+
+  final MonthlyRecurrence? initialRecurrence;
 
   @override
   State<_MonthlyRecurSection> createState() => _MonthlyRecurSectionState();
 }
 
 class _MonthlyRecurSectionState extends State<_MonthlyRecurSection> {
-  final List<int> selected = [];
+  List<int> selected = [];
+
+  @override
+  void initState() {
+    if (widget.initialRecurrence != null) {
+      selected = widget.initialRecurrence!.days;
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
