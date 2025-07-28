@@ -1,16 +1,15 @@
-import 'dart:async';
 
 import 'package:duary/firebase_options.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/provider/link_state_manager.dart';
 import 'package:duary/provider/time_manager.dart';
-import 'package:duary/screen/login_screen.dart';
 import 'package:duary/screen/splash_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/support/secret_key.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:duary/provider/theme_provider.dart';
 import 'package:duary/provider/token_provider.dart';
@@ -24,6 +23,9 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent
+  ));
 
   // init kakao sdk
   KakaoSdk.init(

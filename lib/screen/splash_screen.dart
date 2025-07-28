@@ -106,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
     precacheImage(Image.asset(AssetPath.yellow).image, context);
     return Scaffold(
         body: Stack(
-      children: [
+              children: [
         Align(
             alignment: Alignment.center,
             child: SvgPicture.asset(AssetPath.duarySplashLogo)),
@@ -134,7 +134,7 @@ class _SplashScreenState extends State<SplashScreen>
                     )),
               );
             })
-      ],
-    ));
+              ],
+            ));
   }
 }
