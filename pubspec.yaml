@@ -61,6 +61,7 @@ dependencies:
   share_plus: ^11.0.0
   kakao_flutter_sdk_share: ^1.9.7+3
   app_links: ^6.4.0
+  google_sign_in: ^7.1.1
 
 
 dev_dependencies:

@@ -81,4 +81,13 @@ final class AuthRepositoryImpl
 
     checkResponse(response);
   }
+
+  @override
+  Future<DuaryInfoRes> signInWithGoogle(SignInReq req) async {
+    Uri uri = getUri("/auth/signin/google");
+
+    Response response = await client.post(uri, body: jsonEncode(req.toJson()));
+
+    return getData(response, (p0) => DuaryInfoRes.fromJson(p0)).data;
+  }
 }

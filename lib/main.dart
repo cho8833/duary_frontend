@@ -1,4 +1,3 @@
-
 import 'package:duary/firebase_options.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
@@ -18,14 +17,14 @@ import 'package:duary/support/repository_container.dart';
 import 'package:duary/repository/secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent
-  ));
+  SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
 
   // init kakao sdk
   KakaoSdk.init(
@@ -36,6 +35,11 @@ void main() async {
   final SecureStorage secureStorage = SecureStorageImpl(ss);
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  final GoogleSignIn signIn = GoogleSignIn.instance;
+  await signIn.initialize(
+    nonce: SecretKey.oidcNonce
+  );
 
   // pre cache splash logo
   // Native Splash Screen -> SplashScreen.dart 전환 중 로고 깜빡임 제거
@@ -53,16 +57,16 @@ void main() async {
 
   EventProvider eventProvider = EventProvider(rc.eventRepository);
   DuaryContext duaryContext = DuaryContext();
-  duaryContext.init(rc.coupleRepository, rc.authRepository, rc.memberRepository);
+  duaryContext.init(
+      rc.coupleRepository, rc.authRepository, rc.memberRepository);
 
   runApp(Main(eventProvider: eventProvider));
 }
 
 class Main extends StatelessWidget {
-  const Main(
-      {super.key, required this.eventProvider});
-  final EventProvider eventProvider;
+  const Main({super.key, required this.eventProvider});
 
+  final EventProvider eventProvider;
 
   @override
   Widget build(BuildContext context) {

@@ -18,6 +18,7 @@ import 'package:duary/support/secret_key.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -96,6 +97,24 @@ class DuaryContext {
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
+  }
+
+  Future<void> signInWIthGoogle() async {
+    if (GoogleSignIn.instance.supportsAuthenticate()) {
+      await GoogleSignIn.instance.authenticate().then((account) async {
+        final String? fcmToken = await _requestFcmToken();
+        SignInReq req = SignInReq(googleOAuthToken: account, fcmToken: fcmToken);
+        await _authRepository.signInWithGoogle(req).then((res) async {
+          onSignInSuccess(res);
+        }).catchError((e) {
+          throw ServerResponseException(e.toString());
+        });
+      }).catchError((e) {
+        throw ServerResponseException(e.toString());
+      });
+    } else {
+      throw CustomException("Google 로그인을 지원하지 않습니다");
+    }
   }
 
   Future<void> signInWithToken() async {

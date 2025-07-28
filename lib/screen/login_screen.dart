@@ -3,6 +3,7 @@ import 'package:duary/screen/start/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
 import 'package:duary/screen/start/start_duary_screen.dart';
 import 'package:duary/support/asset_path.dart';
+import 'package:duary/widget/button_base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -27,13 +28,13 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => const HomeScreen()),
-                (p) => false);
+            (p) => false);
       } else {
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
                 builder: (context) => const ConnectCoupleScreen()),
-                (p) => false);
+            (p) => false);
       }
     }
     // 커플이 생성되어 있지 않으면 StartDuaryScreen 으로 route
@@ -77,12 +78,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 8,
                 ),
                 _ButtonShadow(
+                    button: Image.asset(
+                      AssetPath.googleLogin,
+                      width: double.infinity,
+                    ),
+                    onClick: () async {
+                      await duaryContext.signInWIthGoogle().then((_) {
+                        onSignInComplete();
+                      }).catchError((e) {
+                        Fluttertoast.showToast(msg: e.toString());
+                      });
+                    }),
+                const SizedBox(
+                  height: 8,
+                ),
+
+                _ButtonShadow(
                   button: Image.asset(
                     AssetPath.appleLogin,
                     width: double.infinity,
                   ),
-                  onClick: () {
-                    duaryContext.signInWithApple().then((_) {
+                  onClick: () async {
+                    await duaryContext.signInWithApple().then((_) {
                       onSignInComplete();
                     }).catchError((e) {
                       Fluttertoast.showToast(msg: e.toString());
@@ -160,7 +177,7 @@ class _ButtonShadow extends StatelessWidget {
   const _ButtonShadow({required this.button, required this.onClick});
 
   final Widget button;
-  final void Function() onClick;
+  final Future<void> Function() onClick;
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +189,7 @@ class _ButtonShadow extends StatelessWidget {
             spreadRadius: 0,
             color: Colors.black.withOpacity(0.1))
       ]),
-      child: GestureDetector(onTap: onClick, child: button),
+      child: ButtonBase(onTap: onClick, child: button),
     );
   }
 }

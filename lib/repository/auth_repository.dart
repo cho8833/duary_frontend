@@ -13,6 +13,8 @@ abstract interface class AuthRepository {
 
   Future<DuaryInfoRes> signInWithApple(SignInReq req);
 
+  Future<DuaryInfoRes> signInWithGoogle(SignInReq req);
+
   Future<DuaryInfoRes> dummySignIn(DummySignInReq req);
 
   Future<void> signOut();

@@ -16,4 +16,5 @@ class AssetPath {
   static const String home = "asset/home.svg";
   static const String kakaoLogin = 'asset/kakao_login.png';
   static const String appleLogin = 'asset/apple_login.png';
+  static const String googleLogin = "asset/google_login.png";
 }
