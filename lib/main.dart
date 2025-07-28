@@ -16,7 +16,6 @@ import 'package:duary/repository/impl/secure_storage_impl.dart';
 import 'package:duary/support/repository_container.dart';
 import 'package:duary/repository/secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
@@ -79,7 +78,7 @@ class Main extends StatelessWidget {
       ],
       builder: (context, _) =>
           Consumer<ThemeProvider>(builder: (context, provider, _) {
-        return GetMaterialApp(
+        return MaterialApp(
             theme: provider.selected,
             debugShowCheckedModeBanner: false,
             // darkTheme: ThemeProvider.dark,
