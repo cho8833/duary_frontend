@@ -2,6 +2,7 @@ import 'package:duary/repository/couple_repository.dart';
 import 'package:duary/repository/event_repository.dart';
 import 'package:duary/repository/impl/couple_repository_impl.dart';
 import 'package:duary/repository/impl/event_repository_impl.dart';
+import 'package:duary/repository/mock/event_repository_mock.dart';
 import 'package:http/http.dart';
 import 'package:http_interceptor/http_interceptor.dart';
 import 'package:duary/repository/auth_repository.dart';

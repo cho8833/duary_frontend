@@ -1,15 +1,18 @@
+import 'package:duary/data/event_req.dart';
 import 'package:duary/model/couple.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/repository/event_repository.dart';
+import 'package:duary/support/custom_exception.dart';
+import 'package:flutter/material.dart';
 
 class EventProvider {
 
   final EventRepository _eventRepository;
 
   // 이벤트 캐싱
-  final Map<DateTime, List<Event>> _event = {};
+  final EventDataNotifier eventDataNotifier = EventDataNotifier();
 
   // Future caching : 같은 인자로 호출된 비동기 작업이 진행 중이면, 그 작업의 결과를 기다렸다가 반환
   final Map<DateTime, Future<List<Event>>> _eventRequest = {};
@@ -18,12 +21,15 @@ class EventProvider {
     DuaryContext duaryContext = DuaryContext();
     duaryContext.me.addListener(() {
       me = duaryContext.me.value;
+      eventDataNotifier.clear();
     });
     duaryContext.lover.addListener(() {
       lover = duaryContext.lover.value;
+      eventDataNotifier.clear();
     });
     duaryContext.myCouple.addListener(() {
       myCouple = duaryContext.myCouple.value;
+      eventDataNotifier.clear();
     });
   }
 
@@ -32,35 +38,10 @@ class EventProvider {
   Member? lover;
   Couple? myCouple;
 
-  Future<Map<Member, Event?>> getOngoingEvent() async {
-    DateTime now = DateTime.now();
-    DateTime today = DateTime(now.year, now.month, now.day);
-    List<Event> todayEvents = await getEventByDay(today);
-
-    Event? myEvent;
-
-    try {
-      myEvent = todayEvents.firstWhere((e) =>
-      e.createdBy == me!.socialId &&
-          e.startDateTime.isBefore(now) &&
-          e.endDateTime.isAfter(now));
-    } catch (_) {}
-
-    Event? loverEvent;
-    try {
-      loverEvent = todayEvents.firstWhere((e) =>
-      e.createdBy == lover!.socialId &&
-          e.startDateTime.isBefore(now) &&
-          e.endDateTime.isAfter(now));
-    } catch (_) {}
-
-    return {me!: myEvent, lover!: loverEvent};
-  }
-
   Future<List<Event>> getEventByDay(DateTime date) async {
     // 캐싱된 이벤트가 있으면 반환
-    if (_event.containsKey(date)) {
-      return _event[date]!;
+    if (eventDataNotifier.contains(date)) {
+      return eventDataNotifier.get(date)!;
     }
 
     // 현재 요청 진행 중이면 그 요청의 결과 기다리고 반환
@@ -74,10 +55,18 @@ class EventProvider {
     final Future<List<Event>> future =
     _eventRepository.getEvent(myCouple!.id, startDate, endDate).then((events) {
       // 멤버 정보를 이벤트 데이터에 넣어줌
-      _initMemberInEvents(events);
+      events = _initMemberInEvents(events);
 
-      _event[date] = events; // 이벤트 캐싱
-      return events;
+      // 이벤트 정렬
+      events.sort((e1, e2) {
+        return e1.startDateTime.compareTo(e2.startDateTime);
+      });
+
+      eventDataNotifier.set(date, events); // 이벤트 캐싱
+      return eventDataNotifier.get(date) ?? List<Event>.empty();
+    }).catchError((e) {
+      print(e);
+      throw e;
     }).whenComplete(() {
       // 요청이 완료되면 Future cache 에서 제거
       _eventRequest.remove(date);
@@ -101,34 +90,72 @@ class EventProvider {
     return events;
   }
 
-  Future<List<Event>> getComingEvent() async {
-    final DateTime now = DateTime.now();
-    DateTime today = DateTime(now.year, now.month, now.day);
-
-    // 오늘 이벤트들을 불러와서 시작 시간 기준으로 정렬 후, 현재 시간보다 뒤인 이벤트 3개를 고름
-    List<Event> todayEvents = await getEventByDay(today);
-    List<Event> afterNow =
-    todayEvents.where((e) => e.startDateTime.isAfter(now)).toList();
-    afterNow.sort((e1, e2) => e1.startDateTime.compareTo(e2.startDateTime));
-
-    // 골랐을 때 3개 보다 적으면 내일 이벤트까지 불러옴
-    // 내일 이벤트까지 불러왔는데도 3개보다 적으면 어쩔 수 없음
-    if (afterNow.length < 3) {
-      int need = 3 - afterNow.length;
-      DateTime tomorrow = today.add(const Duration(days: 1));
-      List<Event> tomorrowEvents = await getEventByDay(tomorrow);
-      tomorrowEvents
-          .sort((e1, e2) => e1.startDateTime.compareTo(e2.startDateTime));
-      afterNow.addAll(tomorrowEvents.take(need));
+  List<Event> _initMemberInEvents(List<Event> events) {
+    List<Event> temp = [];
+    for (Event event in events) {
+      try {
+        event.member = myCouple!.members
+            .firstWhere((member) => member.getId() == event.createdBy);
+        temp.add(event);
+      } catch (_) {
+        // createdby 와 member 가 매핑되는 event가 없으면 잘못된 데이터로 간주하고 무시
+      }
     }
-
-    return afterNow;
+    return temp;
   }
 
-  void _initMemberInEvents(List<Event> events) {
-    for (Event event in events) {
-      event.member = myCouple!.members
-          .firstWhere((member) => member.socialId == event.createdBy);
-    }
+  Future<void> saveEvent(SaveEventReq req) async {
+    req.validate();
+    await _eventRepository.saveEvent(req).then((event) {
+      eventDataNotifier.clear();
+    }).catchError((e) {
+      throw ServerResponseException(e.toString());
+    });
+  }
+
+  Future<Event?> editEvent(String id, SaveEventReq req) async {
+    req.validate();
+    return await _eventRepository.editEvent(id, req).then((event) {
+      _initMemberInEvents([event]);
+      eventDataNotifier.clear();
+      return event;
+    }).catchError((e) {
+      throw ServerResponseException(e.toString());
+    });
+  }
+
+  Future<void> deleteEvent(String eventId) async {
+    await _eventRepository.deleteEvent(eventId).then((_) {
+      eventDataNotifier.clear();
+    }).catchError((e) {
+      throw ServerResponseException(e.toString());
+    });
+  }
+}
+
+
+class EventDataNotifier extends ChangeNotifier {
+  final Map<DateTime, List<Event>> eventMap = {};
+
+  List<Event>? get(DateTime date) {
+    return eventMap[date];
+  }
+
+  void set(DateTime date, List<Event> events) {
+    eventMap[date] = events;
+    notifyListeners();
+  }
+
+  void clear() {
+    eventMap.clear();
+    notifyListeners();
+  }
+
+  bool isClear() {
+    return eventMap.isEmpty;
+  }
+
+  bool contains(DateTime date) {
+    return eventMap.containsKey(date);
   }
 }

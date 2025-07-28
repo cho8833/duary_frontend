@@ -1,13 +1,13 @@
 import 'package:duary/data/input_couple_code_req.dart';
 import 'package:duary/data/input_couple_code_res.dart';
 import 'package:duary/data/start_duary_req.dart';
-import 'package:duary/data/start_duary_res.dart';
+import 'package:duary/data/duary_info_res.dart';
+import 'package:duary/data/update_couple_req.dart';
 import 'package:duary/model/couple.dart';
+import 'package:duary/model/enums/alarm_offset.dart';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/repository/couple_repository.dart';
-import 'package:duary/data/input_couple_code_req.dart';
-import 'package:duary/data/input_couple_code_res.dart';
 
 class CoupleRepositoryMock implements CoupleRepository {
   @override
@@ -23,6 +23,8 @@ class CoupleRepositoryMock implements CoupleRepository {
             DateTime(2000, 08, 13),
             "3428835809",
             "kakao",
+            AlarmOffset.none,
+            AlarmOffset.atTime
           ),
           Member(
             "이고은",
@@ -31,19 +33,27 @@ class CoupleRepositoryMock implements CoupleRepository {
             DateTime(1999, 04, 19),
             "1",
             "kakao",
+            AlarmOffset.none,
+            AlarmOffset.atTime
           )
         ],
         "asdf"));
   }
 
   @override
-  Future<StartDuaryRes> startDuary(StartDuaryReq req) {
+  Future<DuaryInfoRes> startDuary(StartDuaryReq req) {
     // TODO: implement startDuary
     throw UnimplementedError();
   }
 
   @override
   Future<InputCoupleCodeRes> inputCoupleCode(InputCoupleCodeReq req) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Couple> updateCouple(UpdateCoupleReq req) {
+    // TODO: implement updateCouple
     throw UnimplementedError();
   }
 }

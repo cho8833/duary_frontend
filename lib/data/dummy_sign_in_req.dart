@@ -1,10 +1,12 @@
 class DummySignInReq {
   String username;
+  String? fcmToken;
 
-  DummySignInReq(this.username);
+  DummySignInReq(this.username, {this.fcmToken});
 
-  Map<String, String> toJson() =>
+  Map<String, dynamic> toJson() =>
       {
         "username": username,
+        "fcmToken": fcmToken,
       };
 }

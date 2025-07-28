@@ -1,7 +1,8 @@
 import 'dart:convert';
 
 import 'package:duary/data/start_duary_req.dart';
-import 'package:duary/data/start_duary_res.dart';
+import 'package:duary/data/duary_info_res.dart';
+import 'package:duary/data/update_couple_req.dart';
 import 'package:duary/model/couple.dart';
 import 'package:duary/repository/couple_repository.dart';
 import 'package:duary/support/http_response_handler.dart';
@@ -26,12 +27,12 @@ class CoupleRepositoryImpl with UriProvider, HttpResponseHandler implements Coup
   }
 
   @override
-  Future<StartDuaryRes> startDuary(StartDuaryReq req) async {
+  Future<DuaryInfoRes> startDuary(StartDuaryReq req) async {
     Uri uri = getUri("/start");
 
     Response response = await client.post(uri, body: jsonEncode(req.toJson()));
 
-    return getData(response, (p0) => StartDuaryRes.fromJson(p0)).data;
+    return getData(response, (p0) => DuaryInfoRes.fromJson(p0)).data;
   }
 
   @override
@@ -41,5 +42,14 @@ class CoupleRepositoryImpl with UriProvider, HttpResponseHandler implements Coup
     Response response = await client.post(uri,body: jsonEncode(req.toJson()));
 
     return getData(response, (p0) => InputCoupleCodeRes.fromJson(p0)).data;
+  }
+
+  @override
+  Future<Couple> updateCouple(UpdateCoupleReq req) async {
+    Uri uri = getUri("/couple");
+
+    Response response = await client.put(uri, body: jsonEncode(req.toJson()));
+
+    return getData(response, (p0) => Couple.fromJson(p0)).data;
   }
 }

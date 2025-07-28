@@ -1,16 +1,19 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
+import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
-import 'package:duary/screen/event_details_screen.dart';
-import 'package:duary/screen/my_page_screen.dart';
-import 'package:duary/screen/schedule_screen.dart';
+import 'package:duary/provider/time_manager.dart';
+import 'package:duary/screen/event/event_details_screen.dart';
+import 'package:duary/screen/my_page/my_page_screen.dart';
+import 'package:duary/screen/timetable_screen.dart';
 
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/button_base.dart';
-import 'package:duary/widget/characters.dart';
+import 'package:duary/widget/character_widget.dart';
 import 'package:duary/widget/set_character.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -25,10 +28,17 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final EventProvider _eventProvider;
+  late final TimeManager _timeManager;
+  final DuaryContext duaryContext = DuaryContext();
 
   static const String _noOngoingEventMent = "쉬는 중이야";
 
-  late Future<Map<Member, Event?>> getOngoingEventRequest;
+  Event? myOnGoingEvent;
+  Event? loverOnGoingEvent;
+  List<Event> comingEvents = [];
+
+  DateTime now = DateTime.now();
+  late DateTime today;
 
   static const double _minSheetSize = 0.12;
 
@@ -36,15 +46,108 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late Member lover;
 
+  late final void Function() meListener;
+  late final void Function() loverListener;
+
+  DraggableScrollableController sheetController =
+      DraggableScrollableController();
+
+  late final void Function() eventDataListener;
+
   @override
   void initState() {
     super.initState();
+    today = DateUtils.dateOnly(now);
     _eventProvider = context.read<EventProvider>();
 
-    me = _eventProvider.me!;
-    lover = _eventProvider.lover!;
+    me = duaryContext.me.value!;
+    lover = duaryContext.lover.value!;
+    meListener = () {
+      if (duaryContext.me.value != null) {
+        setState(() {
+          me = duaryContext.me.value!;
+        });
+      }
+      return;
+    };
+    loverListener = () {
+      if (duaryContext.myCouple.value != null) {
+        setState(() {
+          lover = duaryContext.lover.value!;
+        });
+      }
+    };
 
-    getOngoingEventRequest = _eventProvider.getOngoingEvent();
+    duaryContext.me.addListener(meListener);
+    duaryContext.lover.addListener(loverListener);
+
+    eventDataListener = () {
+      List<Event>? todayEvents =
+          _eventProvider.eventDataNotifier.eventMap[today];
+      if (todayEvents != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          refreshOnGoing(todayEvents);
+          refreshComingEvents(todayEvents);
+        });
+      }
+    };
+    _eventProvider.eventDataNotifier.addListener(eventDataListener);
+
+    _timeManager = context.read<TimeManager>();
+    _timeManager.addListener(_changeTime);
+  }
+
+  void _changeTime() {
+    if (now.minute != _timeManager.now.minute) {
+      now = _timeManager.now;
+      today = DateUtils.dateOnly(now);
+      List<Event>? todayEvents = _eventProvider.eventDataNotifier.get(today);
+      if (todayEvents != null) {
+        refreshOnGoing(todayEvents);
+        refreshComingEvents(todayEvents);
+      }
+    }
+  }
+
+  void refreshOnGoing(List<Event> todayEvents) {
+
+      try {
+        setState(() {
+          myOnGoingEvent = todayEvents.lastWhere((e) =>
+          (e.createdBy == me.getId() || e.isTogether) &&
+              e.startDateTime.isBefore(now) &&
+              e.endDateTime.isAfter(now));
+        });
+      } catch (_) {}
+
+      try {
+        setState(() {
+          loverOnGoingEvent = todayEvents.lastWhere((e) =>
+          (e.createdBy == lover.getId() || e.isTogether) &&
+              e.startDateTime.isBefore(now) &&
+              e.endDateTime.isAfter(now));
+        });
+      } catch (_) {}
+
+  }
+
+  void refreshComingEvents(List<Event> todayEvents) {
+      setState(() {
+        comingEvents =
+            todayEvents.where((e) => e.startDateTime.isAfter(now)).toList();
+        comingEvents
+            .sort((e1, e2) => e1.startDateTime.compareTo(e2.startDateTime));
+      });
+
+  }
+
+  @override
+  void dispose() {
+    duaryContext.me.removeListener(meListener);
+    duaryContext.lover.removeListener(loverListener);
+    _timeManager.removeListener(_changeTime);
+    _eventProvider.eventDataNotifier.removeListener(eventDataListener);
+    super.dispose();
   }
 
   @override
@@ -79,8 +182,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         width: 41,
                         child: ClipRRect(
                             borderRadius: BorderRadius.circular(99),
-                            child: Character.characterWidget(me.character!,
-                                width: 41, height: 63, opacity: 1)),
+                            child: Character.characterCircleWidget(
+                                me.character!,
+                                size: 40)),
                       ),
                       const SizedBox(
                         width: 10,
@@ -118,22 +222,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(
                               width: 5,
                             ),
-                            FutureBuilder(
-                                future: getOngoingEventRequest,
-                                builder: (context, snapshot) {
-                                  String title = _noOngoingEventMent;
-                                  if (snapshot.hasData) {
-                                    title = snapshot.data![me]?.title ??
-                                        _noOngoingEventMent;
-                                  }
-                                  return Text(
-                                    title,
-                                    style: const TextStyle(
-                                        color: Color(0xFF111111),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 15),
-                                  );
-                                })
+                            Text(
+                              myOnGoingEvent?.title ?? _noOngoingEventMent,
+                              style: const TextStyle(
+                                  color: Color(0xFF111111),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15),
+                            ),
                           ],
                         ),
                       ),
@@ -160,23 +255,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             ]),
                         child: Row(
                           children: [
-                            FutureBuilder(
-                                future: getOngoingEventRequest,
-                                builder: (context, snapshot) {
-                                  String title = _noOngoingEventMent;
-                                  if (snapshot.hasData) {
-                                    title = snapshot.data![lover]?.title ??
-                                        _noOngoingEventMent;
-                                  }
-                                  return Text(
-                                    title,
-                                    textAlign: TextAlign.end,
-                                    style: const TextStyle(
-                                        color: Color(0xFF111111),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 15),
-                                  );
-                                }),
+                            Text(
+                              loverOnGoingEvent?.title ?? _noOngoingEventMent,
+                              textAlign: TextAlign.end,
+                              style: const TextStyle(
+                                  color: Color(0xFF111111),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15),
+                            ),
                             const SizedBox(
                               width: 5,
                             ),
@@ -206,10 +292,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         width: 41,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(99),
-                          child: const Yellow(
-                            width: 41,
-                            height: 41,
-                          ),
+                          child: Character.characterCircleWidget(
+                              lover.character!,
+                              size: 40),
                         ),
                       ),
                     ],
@@ -217,82 +302,51 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(
                     height: 24,
                   ),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.end,
-                  //   children: [
-                  //     ButtonBase(
-                  //         onTap: () {},
-                  //         child: const Row(
-                  //           crossAxisAlignment: CrossAxisAlignment.center,
-                  //           children: [
-                  //             Text(
-                  //               "오늘 일정 보기",
-                  //               style: TextStyle(
-                  //                   fontWeight: FontWeight.w400,
-                  //                   fontSize: 11,
-                  //                   color: Color(0xFF939393)),
-                  //             ),
-                  //             Icon(
-                  //               Icons.chevron_right,
-                  //               color: Color(0xFF939393),
-                  //               size: 14,
-                  //             )
-                  //           ],
-                  //         )),
-                  //   ],
-                  // ),
-                  // const SizedBox(
-                  //   height: 10,
-                  // ),
-
-                  FutureBuilder(
-                      future: _eventProvider.getComingEvent(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          List<Event> comingEvents = snapshot.data!;
-                          return ListView.separated(
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(
-                              height: 10,
-                            ),
-                            shrinkWrap: true,
-                            itemCount: comingEvents.length,
-                            itemBuilder: (context, index) {
-                              return ComingEventCard(
-                                  event: comingEvents[index]);
-                            },
-                          );
-                        } else {
-                          return Container();
-                        }
-                      }),
+                  ListView.separated(
+                    separatorBuilder: (context, index) => const SizedBox(
+                      height: 10,
+                    ),
+                    shrinkWrap: true,
+                    itemCount: comingEvents.length,
+                    itemBuilder: (context, index) {
+                      return ComingEventCard(event: comingEvents[index]);
+                    },
+                  ),
                 ],
               ),
             ),
             DraggableScrollableSheet(
+                controller: sheetController,
                 minChildSize: _minSheetSize,
                 initialChildSize: _minSheetSize,
                 snap: true,
                 builder: (ctx, controller) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: const [
-                        BoxShadow(
-                            color: Color.from(
-                                alpha: 0.1, red: 0, green: 0, blue: 0),
-                            offset: Offset(0, -2),
-                            blurRadius: 15)
-                      ],
-                      color: Colors.white,
-                    ),
-                    child: SingleChildScrollView(
-                      physics: const ClampingScrollPhysics(),
-                      // 오버스크롤(바운딩) 방지
-                      controller: controller,
-                      child: SizedBox(
-                        height: constraints.maxHeight,
-                        child: const TimetableScreen(),
+                  return ButtonBase(
+                    onTap: () async {
+                      sheetController.animateTo(1,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: const [
+                          BoxShadow(
+                              color: Color.from(
+                                  alpha: 0.1, red: 0, green: 0, blue: 0),
+                              offset: Offset(0, -2),
+                              blurRadius: 15)
+                        ],
+                        color: Colors.white,
+                      ),
+                      child: SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        // 오버스크롤(바운딩) 방지
+                        controller: controller,
+                        child: SizedBox(
+                          height: constraints.maxHeight,
+                          child: const TimetableScreen(),
+                        ),
                       ),
                     ),
                   );
@@ -337,7 +391,7 @@ class ComingEventCard extends StatelessWidget {
         child: Transform(
           alignment: Alignment.center,
           transform: Matrix4.rotationY(pi),
-          child: Blue(
+          child: const Blue(
             width: 114,
             height: 196,
             opacity: 0.2,

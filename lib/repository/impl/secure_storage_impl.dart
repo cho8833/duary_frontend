@@ -9,6 +9,8 @@ class SecureStorageImpl implements SecureStorage {
 
   static const String _refreshTokenKey = "refreshToken";
 
+  static const String _fcmTokenKey = "fcmToken";
+
   static const String themeKey = "theme";
 
   SecureStorageImpl(this._storage);
@@ -63,5 +65,17 @@ class SecureStorageImpl implements SecureStorage {
   @override
   Future<void> deleteRefreshToken() {
     return _storage.delete(key: _refreshTokenKey);
+  }
+
+  @override
+  Future<String?> getFCMToken() {
+    // TODO: implement getFCMToken
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> storeFCMToken(String value) {
+    // TODO: implement storeFCMToken
+    throw UnimplementedError();
   }
 }

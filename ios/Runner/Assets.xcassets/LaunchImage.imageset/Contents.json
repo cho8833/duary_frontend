@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "duary_logo_splash.png",
+      "filename" : "duary_logo_splash.svg",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "duary_logo_splash@2x.png",
+      "filename" : "duary_logo_splash 1.svg",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "duary_logo_splash@3x.png",
+      "filename" : "duary_logo_splash 2.svg",
       "idiom" : "universal",
       "scale" : "3x"
     }
