@@ -102,7 +102,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ButtonBase(
+                  FutureButton(
                     onTap: () async {
                       setState(() {
                         blue ? blue = false : blue = true;
@@ -120,7 +120,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
                   const SizedBox(
                     width: 40,
                   ),
-                  ButtonBase(
+                  FutureButton(
                     onTap: () async {
                       setState(() {
                         blue ? blue = false : blue = true;
@@ -147,7 +147,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
               const SizedBox(
                 height: 24,
               ),
-              ButtonBase(
+              FutureButton(
                 onTap: () async {
                   blue
                       ? myCharacter = Character.blue
@@ -186,7 +186,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
               const SizedBox(
                 height: 16,
               ),
-              ButtonBase(
+              FutureButton(
                   onTap: () async {
                     duaryContext.signOut().then((_) {
                       Navigator.pushAndRemoveUntil(

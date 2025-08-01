@@ -1,3 +1,4 @@
+import 'package:app_links/app_links.dart' show AppLinks;
 import 'package:duary/firebase_options.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
@@ -74,7 +75,7 @@ class Main extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => LinkStateManager()),
+        Provider(create: (_) => LinkStateManager(AppLinks())),
         ChangeNotifierProvider(create: (_) => TimeManager()),
         Provider.value(value: eventProvider)
       ],

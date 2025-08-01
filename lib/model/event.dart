@@ -25,6 +25,7 @@ class Event {
   WeeklyRecurrence? weekly;
   MonthlyRecurrence? monthly;
   YearlyRecurrence? yearly;
+  int? recurCount;
 
   String title;
   String? content;

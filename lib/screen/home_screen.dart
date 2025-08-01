@@ -155,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: MainAppBar(
         appBarObj: AppBar(),
-        leadingBuilder: (context) => ButtonBase(
+        leadingBuilder: (context) => FutureButton(
             onTap: () async {
               Navigator.push(
                   context,
@@ -321,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 initialChildSize: _minSheetSize,
                 snap: true,
                 builder: (ctx, controller) {
-                  return ButtonBase(
+                  return FutureButton(
                     onTap: () async {
                       sheetController.animateTo(1,
                           duration: const Duration(milliseconds: 300),

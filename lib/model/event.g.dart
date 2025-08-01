@@ -36,7 +36,7 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
       content: json['content'] as String?,
       location: json['location'] as String?,
       hangOutWith: json['hangOutWith'] as String?,
-    );
+    )..recurCount = (json['recurCount'] as num?)?.toInt();
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'id': instance.id,
@@ -55,6 +55,7 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'weekly': instance.weekly,
       'monthly': instance.monthly,
       'yearly': instance.yearly,
+      'recurCount': instance.recurCount,
       'title': instance.title,
       'content': instance.content,
       'location': instance.location,

@@ -189,7 +189,7 @@ class _ButtonShadow extends StatelessWidget {
             spreadRadius: 0,
             color: Colors.black.withOpacity(0.1))
       ]),
-      child: ButtonBase(onTap: onClick, child: button),
+      child: FutureButton(onTap: onClick, child: button),
     );
   }
 }

@@ -6,6 +6,10 @@ import 'package:app_links/app_links.dart';
 class LinkStateManager extends ChangeNotifier {
   StreamSubscription<Uri>? _subscription;
 
+  final AppLinks appLinks;
+
+  LinkStateManager(this.appLinks);
+
   ValueNotifier<String?> coupleCode = ValueNotifier(null);
 
   void setCode(String? code) {
@@ -14,7 +18,7 @@ class LinkStateManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void listenToLinkStream(AppLinks appLinks) {
+  void listenToLinkStream() {
     _subscription = appLinks.uriLinkStream.listen((uri) {
       if (uri.queryParameters.containsKey('cleandCode')) {
         setCode(uri.queryParameters['cleandCode']);
@@ -23,7 +27,7 @@ class LinkStateManager extends ChangeNotifier {
   }
 
   Future<void> handleUri() async {
-    Uri? uri = await AppLinks().getLatestLink();
+    Uri? uri = await appLinks.getLatestLink();
     if (uri != null) {
       setCode(uri.queryParameters['cleandCode']);
     }

@@ -75,7 +75,7 @@ class _EditBirthdayScreenState extends State<EditBirthdayScreen> {
                     })
               ],
             ),
-            ButtonBase(
+            FutureButton(
               onTap: () async {
                 if (birthday != me.birthday) {
                   await duaryContext.updateMember(birthday: birthday).then((_) {

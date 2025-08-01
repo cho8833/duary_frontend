@@ -21,6 +21,10 @@ class EventProvider {
     DuaryContext duaryContext = DuaryContext();
     duaryContext.me.addListener(() {
       me = duaryContext.me.value;
+      if (me == null) {   // me 가 null 로 바뀌면 sign out or withdrawal
+        lover = null;
+        myCouple = null;
+      }
       eventDataNotifier.clear();
     });
     duaryContext.lover.addListener(() {

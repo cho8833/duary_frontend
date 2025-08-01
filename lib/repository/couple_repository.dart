@@ -14,4 +14,6 @@ abstract interface class CoupleRepository {
 
   Future<Couple> updateCouple(UpdateCoupleReq req);
 
+  Future<DuaryInfoRes> disconnectCouple();
+
 }

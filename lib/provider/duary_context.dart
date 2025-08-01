@@ -18,7 +18,7 @@ import 'package:duary/support/secret_key.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn;
+import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn, GoogleSignInException, GoogleSignInExceptionCode;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -110,6 +110,11 @@ class DuaryContext {
           throw ServerResponseException(e.toString());
         });
       }).catchError((e) {
+        if (e is GoogleSignInException) {
+          if (e.code == GoogleSignInExceptionCode.canceled) {
+            throw CustomException("취소되었습니다");
+          }
+        }
         throw ServerResponseException(e.toString());
       });
     } else {
@@ -153,11 +158,6 @@ class DuaryContext {
     }
   }
 
-  Future<void> signOut() async {
-    await tokenProvider.deleteToken();
-    await _authRepository.signOut();
-    me.value = null;
-  }
 
   Future<void> getMyCouple() async {
     await _coupleRepository.getMyCouple().then((couple) {
@@ -195,6 +195,31 @@ class DuaryContext {
       me.value = res.member;
       myCouple.value = res.couple;
       lover.value = getLoverFromCouple(res.couple);
+    }).catchError((e) {
+      throw ServerResponseException(e.toString());
+    });
+  }
+
+  Future<void> disconnectCouple() async {
+    await _coupleRepository.disconnectCouple().then((res) {
+      me.value = res.member;
+      myCouple.value = null;
+      lover.value = null;
+    }).catchError((e) {
+      throw ServerResponseException(e.toString());
+    });
+  }
+
+  Future<void> signOut() async {
+    await tokenProvider.deleteToken();
+    await _authRepository.signOut();
+    me.value = null;
+  }
+
+  Future<void> withdrawal() async {
+    await _authRepository.withdrawal().then((_) async {
+      await tokenProvider.deleteToken();
+      me.value = null;
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });

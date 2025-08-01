@@ -474,7 +474,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
             ),
             Column(
               children: [
-                ButtonBase(
+                FutureButton(
                   onTap: () async {
                     if (isEdit) {
                       SaveEventReq req = getSaveReq();

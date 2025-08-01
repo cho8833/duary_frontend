@@ -76,7 +76,7 @@ class _EditNameScreenState extends State<EditNameScreen> {
                     initialValue: name)
               ],
             ),
-            ButtonBase(
+            FutureButton(
               onTap: () async {
                 if (name != me.name) {
                   await duaryContext.updateMember(name: name).then((_) {

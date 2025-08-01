@@ -61,7 +61,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> with RouteAwa
           pushInputCodeScreen();
         });
       }
-      linkStateManager.listenToLinkStream(AppLinks());
+      linkStateManager.listenToLinkStream();
       linkStateManager.coupleCode.addListener(codeListener);
     });
     me = duaryContext.me.value!;
@@ -150,7 +150,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> with RouteAwa
                     color: Color(0xFF464646),
                   ),
                 ),
-                ButtonBase(
+                FutureButton(
                   onTap: () async {
                     Clipboard.setData(ClipboardData(
                             text: duaryContext.myCouple.value!.code))
@@ -174,7 +174,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> with RouteAwa
                   padding: const EdgeInsets.fromLTRB(48, 0, 48, 0),
                   child: Column(
                     children: [
-                      ButtonBase(
+                      FutureButton(
                           onTap: () async {
                             bool isKAkaoTalkSharingAvailable = await ShareClient
                                 .instance
@@ -255,7 +255,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> with RouteAwa
                       const SizedBox(
                         height: 8,
                       ),
-                      ButtonBase(
+                      FutureButton(
                           onTap: () async {
                             if (!isPushed) {
                               pushInputCodeScreen();
@@ -280,7 +280,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> with RouteAwa
                       const SizedBox(
                         height: 19,
                       ),
-                      ButtonBase(
+                      FutureButton(
                           onTap: () async {
                             duaryContext.signOut().then((_) {
                               Navigator.pushAndRemoveUntil(

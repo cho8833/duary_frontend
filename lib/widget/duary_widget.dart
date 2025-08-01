@@ -166,7 +166,7 @@ class _DuaryDateInputBoxState extends State<DuaryDateInputBox> {
 
   @override
   Widget build(BuildContext context) {
-    return ButtonBase(
+    return FutureButton(
       onTap: () async {
         final value = await showDuaryCalendarPicker(
             widget.futureDateSelectable, context, currentPickValue);
@@ -296,6 +296,24 @@ Future<List<DateTime?>?> showDuaryCalendarPicker(bool futureDateSelectable,
     value: currentPickValue,
     dialogBackgroundColor: Colors.white,
   );
+}
+
+class SubPageTitle extends StatelessWidget {
+  const SubPageTitle({super.key, required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontWeight: FontWeight.w700,
+        fontSize: 20,
+        color: Color(0xFFFE8F00),
+      ),
+    );
+  }
 }
 
 void showDuaryCalendarPicker2(

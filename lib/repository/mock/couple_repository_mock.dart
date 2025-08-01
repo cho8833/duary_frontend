@@ -56,4 +56,10 @@ class CoupleRepositoryMock implements CoupleRepository {
     // TODO: implement updateCouple
     throw UnimplementedError();
   }
+
+  @override
+  Future<DuaryInfoRes> disconnectCouple() {
+    // TODO: implement disconnectCouple
+    throw UnimplementedError();
+  }
 }

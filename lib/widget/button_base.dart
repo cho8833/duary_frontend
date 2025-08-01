@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-class ButtonBase extends StatefulWidget {
-  const ButtonBase({super.key, required this.onTap, required this.child});
+class FutureButton extends StatefulWidget {
+  const FutureButton({super.key, required this.onTap, required this.child});
 
   final Future<void> Function() onTap;
   final Widget child;
 
   @override
-  State<ButtonBase> createState() => _ButtonBaseState();
+  State<FutureButton> createState() => _FutureButtonState();
 }
 
-class _ButtonBaseState extends State<ButtonBase> {
+class _FutureButtonState extends State<FutureButton> {
 
   // Future 캐싱을 통해 중복 호출 방지
   Future<void>? _ongoingFuture;

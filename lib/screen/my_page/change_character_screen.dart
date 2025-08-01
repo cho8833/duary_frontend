@@ -125,7 +125,7 @@ class _ChangeCharacterScreenState extends State<ChangeCharacterScreen> {
                 ),
               ],
             ),
-            ButtonBase(
+            FutureButton(
               onTap: () async {
                 if (character != me.character) {
                   await duaryContext

@@ -70,7 +70,7 @@ class _EditRelationDateScreenState extends State<EditRelationDateScreen> {
                     })
               ],
             ),
-            ButtonBase(
+            FutureButton(
               onTap: () async {
                 if (relationDate != duaryContext.myCouple.value!.relationDate) {
                   await duaryContext.updateCouple(relationDate: relationDate).then((_) {

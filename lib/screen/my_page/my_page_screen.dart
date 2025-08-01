@@ -5,10 +5,12 @@ import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/my_page/change_character_screen.dart';
+import 'package:duary/screen/my_page/couple_info_screen.dart';
 import 'package:duary/screen/my_page/edit_birthday_screen.dart';
 import 'package:duary/screen/my_page/edit_name_screen.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/screen/my_page/edit_relation_date_screen.dart';
+import 'package:duary/screen/my_page/my_info_screen.dart';
 import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +65,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
     return Scaffold(
       appBar: AppBarBase(
         appBarObj: AppBar(),
-        leadingBuilder: (context) => ButtonBase(
+        leadingBuilder: (context) => FutureButton(
             onTap: () async {
               Navigator.pop(context);
             },
@@ -165,43 +167,24 @@ class _MyPageScreenState extends State<MyPageScreen> {
               const SizedBox(
                 height: 48,
               ),
-              const SectionTitle(text: "알림 설정"),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const MyInfoScreen()));
+                },
+                child: const Row(
+                  children: [
+                    SectionTitle(text: "내 정보"),
+                    Icon(Icons.chevron_right)
+                  ],
+                ),
+              ),
               const SizedBox(
                 height: 8,
               ),
-              AlarmOffsetDropdownButton(
-                  title: "내 일정 알림",
-                  initialValue: me.myAlarm,
-                  onSelect: (value) async {
-                    await duaryContext.updateMember(myAlarm: value).then((_) {
-                      Fluttertoast.showToast(msg: "설정되었습니다");
-                    }).catchError((e) {
-                      Fluttertoast.showToast(msg: e.toString());
-                    });
-                  }),
-              const SizedBox(
-                height: 10,
-              ),
-              AlarmOffsetDropdownButton(
-                  initialValue: me.loverAlarm,
-                  onSelect: (value) async {
-                    await duaryContext
-                        .updateMember(loverAlarm: value)
-                        .then((_) {
-                      Fluttertoast.showToast(msg: "설정되었습니다");
-                    }).catchError((e) {
-                      Fluttertoast.showToast(msg: e.toString());
-                    });
-                  },
-                  title: "연인 일정 알림"),
-              const SizedBox(
-                height: 27,
-              ),
-              const SectionTitle(text: "내 정보"),
-              const SizedBox(
-                height: 8,
-              ),
-              ButtonBase(
+              FutureButton(
                   onTap: () async {
                     Navigator.push(
                         context,
@@ -212,7 +195,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
               const SizedBox(
                 height: 10,
               ),
-              ButtonBase(
+              FutureButton(
                   onTap: () async {
                     Navigator.push(
                         context,
@@ -225,11 +208,24 @@ class _MyPageScreenState extends State<MyPageScreen> {
               const SizedBox(
                 height: 27,
               ),
-              const SectionTitle(text: "커플 정보"),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const CoupleInfoScreen()));
+                },
+                child: const Row(
+                  children: [
+                    SectionTitle(text: "커플 정보"),
+                    Icon(Icons.chevron_right)
+                  ],
+                ),
+              ),
               const SizedBox(
                 height: 8,
               ),
-              ButtonBase(
+              FutureButton(
                   onTap: () async {
                     Navigator.push(
                         context,
@@ -245,7 +241,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
               ),
               Align(
                 alignment: Alignment.center,
-                child: ButtonBase(
+                child: FutureButton(
                   onTap: () async {
                     await DuaryContext().signOut().then((_) {
                       Navigator.pushAndRemoveUntil(
@@ -260,7 +256,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                     style: TextStyle(
                       color: Color(0xFFFF0000),
                       fontSize: 18,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -295,7 +291,6 @@ class AlarmOffsetDropdownButton extends StatefulWidget {
   final AlarmOffset initialValue;
 
   final Future<void> Function(AlarmOffset) onSelect;
-
 
   @override
   State<AlarmOffsetDropdownButton> createState() =>

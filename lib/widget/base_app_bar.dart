@@ -12,7 +12,7 @@ class SubPageAppBar extends StatelessWidget
         required this.title,
         this.trailingBuilder, this.backgroundColor});
 
-  final Text title;
+  final Widget title;
   final AppBar appBarObj;
   final Widget Function(BuildContext)? trailingBuilder;
   final Color? backgroundColor;

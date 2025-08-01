@@ -19,4 +19,6 @@ abstract interface class AuthRepository {
 
   Future<void> signOut();
 
+  Future<void> withdrawal();
+
 }

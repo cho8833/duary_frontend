@@ -90,4 +90,13 @@ final class AuthRepositoryImpl
 
     return getData(response, (p0) => DuaryInfoRes.fromJson(p0)).data;
   }
+
+  @override
+  Future<void> withdrawal() async {
+    Uri uri = getUri("/auth/withdrawal");
+
+    Response response = await client.post(uri);
+
+    checkResponse(response);
+  }
 }
