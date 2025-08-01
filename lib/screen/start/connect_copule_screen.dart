@@ -1,4 +1,6 @@
 import 'package:app_links/app_links.dart';
+import 'package:duary/main.dart';
+import 'package:duary/model/couple.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/link_state_manager.dart';
@@ -23,7 +25,7 @@ class ConnectCoupleScreen extends StatefulWidget {
   State<ConnectCoupleScreen> createState() => _ConnectCoupleScreenState();
 }
 
-class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
+class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> with RouteAware {
   final DuaryContext duaryContext = DuaryContext();
 
   late final PullingManager<void> pullingManager;
@@ -37,16 +39,14 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
   bool isPushed = false;
 
   void codeListener() {
-    if (linkStateManager.coupleCode.value != null && !isPushed ) {
+    if (linkStateManager.coupleCode.value != null && !isPushed) {
       pushInputCodeScreen();
     }
   }
 
   void pushInputCodeScreen() {
-    isPushed = true;
     Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const InputCodeScreen())).then((_) =>
-    isPushed = false);
+            MaterialPageRoute(builder: (context) => const InputCodeScreen()));
   }
 
   @override
@@ -67,22 +67,45 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
     me = duaryContext.me.value!;
 
     pullingManager = PullingManager(
-        fetchData: () async {
-          duaryContext.getMyCouple().then((_) {
-            if (duaryContext.isCoupleConnected()) {
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomeScreen()),
-                  (p) => false);
-            }
-          });
-        },
-        customDurations: [const Duration(seconds: 5)],
-        immediateFirstFetch: false,
-        attachToLifecycle: true);
+      fetchData: () async {
+        if (!isPushed) {
+          return duaryContext.getMyCouple();
+        }
+      },
+      customDurations: [const Duration(seconds: 5)],
+      immediateFirstFetch: false,
+    );
 
-    pullingManager.dataStream.listen(null);
+    pullingManager.dataStream.listen((_) {
+      if (duaryContext.isCoupleConnected() && !isPushed) {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (p) => false);
+      }
+    });
   }
+
+  @override
+  void didPushNext() {
+    super.didPush();
+    isPushed = true;
+  }
+
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    isPushed = false;
+  }
+
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -153,9 +176,9 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                     children: [
                       ButtonBase(
                           onTap: () async {
-                            bool isKAkaoTalkSharingAvailable =
-                                await ShareClient.instance
-                                    .isKakaoTalkSharingAvailable();
+                            bool isKAkaoTalkSharingAvailable = await ShareClient
+                                .instance
+                                .isKakaoTalkSharingAvailable();
 
                             String cleandCode = duaryContext
                                 .myCouple.value!.code
@@ -169,9 +192,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                                 androidExecutionParams: {
                                   "cleandCode": cleandCode
                                 },
-                                iosExecutionParams: {
-                                  "cleandCode": cleandCode
-                                },
+                                iosExecutionParams: {"cleandCode": cleandCode},
                               ),
                               buttonTitle: "커플 연결하기",
                             );
@@ -184,8 +205,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                               try {
                                 Uri uri = await ShareClient.instance
                                     .shareDefault(template: template);
-                                await ShareClient.instance
-                                    .launchKakaoTalk(uri);
+                                await ShareClient.instance.launchKakaoTalk(uri);
                               } catch (e) {
                                 print("카카오톡 공유 실패 : $e");
                               }
@@ -237,18 +257,10 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                       ),
                       ButtonBase(
                           onTap: () async {
-                            pullingManager.pause();
-                            if ( !isPushed ) {
-                              isPushed = true;
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const InputCodeScreen())).then((_) {
-                              pullingManager.resume();
-                              isPushed = false;
-                            });
-                          }},
+                            if (!isPushed) {
+                              pushInputCodeScreen();
+                            }
+                          },
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
@@ -256,8 +268,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(5),
                                 border: Border.all(
-                                    color: const Color(0xFFFFbd64),
-                                    width: 2)),
+                                    color: const Color(0xFFFFbd64), width: 2)),
                             child: const Text(
                               "상대방 코드로 연결하기",
                               style: TextStyle(
@@ -302,7 +313,9 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> {
   void dispose() {
     pullingManager.pause();
     pullingManager.dispose();
+    routeObserver.unsubscribe(this);
     linkStateManager.cancelSubscription();
+    linkStateManager.coupleCode.removeListener(codeListener);
     super.dispose();
   }
 }

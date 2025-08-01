@@ -128,9 +128,6 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
                       Fluttertoast.showToast(msg: "코드를 입력해주세요");
                     } else {
                       await duaryContext.inputCoupleCode(coupleCode).then((_) {
-                        context.read<LinkStateManager>().cancelSubscription();
-                        context.read<LinkStateManager>().coupleCode.value =
-                            null;
                         Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
@@ -176,6 +173,8 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
   @override
   void dispose() {
     _controller.dispose();
+    linkStateManager.coupleCode.removeListener(codeListener);
+    linkStateManager.cancelSubscription();
     super.dispose();
   }
 }

@@ -20,6 +20,8 @@ import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
@@ -82,7 +84,9 @@ class Main extends StatelessWidget {
             theme: provider.selected,
             debugShowCheckedModeBanner: false,
             // darkTheme: ThemeProvider.dark,
-            home: const SplashScreen());
+            home: const SplashScreen(),
+          navigatorObservers: [routeObserver],
+        );
       }),
     );
   }
