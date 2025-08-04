@@ -1,5 +1,7 @@
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/screen/start/connect_copule_screen.dart';
 import 'package:duary/screen/start/start_duary_screen.dart';
+import 'package:duary/support/custom_page_route.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/duary_widget.dart';
@@ -24,6 +26,16 @@ class CoupleInfoScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context, SlideDownRoute(page: const ConnectCoupleScreen()));
+              },
+              child: const Row(
+                children: [Text("커플 연결하기"), Icon(Icons.chevron_right)],
+              ),
+            ),
+            SizedBox(height: 16,),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -31,7 +43,7 @@ class CoupleInfoScreen extends StatelessWidget {
                 FutureButton(
                   onTap: () async {
                     Clipboard.setData(ClipboardData(
-                        text: duaryContext.myCouple.value!.code))
+                            text: duaryContext.myCouple.value!.code))
                         .then((_) {
                       Fluttertoast.showToast(msg: "복사되었습니다");
                     });
@@ -48,7 +60,9 @@ class CoupleInfoScreen extends StatelessWidget {
                 )
               ],
             ),
-            const SizedBox(height: 8,),
+            const SizedBox(
+              height: 8,
+            ),
             const Text(codeMent),
             const Spacer(),
             FutureButton(

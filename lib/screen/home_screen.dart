@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late Member me;
 
-  late Member lover;
+  Member? lover;
 
   late final void Function() meListener;
   late final void Function() loverListener;
@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _eventProvider = context.read<EventProvider>();
 
     me = duaryContext.me.value!;
-    lover = duaryContext.lover.value!;
+    lover = duaryContext.lover.value;
     meListener = () {
       if (duaryContext.me.value != null) {
         setState(() {
@@ -122,10 +122,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
       try {
         setState(() {
-          loverOnGoingEvent = todayEvents.lastWhere((e) =>
-          (e.createdBy == lover.getId() || e.isTogether) &&
-              e.startDateTime.isBefore(now) &&
-              e.endDateTime.isAfter(now));
+          if (lover != null) {
+            loverOnGoingEvent = todayEvents.lastWhere((e) =>
+            (e.createdBy == lover!.getId() || e.isTogether) &&
+                e.startDateTime.isBefore(now) &&
+                e.endDateTime.isAfter(now));
+          }
         });
       } catch (_) {}
 
@@ -237,68 +239,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(
                     height: 15,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(11, 10, 11, 10),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: const Color(0xFF555555)
-                                      .withValues(alpha: 0.1),
-                                  blurRadius: 6,
-                                  spreadRadius: 0,
-                                  offset: const Offset(0, 2))
-                            ]),
-                        child: Row(
-                          children: [
-                            Text(
-                              loverOnGoingEvent?.title ?? _noOngoingEventMent,
-                              textAlign: TextAlign.end,
-                              style: const TextStyle(
-                                  color: Color(0xFF111111),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15),
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            Container(
-                              color: lover.character!.characterColor,
-                              width: 1,
-                              height: 19,
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              lover.name!,
-                              style: TextStyle(
-                                  color: lover.character!.characterColor,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      SizedBox(
-                        height: 41,
-                        width: 41,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(99),
-                          child: Character.characterCircleWidget(
-                              lover.character!,
-                              size: 40),
-                        ),
-                      ),
-                    ],
-                  ),
+
+                  loverOngoingEvent(),
+
                   const SizedBox(
                     height: 24,
                   ),
@@ -354,6 +297,71 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         );
       }),
+    );
+  }
+
+  Widget loverOngoingEvent() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Container(
+          padding: const EdgeInsets.fromLTRB(11, 10, 11, 10),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                    color: const Color(0xFF555555)
+                        .withValues(alpha: 0.1),
+                    blurRadius: 6,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 2))
+              ]),
+          child: lover != null ? Row(
+            children: [
+              Text(
+                loverOnGoingEvent?.title ?? _noOngoingEventMent,
+                textAlign: TextAlign.end,
+                style: const TextStyle(
+                    color: Color(0xFF111111),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15),
+              ),
+              const SizedBox(
+                width: 5,
+              ),
+              Container(
+                color: lover!.character!.characterColor,
+                width: 1,
+                height: 19,
+              ),
+              const SizedBox(
+                width: 5,
+              ),
+              Text(
+                lover!.name!,
+                style: TextStyle(
+                    color: lover!.character!.characterColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15),
+              ),
+            ],
+          ) : const Text("연인을 연결해주세요"),
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        SizedBox(
+          height: 41,
+          width: 41,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(99),
+            child: Character.characterCircleWidget(
+                lover != null ? lover!.character! : Character.none,
+                size: 40),
+          ),
+        ),
+      ],
     );
   }
 }

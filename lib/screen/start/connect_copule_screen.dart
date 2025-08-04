@@ -25,7 +25,8 @@ class ConnectCoupleScreen extends StatefulWidget {
   State<ConnectCoupleScreen> createState() => _ConnectCoupleScreenState();
 }
 
-class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> with RouteAware {
+class _ConnectCoupleScreenState extends State<ConnectCoupleScreen>
+    with RouteAware {
   final DuaryContext duaryContext = DuaryContext();
 
   late final PullingManager<void> pullingManager;
@@ -46,7 +47,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> with RouteAwa
 
   void pushInputCodeScreen() {
     Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const InputCodeScreen()));
+        MaterialPageRoute(builder: (context) => const InputCodeScreen()));
   }
 
   @override
@@ -98,20 +99,25 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> with RouteAwa
     isPushed = false;
   }
 
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: MainAppBar(
         appBarObj: AppBar(),
+        trailingBuilder: (context) => GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(
+              Icons.close,
+              color: Color(0xFF9A9A9A),
+            )),
       ),
       body: SafeArea(
         child: SizedBox(
@@ -280,21 +286,6 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen> with RouteAwa
                       const SizedBox(
                         height: 19,
                       ),
-                      FutureButton(
-                          onTap: () async {
-                            duaryContext.signOut().then((_) {
-                              Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const LoginScreen()),
-                                  (p) => false);
-                            });
-                          },
-                          child: const Text(
-                            "다른 계정으로 로그인",
-                            style: TextStyle(fontSize: 12),
-                          )),
                       const SizedBox(
                         height: 32,
                       )

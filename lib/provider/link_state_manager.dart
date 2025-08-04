@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:app_links/app_links.dart';
 
-class LinkStateManager extends ChangeNotifier {
+class LinkStateManager {
   StreamSubscription<Uri>? _subscription;
 
   final AppLinks appLinks;
@@ -13,9 +13,7 @@ class LinkStateManager extends ChangeNotifier {
   ValueNotifier<String?> coupleCode = ValueNotifier(null);
 
   void setCode(String? code) {
-    coupleCode.value = null;
     coupleCode.value = code;
-    notifyListeners();
   }
 
   void listenToLinkStream() {

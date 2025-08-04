@@ -4,6 +4,7 @@ import 'package:duary/screen/home_screen.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/screen/start/start_duary_screen.dart';
 import 'package:duary/support/asset_path.dart';
+import 'package:duary/support/custom_page_route.dart';
 import 'package:duary/widget/character_widget.dart';
 
 import 'package:flutter/material.dart';
@@ -68,29 +69,31 @@ class _SplashScreenState extends State<SplashScreen>
 
   void whenTaskComplete() {
     if (_isAnimationDone && _isSIgnInDone) {
+      late Widget routeScreen;
+      if (duaryContext.isLoggedIn()) {
+        // 커플이 생성되어 있는지 확인
+        if (duaryContext.isCoupleCreated()) {
+          // 커플이 생성되어 있는 경우 커플이 연결되어 있는지 확인
+          routeScreen = const HomeScreen();
+
+          // 커플이 생성되어 있지 않은 경우 StartDuaryScreen 으로 route
+        } else {
+          routeScreen = const StartDuaryScreen();
+        }
+        // 로그인되어 있지 않으면 LoginScreen 으로 route
+      } else {
+        routeScreen = const LoginScreen();
+      }
       Navigator.of(context)
           .pushReplacement(MaterialPageRoute(builder: (context) {
-        // 로그인되어 있으면
-        if (duaryContext.isLoggedIn()) {
-          // 커플이 생성되어 있는지 확인
-          if (duaryContext.isCoupleCreated()) {
-            // 커플이 생성되어 있는 경우 커플이 연결되어 있는지 확인
-            if (duaryContext.isCoupleConnected()) {
-              // Couple 연결 완료 상태면 HomeScreen 으로 route
-              return const HomeScreen();
-            } else {
-              // Couple 연결이 되어있지 않은 경우 ConnectCoupleScreen 으로 route
-              return const ConnectCoupleScreen();
-            }
-            // 커플이 생성되어 있지 않은 경우 StartDuaryScreen 으로 route
-          } else {
-            return const StartDuaryScreen();
-          }
-          // 로그인되어 있지 않으면 LoginScreen 으로 route
-        } else {
-          return const LoginScreen();
+        return routeScreen;
+      })).then((_) {
+        // routing 이 완료된 후 HomeScreen 으로 이동했을 때
+        if (!duaryContext.isCoupleConnected() && routeScreen is HomeScreen) {
+          Navigator.push(
+              context, SlideDownRoute(page: const ConnectCoupleScreen()));
         }
-      }));
+      });
     }
   }
 
@@ -106,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen>
     precacheImage(Image.asset(AssetPath.yellow).image, context);
     return Scaffold(
         body: Stack(
-              children: [
+      children: [
         Align(
             alignment: Alignment.center,
             child: SvgPicture.asset(AssetPath.duarySplashLogo)),
@@ -134,7 +137,7 @@ class _SplashScreenState extends State<SplashScreen>
                     )),
               );
             })
-              ],
-            ));
+      ],
+    ));
   }
 }

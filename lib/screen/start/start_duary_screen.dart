@@ -1,7 +1,9 @@
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/screen/home_screen.dart';
 import 'package:duary/screen/start/connect_copule_screen.dart';
 import 'package:duary/screen/login_screen.dart';
+import 'package:duary/support/custom_page_route.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/character_widget.dart';
@@ -159,8 +161,11 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
                     Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const ConnectCoupleScreen()),
-                        (p) => false);
+                            builder: (context) => const HomeScreen()),
+                        (p) => false).then((_) {
+                      Navigator.of(context).push(
+                          SlideDownRoute(page: const ConnectCoupleScreen()));
+                    });
                   }).catchError((e) {
                     Fluttertoast.showToast(msg: e.toString());
                   });
