@@ -29,8 +29,6 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen>
     with RouteAware {
   final DuaryContext duaryContext = DuaryContext();
 
-  late final PullingManager<void> pullingManager;
-
   late final Member me;
 
   String? coupleCode;
@@ -66,25 +64,13 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen>
       linkStateManager.coupleCode.addListener(codeListener);
     });
     me = duaryContext.me.value!;
+    duaryContext.lover.addListener(onCoupleConnected);
+  }
 
-    pullingManager = PullingManager(
-      fetchData: () async {
-        if (!isPushed) {
-          return duaryContext.getMyCouple();
-        }
-      },
-      customDurations: [const Duration(seconds: 5)],
-      immediateFirstFetch: false,
-    );
-
-    pullingManager.dataStream.listen((_) {
-      if (duaryContext.isCoupleConnected() && !isPushed) {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-            (p) => false);
-      }
-    });
+  void onCoupleConnected() {
+    if (duaryContext.lover.value != null) {
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -302,8 +288,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen>
 
   @override
   void dispose() {
-    pullingManager.pause();
-    pullingManager.dispose();
+    duaryContext.lover.removeListener(onCoupleConnected);
     routeObserver.unsubscribe(this);
     linkStateManager.cancelSubscription();
     linkStateManager.coupleCode.removeListener(codeListener);

@@ -74,6 +74,7 @@ final class AuthRepositoryImpl
     return getData(response, (p0) => DuaryInfoRes.fromJson(p0)).data;
   }
 
+  @override
   Future<void> signOut() async {
     Uri uri = getUri("/auth/signout");
 

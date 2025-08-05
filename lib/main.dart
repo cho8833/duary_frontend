@@ -4,6 +4,7 @@ import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/provider/link_state_manager.dart';
 import 'package:duary/provider/time_manager.dart';
+import 'package:duary/repository/impl/websocket_handler.dart';
 import 'package:duary/screen/splash_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/support/secret_key.dart';
@@ -36,8 +37,10 @@ void main() async {
   FlutterSecureStorage ss = const FlutterSecureStorage();
   final SecureStorage secureStorage = SecureStorageImpl(ss);
 
+  // init Firebase(FCM)
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // init Google Sign In
   final GoogleSignIn signIn = GoogleSignIn.instance;
   await signIn.initialize(
     nonce: SecretKey.oidcNonce
@@ -57,10 +60,14 @@ void main() async {
   RepositoryContainer rc = RepositoryContainer();
   rc.initialize(secureStorage);
 
+  // init Providers
   EventProvider eventProvider = EventProvider(rc.eventRepository);
   DuaryContext duaryContext = DuaryContext();
   duaryContext.init(
       rc.coupleRepository, rc.authRepository, rc.memberRepository);
+
+  WebSocketHandler wsHandler = WebSocketHandler();
+  wsHandler.init(tokenProvider);
 
   runApp(Main(eventProvider: eventProvider));
 }

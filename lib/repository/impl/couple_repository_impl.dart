@@ -10,7 +10,6 @@ import 'package:duary/support/iso8601_time_zone_formatter.dart';
 import 'package:duary/support/uri_provider.dart';
 import 'package:http/http.dart';
 import 'package:duary/data/input_couple_code_req.dart';
-import 'package:duary/data/input_couple_code_res.dart';
 
 class CoupleRepositoryImpl with UriProvider, HttpResponseHandler implements CoupleRepository {
 
@@ -37,12 +36,12 @@ class CoupleRepositoryImpl with UriProvider, HttpResponseHandler implements Coup
   }
 
   @override
-  Future<InputCoupleCodeRes> inputCoupleCode(InputCoupleCodeReq req) async {
+  Future<DuaryInfoRes> inputCoupleCode(InputCoupleCodeReq req) async {
     Uri uri = getUri("/couple/connect");
 
     Response response = await client.post(uri,body: jsonEncode(req.toJson()));
 
-    return getData(response, (p0) => InputCoupleCodeRes.fromJson(p0)).data;
+    return getData(response, (p0) => DuaryInfoRes.fromJson(p0)).data;
   }
 
   @override

@@ -9,7 +9,9 @@ import 'package:duary/provider/event_provider.dart';
 import 'package:duary/provider/time_manager.dart';
 import 'package:duary/screen/event/event_details_screen.dart';
 import 'package:duary/screen/my_page/my_page_screen.dart';
+import 'package:duary/screen/start/connect_copule_screen.dart';
 import 'package:duary/screen/timetable_screen.dart';
+import 'package:duary/support/custom_page_route.dart';
 
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/button_base.dart';
@@ -71,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     };
     loverListener = () {
-      if (duaryContext.myCouple.value != null) {
+      if (duaryContext.lover.value != null) {
         setState(() {
           lover = duaryContext.lover.value!;
         });
@@ -95,6 +97,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _timeManager = context.read<TimeManager>();
     _timeManager.addListener(_changeTime);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!duaryContext.isCoupleConnected()) {
+        Navigator.push(
+            context, SlideDownRoute(page: const ConnectCoupleScreen()));
+      }
+    });
   }
 
   void _changeTime() {
@@ -110,37 +119,34 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void refreshOnGoing(List<Event> todayEvents) {
+    try {
+      setState(() {
+        myOnGoingEvent = todayEvents.lastWhere((e) =>
+            (e.createdBy == me.getId() || e.isTogether) &&
+            e.startDateTime.isBefore(now) &&
+            e.endDateTime.isAfter(now));
+      });
+    } catch (_) {}
 
-      try {
-        setState(() {
-          myOnGoingEvent = todayEvents.lastWhere((e) =>
-          (e.createdBy == me.getId() || e.isTogether) &&
+    try {
+      setState(() {
+        if (lover != null) {
+          loverOnGoingEvent = todayEvents.lastWhere((e) =>
+              (e.createdBy == lover!.getId() || e.isTogether) &&
               e.startDateTime.isBefore(now) &&
               e.endDateTime.isAfter(now));
-        });
-      } catch (_) {}
-
-      try {
-        setState(() {
-          if (lover != null) {
-            loverOnGoingEvent = todayEvents.lastWhere((e) =>
-            (e.createdBy == lover!.getId() || e.isTogether) &&
-                e.startDateTime.isBefore(now) &&
-                e.endDateTime.isAfter(now));
-          }
-        });
-      } catch (_) {}
-
+        }
+      });
+    } catch (_) {}
   }
 
   void refreshComingEvents(List<Event> todayEvents) {
-      setState(() {
-        comingEvents =
-            todayEvents.where((e) => e.startDateTime.isAfter(now)).toList();
-        comingEvents
-            .sort((e1, e2) => e1.startDateTime.compareTo(e2.startDateTime));
-      });
-
+    setState(() {
+      comingEvents =
+          todayEvents.where((e) => e.startDateTime.isAfter(now)).toList();
+      comingEvents
+          .sort((e1, e2) => e1.startDateTime.compareTo(e2.startDateTime));
+    });
   }
 
   @override
@@ -239,9 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(
                     height: 15,
                   ),
-
                   loverOngoingEvent(),
-
                   const SizedBox(
                     height: 24,
                   ),
@@ -311,42 +315,43 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                    color: const Color(0xFF555555)
-                        .withValues(alpha: 0.1),
+                    color: const Color(0xFF555555).withValues(alpha: 0.1),
                     blurRadius: 6,
                     spreadRadius: 0,
                     offset: const Offset(0, 2))
               ]),
-          child: lover != null ? Row(
-            children: [
-              Text(
-                loverOnGoingEvent?.title ?? _noOngoingEventMent,
-                textAlign: TextAlign.end,
-                style: const TextStyle(
-                    color: Color(0xFF111111),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15),
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              Container(
-                color: lover!.character!.characterColor,
-                width: 1,
-                height: 19,
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              Text(
-                lover!.name!,
-                style: TextStyle(
-                    color: lover!.character!.characterColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15),
-              ),
-            ],
-          ) : const Text("연인을 연결해주세요"),
+          child: lover != null
+              ? Row(
+                  children: [
+                    Text(
+                      loverOnGoingEvent?.title ?? _noOngoingEventMent,
+                      textAlign: TextAlign.end,
+                      style: const TextStyle(
+                          color: Color(0xFF111111),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15),
+                    ),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    Container(
+                      color: lover!.character!.characterColor,
+                      width: 1,
+                      height: 19,
+                    ),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    Text(
+                      lover!.name!,
+                      style: TextStyle(
+                          color: lover!.character!.characterColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15),
+                    ),
+                  ],
+                )
+              : const Text("연인을 연결해주세요"),
         ),
         const SizedBox(
           width: 10,

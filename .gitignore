@@ -55,3 +55,6 @@ asset/
 
 # secret key
 lib/support/secret_key.dart
+
+# uri
+lib/support/uri_provider.dart

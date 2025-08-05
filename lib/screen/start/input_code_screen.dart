@@ -32,12 +32,19 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
       _controller.text = linkStateManager.coupleCode.value!;
     }
     linkStateManager.coupleCode.addListener(codeListener);
+    duaryContext.lover.addListener(onCoupleConnected);
   }
 
   void codeListener() {
     String? temp = linkStateManager.coupleCode.value;
     if (temp != null) {
       _controller.text = temp;
+    }
+  }
+
+  void onCoupleConnected() {
+    if (duaryContext.lover.value != null) {
+      Navigator.pop(context);
     }
   }
 
@@ -173,6 +180,7 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
   @override
   void dispose() {
     _controller.dispose();
+    duaryContext.lover.removeListener(onCoupleConnected);
     linkStateManager.coupleCode.removeListener(codeListener);
     linkStateManager.cancelSubscription();
     super.dispose();

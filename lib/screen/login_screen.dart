@@ -1,5 +1,4 @@
 import 'package:duary/provider/duary_context.dart';
-import 'package:duary/screen/start/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
 import 'package:duary/screen/start/start_duary_screen.dart';
 import 'package:duary/support/asset_path.dart';
@@ -22,20 +21,12 @@ class _LoginScreenState extends State<LoginScreen> {
   //test var
   String? username;
 
-  void onSignInComplete() {
+  void onSignInComplete() async {
     if (duaryContext.isCoupleCreated()) {
-      if (duaryContext.isCoupleConnected()) {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-            (p) => false);
-      } else {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const ConnectCoupleScreen()),
-            (p) => false);
-      }
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (p) => false);
     }
     // 커플이 생성되어 있지 않으면 StartDuaryScreen 으로 route
     else {

@@ -157,15 +157,14 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
 
                   await duaryContext
                       .startDuary(name, birthday, relationDate, myCharacter)
-                      .then((_) {
-                    Navigator.pushAndRemoveUntil(
+                      .then((_) async {
+                    await Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
                             builder: (context) => const HomeScreen()),
-                        (p) => false).then((_) {
-                      Navigator.of(context).push(
-                          SlideDownRoute(page: const ConnectCoupleScreen()));
-                    });
+                            (p) => false);
+                    Navigator.of(context).push(
+                        SlideDownRoute(page: const ConnectCoupleScreen()));
                   }).catchError((e) {
                     Fluttertoast.showToast(msg: e.toString());
                   });
@@ -179,13 +178,13 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
                   ),
                   child: const Center(
                       child: Text(
-                    'Duary 시작하기',
-                    style: TextStyle(
-                      color: Color(0xFF573200),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  )),
+                        'Duary 시작하기',
+                        style: TextStyle(
+                          color: Color(0xFF573200),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      )),
                 ),
               ),
               const SizedBox(
@@ -198,7 +197,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => const LoginScreen()),
-                          (p) => false);
+                              (p) => false);
                     });
                   },
                   child: const Text(
@@ -210,8 +209,8 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
               ),
               const Text(
                 '위 내용은 연결된 상대방의 Duary에도 보이며\n'
-                '마이페이지에서 변경 가능합니다. 입력하신\n'
-                '모든 정보는 서비스 최적화를 위해서만 사용됩니다.',
+                    '마이페이지에서 변경 가능합니다. 입력하신\n'
+                    '모든 정보는 서비스 최적화를 위해서만 사용됩니다.',
                 style: TextStyle(
                   color: Color(0xFFCBCBCB),
                   fontSize: 11,

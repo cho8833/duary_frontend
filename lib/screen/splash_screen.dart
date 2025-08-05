@@ -67,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
   }
 
-  void whenTaskComplete() {
+  void whenTaskComplete() async {
     if (_isAnimationDone && _isSIgnInDone) {
       late Widget routeScreen;
       if (duaryContext.isLoggedIn()) {
@@ -87,13 +87,7 @@ class _SplashScreenState extends State<SplashScreen>
       Navigator.of(context)
           .pushReplacement(MaterialPageRoute(builder: (context) {
         return routeScreen;
-      })).then((_) {
-        // routing 이 완료된 후 HomeScreen 으로 이동했을 때
-        if (!duaryContext.isCoupleConnected() && routeScreen is HomeScreen) {
-          Navigator.push(
-              context, SlideDownRoute(page: const ConnectCoupleScreen()));
-        }
-      });
+      }));
     }
   }
 

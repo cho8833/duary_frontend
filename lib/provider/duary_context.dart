@@ -10,6 +10,7 @@ import 'package:duary/model/enums/alarm_offset.dart';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/token_provider.dart';
+import 'package:duary/repository/impl/websocket_handler.dart';
 import 'package:duary/repository/auth_repository.dart';
 import 'package:duary/repository/couple_repository.dart';
 import 'package:duary/repository/member_repository.dart';
@@ -18,6 +19,7 @@ import 'package:duary/support/secret_key.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn, GoogleSignInException, GoogleSignInExceptionCode;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -38,11 +40,15 @@ class DuaryContext {
 
   late final MemberRepository _memberRepository;
 
+  final WebSocketHandler _wsHandler = WebSocketHandler();
+
   void init(CoupleRepository coupleRepository, AuthRepository authRepository,
       MemberRepository memberRepository) {
     _coupleRepository = coupleRepository;
     _authRepository = authRepository;
     _memberRepository = memberRepository;
+
+    _wsHandler.duaryInfoNotifier.addListener(_coupleConnectionListener);
   }
 
   final TokenProvider tokenProvider = TokenProvider();
@@ -151,19 +157,12 @@ class DuaryContext {
   }
 
   void onSignInSuccess(DuaryInfoRes res) {
+    _wsHandler.connect();
     me.value = res.member;
     myCouple.value = res.couple;
     if (res.couple != null) {
       lover.value = getLoverFromCouple(res.couple!);
     }
-  }
-
-
-  Future<void> getMyCouple() async {
-    await _coupleRepository.getMyCouple().then((couple) {
-      myCouple.value = couple;
-      lover.value = getLoverFromCouple(couple);
-    });
   }
 
   Future<void> startDuary(
@@ -182,8 +181,7 @@ class DuaryContext {
     StartDuaryReq req =
         StartDuaryReq(name!, birthdayReq, relationDateReq, myCharacter);
     await _coupleRepository.startDuary(req).then((res) {
-      me.value = res.member;
-      myCouple.value = res.couple;
+      onSignInSuccess(res);
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
@@ -192,9 +190,7 @@ class DuaryContext {
   Future<void> inputCoupleCode(String coupleCode) async {
     InputCoupleCodeReq req = InputCoupleCodeReq(coupleCode);
     await _coupleRepository.inputCoupleCode(req).then((res) {
-      me.value = res.member;
-      myCouple.value = res.couple;
-      lover.value = getLoverFromCouple(res.couple);
+      onSignInSuccess(res);
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
@@ -214,15 +210,31 @@ class DuaryContext {
     await tokenProvider.deleteToken();
     await _authRepository.signOut();
     me.value = null;
+    _wsHandler.disconnect();
   }
 
   Future<void> withdrawal() async {
     await _authRepository.withdrawal().then((_) async {
       await tokenProvider.deleteToken();
       me.value = null;
+      _wsHandler.disconnect();
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
+  }
+
+  void _coupleConnectionListener() {
+    final duaryInfo = _wsHandler.duaryInfoNotifier.value;
+    if (duaryInfo != null) {
+      me.value = duaryInfo.member;
+      myCouple.value = duaryInfo.couple;
+      if (duaryInfo.couple != null) {
+        lover.value = getLoverFromCouple(duaryInfo.couple!);
+      } else {
+        lover.value = null;
+      }
+      Fluttertoast.showToast(msg: "연결되었습니다");
+    }
   }
 
   bool isLoggedIn() {
