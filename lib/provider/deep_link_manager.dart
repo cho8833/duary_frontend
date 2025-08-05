@@ -24,7 +24,7 @@ class DeepLinkManager {
     });
   }
 
-  Future<void> handleUri() async {
+  Future<void> getCodeFromUri() async {
     Uri? uri = await appLinks.getLatestLink();
     if (uri != null) {
       setCode(uri.queryParameters['cleandCode']);

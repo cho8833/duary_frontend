@@ -158,14 +158,12 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
 
                   await duaryContext
                       .startDuary(name, birthday, relationDate, myCharacter)
-                      .then((_) async {
-                    await Navigator.pushAndRemoveUntil(
+                      .then((_) {
+                    Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
                             builder: (context) => const HomeScreen()),
                             (p) => false);
-                    Navigator.of(context).push(
-                        SlideDownRoute(page: const ConnectCoupleScreen()));
                   }).catchError((e) {
                     Fluttertoast.showToast(msg: e.toString());
                   });

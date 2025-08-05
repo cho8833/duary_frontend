@@ -119,6 +119,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void refreshOnGoing(List<Event> todayEvents) {
+    if (todayEvents.isEmpty) {
+      return;
+    }
+
     try {
       setState(() {
         myOnGoingEvent = todayEvents.lastWhere((e) =>
@@ -141,6 +145,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void refreshComingEvents(List<Event> todayEvents) {
+    if (todayEvents.isEmpty) {
+      return;
+    }
     setState(() {
       comingEvents =
           todayEvents.where((e) => e.startDateTime.isAfter(now)).toList();

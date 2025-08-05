@@ -54,7 +54,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen>
 
     linkStateManager = context.read<DeepLinkManager>();
 
-    linkStateManager.handleUri().then((_) {
+    linkStateManager.getCodeFromUri().then((_) {
       if (linkStateManager.coupleCode.value != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           pushInputCodeScreen();

@@ -26,20 +26,24 @@ class CoupleInfoScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                    context, SlideDownRoute(page: const ConnectCoupleScreen()));
-              },
-              child: const Row(
-                children: [Text("커플 연결하기"), Icon(Icons.chevron_right)],
-              ),
+            duaryContext.isCoupleConnected()
+                ? Container()
+                : GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          SlideDownRoute(page: const ConnectCoupleScreen()));
+                    },
+                    child: const Row(
+                      children: [Text("커플 연결하기"), Icon(Icons.chevron_right)],
+                    ),
+                  ),
+            const SizedBox(
+              height: 16,
             ),
-            SizedBox(height: 16,),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("커플 코드"),
+                const Text("커플 코드"),
                 FutureButton(
                   onTap: () async {
                     Clipboard.setData(ClipboardData(
@@ -77,14 +81,16 @@ class CoupleInfoScreen extends StatelessWidget {
                   Fluttertoast.showToast(msg: e.toString());
                 });
               },
-              child: const Text(
-                "커플 연결 끊기",
-                style: TextStyle(
-                  color: Color(0xFFFF0000),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: duaryContext.isCoupleConnected()
+                  ? const Text(
+                      "커플 연결 끊기",
+                      style: TextStyle(
+                        color: Color(0xFFFF0000),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )
+                  : Container(),
             ),
             const SizedBox(
               height: 16,
