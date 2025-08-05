@@ -37,6 +37,14 @@ class DuaryContext {
     _memberRepository = memberRepository;
 
     wsHandler.duaryInfoNotifier.addListener(_coupleConnectionListener);
+
+    wsHandler.loverUpdateNotifier.addListener(() {
+      final data = wsHandler.loverUpdateNotifier.value;
+      if (data != null) {
+        lover.value = data.member;
+        myCouple.value = data.couple;
+      }
+    });
   }
 
   final TokenProvider tokenProvider = TokenProvider();

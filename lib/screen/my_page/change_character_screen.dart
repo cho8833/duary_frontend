@@ -30,6 +30,7 @@ class _ChangeCharacterScreenState extends State<ChangeCharacterScreen> {
     character = me.character!;
 
     characters.remove(Character.together);
+    characters.remove(Character.none);
 
     currentIndex = characters.indexWhere((e) => e == character);
 

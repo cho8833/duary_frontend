@@ -2,7 +2,8 @@ enum WSAction {
   coupleConnected("COUPLE_CONNECTED"),
   eventCreated("EVENT_CREATED"),
   eventDeleted("EVENT_DELETED"),
-  eventUpdated("EVENT_UPDATED");
+  eventUpdated("EVENT_UPDATED"),
+  loverUpdated("LOVER_UPDATED");
 
   const WSAction(this.value);
 
