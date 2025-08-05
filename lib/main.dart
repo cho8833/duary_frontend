@@ -2,7 +2,7 @@ import 'package:app_links/app_links.dart' show AppLinks;
 import 'package:duary/firebase_options.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
-import 'package:duary/provider/link_state_manager.dart';
+import 'package:duary/provider/deep_link_manager.dart';
 import 'package:duary/provider/time_manager.dart';
 import 'package:duary/repository/impl/websocket_handler.dart';
 import 'package:duary/screen/splash_screen.dart';
@@ -60,14 +60,15 @@ void main() async {
   RepositoryContainer rc = RepositoryContainer();
   rc.initialize(secureStorage);
 
+  // init websocket
+  WebSocketHandler().init(tokenProvider);
+
   // init Providers
   EventProvider eventProvider = EventProvider(rc.eventRepository);
   DuaryContext duaryContext = DuaryContext();
   duaryContext.init(
       rc.coupleRepository, rc.authRepository, rc.memberRepository);
 
-  WebSocketHandler wsHandler = WebSocketHandler();
-  wsHandler.init(tokenProvider);
 
   runApp(Main(eventProvider: eventProvider));
 }
@@ -82,7 +83,7 @@ class Main extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        Provider(create: (_) => LinkStateManager(AppLinks())),
+        Provider(create: (_) => DeepLinkManager(AppLinks())),
         ChangeNotifierProvider(create: (_) => TimeManager()),
         Provider.value(value: eventProvider)
       ],

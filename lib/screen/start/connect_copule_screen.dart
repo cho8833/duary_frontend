@@ -3,7 +3,7 @@ import 'package:duary/main.dart';
 import 'package:duary/model/couple.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
-import 'package:duary/provider/link_state_manager.dart';
+import 'package:duary/provider/deep_link_manager.dart';
 import 'package:duary/screen/home_screen.dart';
 import 'package:duary/screen/start/input_code_screen.dart';
 import 'package:duary/screen/login_screen.dart';
@@ -33,7 +33,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen>
 
   String? coupleCode;
 
-  late LinkStateManager linkStateManager;
+  late DeepLinkManager linkStateManager;
 
   bool isPushed = false;
 
@@ -52,7 +52,7 @@ class _ConnectCoupleScreenState extends State<ConnectCoupleScreen>
   void initState() {
     super.initState();
 
-    linkStateManager = context.read<LinkStateManager>();
+    linkStateManager = context.read<DeepLinkManager>();
 
     linkStateManager.handleUri().then((_) {
       if (linkStateManager.coupleCode.value != null) {

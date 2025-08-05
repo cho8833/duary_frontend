@@ -1,5 +1,5 @@
 import 'package:duary/provider/duary_context.dart';
-import 'package:duary/provider/link_state_manager.dart';
+import 'package:duary/provider/deep_link_manager.dart';
 import 'package:duary/screen/start/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
 import 'package:duary/widget/base_app_bar.dart';
@@ -20,23 +20,23 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
   final DuaryContext duaryContext = DuaryContext();
   String coupleCode = "";
 
-  late final LinkStateManager linkStateManager;
+  late final DeepLinkManager deepLinkManager;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: coupleCode);
 
-    linkStateManager = context.read<LinkStateManager>();
-    if (linkStateManager.coupleCode.value != null) {
-      _controller.text = linkStateManager.coupleCode.value!;
+    deepLinkManager = context.read<DeepLinkManager>();
+    if (deepLinkManager.coupleCode.value != null) {
+      _controller.text = deepLinkManager.coupleCode.value!;
     }
-    linkStateManager.coupleCode.addListener(codeListener);
+    deepLinkManager.coupleCode.addListener(codeListener);
     duaryContext.lover.addListener(onCoupleConnected);
   }
 
   void codeListener() {
-    String? temp = linkStateManager.coupleCode.value;
+    String? temp = deepLinkManager.coupleCode.value;
     if (temp != null) {
       _controller.text = temp;
     }
@@ -181,8 +181,8 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
   void dispose() {
     _controller.dispose();
     duaryContext.lover.removeListener(onCoupleConnected);
-    linkStateManager.coupleCode.removeListener(codeListener);
-    linkStateManager.cancelSubscription();
+    deepLinkManager.coupleCode.removeListener(codeListener);
+    deepLinkManager.cancelSubscription();
     super.dispose();
   }
 }

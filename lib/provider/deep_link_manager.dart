@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:app_links/app_links.dart';
 
-class LinkStateManager {
+class DeepLinkManager {
   StreamSubscription<Uri>? _subscription;
 
   final AppLinks appLinks;
 
-  LinkStateManager(this.appLinks);
+  DeepLinkManager(this.appLinks);
 
   ValueNotifier<String?> coupleCode = ValueNotifier(null);
 
@@ -30,7 +30,6 @@ class LinkStateManager {
       setCode(uri.queryParameters['cleandCode']);
     }
   }
-
 
   void cancelSubscription() {
     coupleCode.value = null;

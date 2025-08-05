@@ -19,9 +19,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 class DuaryContext {
   // singleton
   static final DuaryContext _instance = DuaryContext._internal();
-
   factory DuaryContext() => _instance;
-
   DuaryContext._internal();
 
   late final CoupleRepository _coupleRepository;
@@ -36,7 +34,7 @@ class DuaryContext {
       MemberRepository memberRepository) {
     _coupleRepository = coupleRepository;
     authRepository = ar;
-    memberRepository = memberRepository;
+    _memberRepository = memberRepository;
 
     wsHandler.duaryInfoNotifier.addListener(_coupleConnectionListener);
   }
