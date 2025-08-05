@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:duary/base/ws_data.dart';
 import 'package:duary/data/duary_info_res.dart';
+import 'package:duary/model/event.dart';
 import 'package:duary/provider/token_provider.dart';
 import 'package:duary/support/uri_provider.dart';
 import 'package:flutter/foundation.dart';
@@ -26,6 +27,7 @@ final class WebSocketHandler with UriProvider {
   }
 
   ValueNotifier<DuaryInfoRes?> duaryInfoNotifier = ValueNotifier(null);
+  ValueNotifier<WebSocketData<Event>?> eventMsgNotifier = ValueNotifier(null);
 
   ConnectionStatus _status = ConnectionStatus.disconnected;
   Timer? _reconnectTimer;
@@ -77,12 +79,16 @@ final class WebSocketHandler with UriProvider {
     final decoded = jsonDecode(data);
     final WSAction action = WSAction.fromJson(decoded['action']);
     switch (action) {
+
       case WSAction.coupleConnected:
         final value = DuaryInfoRes.fromJson(decoded['data']);
         duaryInfoNotifier.value = value;
 
-      default:
-        return;
+      case WSAction.eventCreated:
+      case WSAction.eventUpdated:
+      case WSAction.eventDeleted:
+        final value = Event.fromJson(decoded['data']);
+        eventMsgNotifier.value = WebSocketData(action, value);
     }
   }
 

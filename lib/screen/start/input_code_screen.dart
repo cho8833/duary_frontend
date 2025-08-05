@@ -1,7 +1,5 @@
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/deep_link_manager.dart';
-import 'package:duary/screen/start/connect_copule_screen.dart';
-import 'package:duary/screen/home_screen.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,7 +14,7 @@ class InputCodeScreen extends StatefulWidget {
 }
 
 class _InputCodeScreenState extends State<InputCodeScreen> {
-  late TextEditingController _controller;
+  late final TextEditingController _controller;
   final DuaryContext duaryContext = DuaryContext();
   String coupleCode = "";
 
@@ -57,11 +55,7 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
         appBarObj: AppBar(),
         leadingBuilder: (context) => GestureDetector(
           onTap: () {
-            Navigator.pop(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const ConnectCoupleScreen()),
-            );
+            Navigator.pop(context);
           },
           child: const Icon(Icons.chevron_left),
         ),
@@ -134,13 +128,10 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
                     if (coupleCode.isEmpty == true) {
                       Fluttertoast.showToast(msg: "코드를 입력해주세요");
                     } else {
-                      await duaryContext.inputCoupleCode(coupleCode).then((_) {
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const HomeScreen()),
-                            (p) => false);
-                      }).catchError((e) {
+                      /// [duaryContext.lover] 가 세팅되면 [onCoupleConnected] listener 에 의해 pop 되므로 별도로 routing 작업 해줄 필요 없음
+                      await duaryContext
+                          .inputCoupleCode(coupleCode)
+                          .catchError((e) {
                         Fluttertoast.showToast(msg: e.toString());
                       });
                     }

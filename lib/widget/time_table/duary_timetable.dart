@@ -125,9 +125,11 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
   }
 
   void refresh() {
-    dayFocus = DateUtils.dateOnly(DateTime.now());
-    initialDayIndex = (dayFocus.difference(DateTime.now()).inHours / 24).ceil();
-    dayIndex = initialDayIndex;
+    setState(() {
+      dayFocus = DateUtils.dateOnly(DateTime.now());
+      initialDayIndex = (dayFocus.difference(DateTime.now()).inHours / 24).ceil();
+      dayIndex = initialDayIndex;
+    });
 
     nextUpPageKey = dayFocus.subtract(const Duration(days: 1));
     nextDownPageKey = dayFocus;

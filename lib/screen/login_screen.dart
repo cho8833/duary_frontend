@@ -5,7 +5,6 @@ import 'package:duary/screen/start/start_duary_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/widget/button_base.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -102,59 +101,59 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 48,
                 ),
                 //test~
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SizedBox(
-                      width: 200,
-                      height: 48,
-                      child: TextField(
-                        onSubmitted: (value) {
-                          if (value != null || value.isEmpty == false) {
-                            username = value;
-                          } else {
-                            username = null;
-                          }
-                        },
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              width: 1.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () async {
-                        if (username == null) {
-                          Fluttertoast.showToast(msg: 'id를 입력해주세요');
-                        } else {
-                          await duaryContext.dummySignIn(username!).then((_) {
-                            onSignInComplete();
-                          }).catchError((e) {
-                            Fluttertoast.showToast(msg: e.toString());
-                          });
-                        }
-                      },
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          border: Border.all(width: 1),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-
-                const SizedBox(
-                  height: 48,
-                )
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //   children: [
+                //     SizedBox(
+                //       width: 200,
+                //       height: 48,
+                //       child: TextField(
+                //         onSubmitted: (value) {
+                //           if (value != null || value.isEmpty == false) {
+                //             username = value;
+                //           } else {
+                //             username = null;
+                //           }
+                //         },
+                //         inputFormatters: [
+                //           FilteringTextInputFormatter.digitsOnly,
+                //         ],
+                //         decoration: const InputDecoration(
+                //           border: OutlineInputBorder(
+                //             borderSide: BorderSide(
+                //               width: 1.0,
+                //             ),
+                //           ),
+                //         ),
+                //       ),
+                //     ),
+                //     GestureDetector(
+                //       onTap: () async {
+                //         if (username == null) {
+                //           Fluttertoast.showToast(msg: 'id를 입력해주세요');
+                //         } else {
+                //           await duaryContext.dummySignIn(username!).then((_) {
+                //             onSignInComplete();
+                //           }).catchError((e) {
+                //             Fluttertoast.showToast(msg: e.toString());
+                //           });
+                //         }
+                //       },
+                //       child: Container(
+                //         width: 48,
+                //         height: 48,
+                //         decoration: BoxDecoration(
+                //           border: Border.all(width: 1),
+                //           borderRadius: BorderRadius.circular(5),
+                //         ),
+                //       ),
+                //     )
+                //   ],
+                // ),
+                //
+                // const SizedBox(
+                //   height: 48,
+                // )
                 //~test
               ],
             ),

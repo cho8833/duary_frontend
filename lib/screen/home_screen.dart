@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     eventDataListener = () {
       List<Event>? todayEvents =
-          _eventProvider.eventDataNotifier.eventMap[today];
+          _eventProvider.eventDataNotifier.get(today);
       if (todayEvents != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           refreshOnGoing(todayEvents);
@@ -119,40 +119,45 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void refreshOnGoing(List<Event> todayEvents) {
-    if (todayEvents.isEmpty) {
-      return;
-    }
-
-    try {
-      setState(() {
-        myOnGoingEvent = todayEvents.lastWhere((e) =>
-            (e.createdBy == me.getId() || e.isTogether) &&
-            e.startDateTime.isBefore(now) &&
-            e.endDateTime.isAfter(now));
-      });
-    } catch (_) {}
-
-    try {
-      setState(() {
-        if (lover != null) {
-          loverOnGoingEvent = todayEvents.lastWhere((e) =>
-              (e.createdBy == lover!.getId() || e.isTogether) &&
-              e.startDateTime.isBefore(now) &&
-              e.endDateTime.isAfter(now));
+    setState(() {
+      if (todayEvents.isEmpty) {
+        myOnGoingEvent = null;
+        loverOnGoingEvent = null;
+      } else {
+        try {
+            myOnGoingEvent = todayEvents.lastWhere((e) =>
+                (e.createdBy == me.getId() || e.isTogether) &&
+                e.startDateTime.isBefore(now) &&
+                e.endDateTime.isAfter(now));
+        } catch (_) {
+          myOnGoingEvent = null;
         }
-      });
-    } catch (_) {}
+
+        try {
+            if (lover != null) {
+              loverOnGoingEvent = todayEvents.lastWhere((e) =>
+                  (e.createdBy == lover!.getId() || e.isTogether) &&
+                  e.startDateTime.isBefore(now) &&
+                  e.endDateTime.isAfter(now));
+            }
+        } catch (_) {
+          loverOnGoingEvent = null;
+        }
+      }
+
+    });
   }
 
   void refreshComingEvents(List<Event> todayEvents) {
-    if (todayEvents.isEmpty) {
-      return;
-    }
     setState(() {
-      comingEvents =
-          todayEvents.where((e) => e.startDateTime.isAfter(now)).toList();
-      comingEvents
-          .sort((e1, e2) => e1.startDateTime.compareTo(e2.startDateTime));
+      if (todayEvents.isEmpty) {
+        comingEvents = [];
+      } else {
+        comingEvents =
+            todayEvents.where((e) => e.startDateTime.isAfter(now)).toList();
+        comingEvents
+            .sort((e1, e2) => e1.startDateTime.compareTo(e2.startDateTime));
+      }
     });
   }
 

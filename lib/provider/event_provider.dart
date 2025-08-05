@@ -1,15 +1,21 @@
+import 'package:duary/base/ws_data.dart';
 import 'package:duary/data/event_req.dart';
 import 'package:duary/model/couple.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/repository/event_repository.dart';
+import 'package:duary/repository/impl/websocket_handler.dart';
 import 'package:duary/support/custom_exception.dart';
 import 'package:flutter/material.dart';
 
 class EventProvider {
 
   final EventRepository _eventRepository;
+
+  Member? me;
+  Member? lover;
+  Couple? myCouple;
 
   // 이벤트 캐싱
   final EventDataNotifier eventDataNotifier = EventDataNotifier();
@@ -35,12 +41,12 @@ class EventProvider {
       myCouple = duaryContext.myCouple.value;
       eventDataNotifier.clear();
     });
+
+    WebSocketHandler wsHandler = WebSocketHandler();
+    wsHandler.eventMsgNotifier.addListener(() {
+      _handleWS(wsHandler.eventMsgNotifier.value);
+    });
   }
-
-
-  Member? me;
-  Member? lover;
-  Couple? myCouple;
 
   Future<List<Event>> getEventByDay(DateTime date) async {
     // 커플이 null 이면 Sign Out 했을 가능성 높음 -> null check error 회피
@@ -134,38 +140,50 @@ class EventProvider {
     });
   }
 
-  Future<void> deleteEvent(String eventId) async {
-    await _eventRepository.deleteEvent(eventId).then((_) {
+  Future<void> deleteEvent(Event event) async {
+    await _eventRepository.deleteEvent(event.id).then((_) {
       eventDataNotifier.clear();
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
   }
+
+  void _handleWS(WebSocketData<Event>? data) {
+    eventDataNotifier.clear();
+  }
 }
 
 
 class EventDataNotifier extends ChangeNotifier {
-  final Map<DateTime, List<Event>> eventMap = {};
+  final Map<DateTime, List<Event>> _eventMap = {};
 
   List<Event>? get(DateTime date) {
-    return eventMap[date];
+    return _eventMap[date];
   }
 
   void set(DateTime date, List<Event> events) {
-    eventMap[date] = events;
+    _eventMap[date] = events;
     notifyListeners();
+  }
+  void add(DateTime date, Event event) {
+    List<Event>? events = _eventMap[date];
+    if (events != null) {
+      events.add(event);
+    }
   }
 
   void clear() {
-    eventMap.clear();
+    _eventMap.clear();
     notifyListeners();
   }
 
+  void notifyUpdate() => notifyListeners();
+
   bool isClear() {
-    return eventMap.isEmpty;
+    return _eventMap.isEmpty;
   }
 
   bool contains(DateTime date) {
-    return eventMap.containsKey(date);
+    return _eventMap.containsKey(date);
   }
 }

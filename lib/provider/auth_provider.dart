@@ -14,7 +14,7 @@ extension AuthProvider on DuaryContext {
   static const String nonce = SecretKey.oidcNonce;
 
   Future<void> signInWithApple() async {
-    late final AuthorizationCredentialAppleID credential;
+    AuthorizationCredentialAppleID? credential;
     try {
       credential = await SignInWithApple.getAppleIDCredential(scopes: [
         AppleIDAuthorizationScopes.email,
@@ -26,13 +26,15 @@ extension AuthProvider on DuaryContext {
         }
       }
     }
-    final String? fcmToken = await _requestFcmToken();
-    SignInReq req = SignInReq(appleOAuthToken: credential, fcmToken: fcmToken);
-    await authRepository.signInWithApple(req).then((res) async {
-      refreshDuaryInfo(res);
-    }).catchError((e) {
-      throw ServerResponseException(e.toString());
-    });
+    if (credential != null) {
+      final String? fcmToken = await _requestFcmToken();
+      SignInReq req = SignInReq(appleOAuthToken: credential, fcmToken: fcmToken);
+      await authRepository.signInWithApple(req).then((res) async {
+        refreshDuaryInfo(res);
+      }).catchError((e) {
+        throw ServerResponseException(e.toString());
+      });
+    }
   }
 
   Future<void> signInWIthGoogle() async {

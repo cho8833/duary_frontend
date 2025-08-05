@@ -183,7 +183,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
             ),
             GestureDetector(
               onTap: () {
-                _eventProvider.deleteEvent(event.id).then((_) {
+                _eventProvider.deleteEvent(event).then((_) {
                   Navigator.pop(context, true);
                 }).catchError((e) {
                   Fluttertoast.showToast(msg: e.toString());
