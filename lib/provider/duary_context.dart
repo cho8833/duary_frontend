@@ -1,6 +1,4 @@
 import 'package:duary/data/duary_info_res.dart';
-import 'package:duary/data/dummy_sign_in_req.dart';
-import 'package:duary/data/sign_in_req.dart';
 import 'package:duary/data/start_duary_req.dart';
 import 'package:duary/data/input_couple_code_req.dart';
 import 'package:duary/data/update_couple_req.dart';
@@ -15,14 +13,8 @@ import 'package:duary/repository/auth_repository.dart';
 import 'package:duary/repository/couple_repository.dart';
 import 'package:duary/repository/member_repository.dart';
 import 'package:duary/support/custom_exception.dart';
-import 'package:duary/support/secret_key.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn, GoogleSignInException, GoogleSignInExceptionCode;
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class DuaryContext {
   // singleton
@@ -32,23 +24,21 @@ class DuaryContext {
 
   DuaryContext._internal();
 
-  static const String nonce = SecretKey.oidcNonce;
-
   late final CoupleRepository _coupleRepository;
 
-  late final AuthRepository _authRepository;
+  late final AuthRepository authRepository;
 
   late final MemberRepository _memberRepository;
 
-  final WebSocketHandler _wsHandler = WebSocketHandler();
+  final WebSocketHandler wsHandler = WebSocketHandler();
 
-  void init(CoupleRepository coupleRepository, AuthRepository authRepository,
+  void init(CoupleRepository coupleRepository, AuthRepository ar,
       MemberRepository memberRepository) {
     _coupleRepository = coupleRepository;
-    _authRepository = authRepository;
-    _memberRepository = memberRepository;
+    authRepository = ar;
+    memberRepository = memberRepository;
 
-    _wsHandler.duaryInfoNotifier.addListener(_coupleConnectionListener);
+    wsHandler.duaryInfoNotifier.addListener(_coupleConnectionListener);
   }
 
   final TokenProvider tokenProvider = TokenProvider();
@@ -59,105 +49,8 @@ class DuaryContext {
 
   ValueNotifier<Member?> lover = ValueNotifier(null);
 
-  Future<void> signInWithApple() async {
-    late final AuthorizationCredentialAppleID credential;
-    try {
-      credential = await SignInWithApple.getAppleIDCredential(scopes: [
-        AppleIDAuthorizationScopes.email,
-      ], nonce: nonce);
-    } catch (e) {
-      if (e is SignInWithAppleAuthorizationException) {
-        if (e.code == AuthorizationErrorCode.canceled) {
-          throw CustomException("취소되었습니다");
-        }
-      }
-    }
-    final String? fcmToken = await _requestFcmToken();
-    SignInReq req = SignInReq(appleOAuthToken: credential, fcmToken: fcmToken);
-    await _authRepository.signInWithApple(req).then((res) async {
-      onSignInSuccess(res);
-    }).catchError((e) {
-      throw ServerResponseException(e.toString());
-    });
-  }
-
-  Future<void> signInWithKakaoTalk() async {
-    late OAuthToken token;
-    try {
-      if (await isKakaoTalkInstalled()) {
-        token = await UserApi.instance.loginWithKakaoTalk(nonce: nonce);
-      } else {
-        token = await UserApi.instance.loginWithKakaoAccount(nonce: nonce);
-      }
-    } catch (e) {
-      if (e is PlatformException) {
-        if (e.code == "CANCELED") {
-          throw CustomException("취소되었습니다");
-        }
-      }
-    }
-    final String? fcmToken = await _requestFcmToken();
-    SignInReq req = SignInReq(kakaoOAuthToken: token, fcmToken: fcmToken);
-    await _authRepository.signInWithKakaoTalk(req).then((res) async {
-      onSignInSuccess(res);
-    }).catchError((e) {
-      throw ServerResponseException(e.toString());
-    });
-  }
-
-  Future<void> signInWIthGoogle() async {
-    if (GoogleSignIn.instance.supportsAuthenticate()) {
-      await GoogleSignIn.instance.authenticate().then((account) async {
-        final String? fcmToken = await _requestFcmToken();
-        SignInReq req = SignInReq(googleOAuthToken: account, fcmToken: fcmToken);
-        await _authRepository.signInWithGoogle(req).then((res) async {
-          onSignInSuccess(res);
-        }).catchError((e) {
-          throw ServerResponseException(e.toString());
-        });
-      }).catchError((e) {
-        if (e is GoogleSignInException) {
-          if (e.code == GoogleSignInExceptionCode.canceled) {
-            throw CustomException("취소되었습니다");
-          }
-        }
-        throw ServerResponseException(e.toString());
-      });
-    } else {
-      throw CustomException("Google 로그인을 지원하지 않습니다");
-    }
-  }
-
-  Future<void> signInWithToken() async {
-    final String? fcmToken = await _requestFcmToken();
-    SignInReq req = SignInReq(fcmToken: fcmToken);
-    await _authRepository.signInWithToken(req).then((res) {
-      onSignInSuccess(res);
-    }).catchError((e) {
-      print(e);
-    });
-  }
-
-  Future<void> dummySignIn(String username) async {
-    final String? fcmToken = await _requestFcmToken();
-    DummySignInReq req = DummySignInReq(username, fcmToken: fcmToken);
-    await _authRepository.dummySignIn(req).then((res) async {
-      onSignInSuccess(res);
-    }).catchError((e) {
-      throw ServerResponseException(e.toString());
-    });
-  }
-
-  Future<String?> _requestFcmToken() async {
-    final String? fcmToken =
-        await FirebaseMessaging.instance.getToken().catchError((e) {
-      return null;
-    });
-    return fcmToken;
-  }
-
-  void onSignInSuccess(DuaryInfoRes res) {
-    _wsHandler.connect();
+  void refreshDuaryInfo(DuaryInfoRes res) {
+    wsHandler.connect();
     me.value = res.member;
     myCouple.value = res.couple;
     if (res.couple != null) {
@@ -181,7 +74,7 @@ class DuaryContext {
     StartDuaryReq req =
         StartDuaryReq(name!, birthdayReq, relationDateReq, myCharacter);
     await _coupleRepository.startDuary(req).then((res) {
-      onSignInSuccess(res);
+      refreshDuaryInfo(res);
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
@@ -190,7 +83,7 @@ class DuaryContext {
   Future<void> inputCoupleCode(String coupleCode) async {
     InputCoupleCodeReq req = InputCoupleCodeReq(coupleCode);
     await _coupleRepository.inputCoupleCode(req).then((res) {
-      onSignInSuccess(res);
+      refreshDuaryInfo(res);
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
@@ -206,25 +99,8 @@ class DuaryContext {
     });
   }
 
-  Future<void> signOut() async {
-    await tokenProvider.deleteToken();
-    await _authRepository.signOut();
-    me.value = null;
-    _wsHandler.disconnect();
-  }
-
-  Future<void> withdrawal() async {
-    await _authRepository.withdrawal().then((_) async {
-      await tokenProvider.deleteToken();
-      me.value = null;
-      _wsHandler.disconnect();
-    }).catchError((e) {
-      throw ServerResponseException(e.toString());
-    });
-  }
-
   void _coupleConnectionListener() {
-    final duaryInfo = _wsHandler.duaryInfoNotifier.value;
+    final duaryInfo = wsHandler.duaryInfoNotifier.value;
     if (duaryInfo != null) {
       me.value = duaryInfo.member;
       myCouple.value = duaryInfo.couple;

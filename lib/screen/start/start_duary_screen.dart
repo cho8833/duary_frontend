@@ -1,4 +1,5 @@
 import 'package:duary/model/enums/character.dart';
+import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/home_screen.dart';
 import 'package:duary/screen/start/connect_copule_screen.dart';

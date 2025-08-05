@@ -25,7 +25,6 @@ final class WebSocketHandler with UriProvider {
     tokenProvider = tp;
   }
 
-
   ValueNotifier<DuaryInfoRes?> duaryInfoNotifier = ValueNotifier(null);
 
   ConnectionStatus _status = ConnectionStatus.disconnected;
@@ -33,22 +32,22 @@ final class WebSocketHandler with UriProvider {
 
   bool isManuallyDisconnected = false;
 
-
-
   Future<void> connect() async {
-    if (_status == ConnectionStatus.connected || _status == ConnectionStatus.connecting) {
+    if (_status == ConnectionStatus.connected ||
+        _status == ConnectionStatus.connecting) {
       return; // 이미 연결되었거나 시도 중이면 무시
     }
 
     _status = ConnectionStatus.connecting;
+
+    _channel = WebSocketChannel.connect(getWSUri(
+        queryParameters: {"Authorization": await tokenProvider.accessToken}));
+
     isManuallyDisconnected = false;
 
-    _channel = WebSocketChannel.connect(getWSUri(queryParameters: {
-      "Authorization": await tokenProvider.accessToken
-    }));
-
+    print("웹소켓 연결");
     _channel!.stream.listen(
-          (message) {
+      (message) {
         // 연결이 성공적으로 이루어지면 상태를 'connected'로 변경
         if (_status != ConnectionStatus.connected) {
           _status = ConnectionStatus.connected;
@@ -88,12 +87,11 @@ final class WebSocketHandler with UriProvider {
   }
 
   void disconnect() {
+    isManuallyDisconnected = true;
     _reconnectTimer?.cancel(); // 재연결 시도 중단
     _channel?.sink.close();
-    isManuallyDisconnected = true;
     _status = ConnectionStatus.disconnected;
   }
-
 
   void _scheduleReconnect() {
     if (_reconnectTimer?.isActive ?? false) return; // 이미 재연결 스케줄이 있으면 무시

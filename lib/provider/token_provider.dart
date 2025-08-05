@@ -36,10 +36,6 @@ class TokenProvider {
     await secureStorage.storeRefreshToken(refreshToken);
   }
 
-  storeAccessTokenInMemory(String accessToken) {
-    _accessToken = accessToken;
-  }
-
   deleteAccessTokenInMemory() {
     _accessToken = null;
   }

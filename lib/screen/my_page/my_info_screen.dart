@@ -1,3 +1,4 @@
+import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/widget/base_app_bar.dart';

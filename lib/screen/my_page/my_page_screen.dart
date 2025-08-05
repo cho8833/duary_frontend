@@ -3,6 +3,7 @@ import 'package:duary/model/couple.dart';
 import 'package:duary/model/enums/alarm_offset.dart';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/member.dart';
+import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/my_page/change_character_screen.dart';
 import 'package:duary/screen/my_page/couple_info_screen.dart';

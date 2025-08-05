@@ -43,6 +43,11 @@ class EventProvider {
   Couple? myCouple;
 
   Future<List<Event>> getEventByDay(DateTime date) async {
+    // 커플이 null 이면 Sign Out 했을 가능성 높음 -> null check error 회피
+    if (myCouple == null) {
+      return [];
+    }
+
     // 캐싱된 이벤트가 있으면 반환
     if (eventDataNotifier.contains(date)) {
       return eventDataNotifier.get(date)!;
@@ -52,6 +57,7 @@ class EventProvider {
     if (_eventRequest.containsKey(date)) {
       return _eventRequest[date]!;
     }
+
 
     // 새로운 요청이면 Future 캐싱
     DateTime startDate = DateTime(date.year, date.month, date.day);
