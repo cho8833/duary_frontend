@@ -17,4 +17,7 @@ class AssetPath {
   static const String kakaoLogin = 'asset/kakao_login.png';
   static const String appleLogin = 'asset/apple_login.png';
   static const String googleLogin = "asset/google_login.png";
+  static const String kakaoIcon = "asset/kakao_icon.png";
+  static const String appleIcon = "asset/apple_icon.png";
+  static const String googleIcon = "asset/google_icon.png";
 }

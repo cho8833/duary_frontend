@@ -1,3 +1,4 @@
+import 'package:duary/model/enums/social_provider.dart';
 import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/login_screen.dart';
@@ -13,12 +14,26 @@ class MyInfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DuaryContext duaryContext = DuaryContext();
+    final SocialProvider socialProvider =
+        SocialProvider.fromString(duaryContext.me.value!.provider);
     return Scaffold(
-      appBar: SubPageAppBar(appBarObj: AppBar(), title: const SubPageTitle(title: "내 정보")),
+      appBar: SubPageAppBar(
+          appBarObj: AppBar(), title: const SubPageTitle(title: "내 정보")),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            Row(
+              children: [
+                Text("로그인 방법"),
+                Spacer(),
+                SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: Image.asset(socialProvider.iconPath)),
+                Text(socialProvider.title),
+              ],
+            ),
             const Spacer(),
             Center(
               child: FutureButton(
@@ -28,7 +43,7 @@ class MyInfoScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                             builder: (context) => const LoginScreen()),
-                            (p) => false);
+                        (p) => false);
                   }).catchError((e) {
                     Fluttertoast.showToast(msg: e.toString());
                   });
