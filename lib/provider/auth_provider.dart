@@ -34,6 +34,8 @@ extension AuthProvider on DuaryContext {
       }).catchError((e) {
         throw ServerResponseException(e.toString());
       });
+    }  else {
+      throw CustomException("취소되었습니다");
     }
   }
 

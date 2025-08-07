@@ -56,14 +56,15 @@ enum Character {
     }
   }
 
-  static Widget characterCircleWidget(Character character, {required double size}) {
+  static Widget characterCircleWidget(Character character, {required double size, bool right = false}) {
     switch (character) {
       case Character.blue:
-        return CircleBlue(size: size);
+        return CircleBlue(size: size, right: right);
       case Character.yellow:
         return Yellow(
           width: size,
           height: size,
+          right: right,
         );
       case Character.none:
         return Yellow(

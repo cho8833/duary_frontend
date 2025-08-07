@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:duary/model/enums/character.dart';
@@ -204,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(99),
                             child: Character.characterCircleWidget(
                                 me.character!,
-                                size: 40)),
+                                size: 40, right: true)),
                       ),
                       const SizedBox(
                         width: 10,

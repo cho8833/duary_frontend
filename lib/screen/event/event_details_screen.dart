@@ -4,6 +4,7 @@ import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/event/edit_event_screen.dart';
 import 'package:duary/support/custom_page_route.dart';
 import 'package:duary/widget/base_app_bar.dart';
+import 'package:duary/widget/button_base.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
@@ -181,8 +182,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
             const SizedBox(
               height: 15,
             ),
-            GestureDetector(
-              onTap: () {
+            FutureButton(
+              onTap: () async {
                 _eventProvider.deleteEvent(event).then((_) {
                   Navigator.pop(context, true);
                 }).catchError((e) {

@@ -28,6 +28,7 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
     deepLinkManager = context.read<DeepLinkManager>();
     if (deepLinkManager.coupleCode.value != null) {
       _controller.text = deepLinkManager.coupleCode.value!;
+      coupleCode = deepLinkManager.coupleCode.value!;
     }
     deepLinkManager.coupleCode.addListener(codeListener);
     duaryContext.lover.addListener(onCoupleConnected);
@@ -37,6 +38,7 @@ class _InputCodeScreenState extends State<InputCodeScreen> {
     String? temp = deepLinkManager.coupleCode.value;
     if (temp != null) {
       _controller.text = temp;
+      coupleCode = temp;
     }
   }
 
