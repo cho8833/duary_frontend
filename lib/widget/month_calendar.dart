@@ -2,20 +2,15 @@ import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
+import 'package:duary/screen/timetable_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 class MonthCalendar extends StatefulWidget {
-  const MonthCalendar(
-      {super.key,
-      required this.initialDate,
-      required this.onDateTap,
-      required this.onYearTap});
+  const MonthCalendar({super.key, required this.timeTableController});
 
-  final DateTime initialDate;
-  final void Function(DateTime) onYearTap;
-  final void Function(DateTime) onDateTap;
+  final TimeTableController timeTableController;
 
   @override
   State<MonthCalendar> createState() => _MonthCalendarState();
@@ -25,16 +20,29 @@ class _MonthCalendarState extends State<MonthCalendar> {
   // 충분히 큰 초기 페이지를 지정해서, 양쪽 방향으로 스와이프 가능하게 함.
   static const _totalPage = 500;
   static const _initialPage = 250;
-  late final PageController _pageController;
+  late final PageController _pageController =
+      PageController(initialPage: _initialPage);
 
-  late DateTime focusMonth;
+  late TimeTableController timeTableController = widget.timeTableController;
+  late DateTime focusMonth = widget.timeTableController.focusMonth.value;
+  late DateTime initialMonth = focusMonth;
 
   @override
   void initState() {
-    focusMonth = widget.initialDate;
-
-    _pageController = PageController(initialPage: _initialPage);
     super.initState();
+    timeTableController.focusMonth.addListener(monthListener);
+  }
+
+  void monthListener() {
+    setState(() {
+      initialMonth = timeTableController.focusMonth.value;
+    });
+  }
+
+  @override
+  void dispose() {
+    timeTableController.focusMonth.removeListener(monthListener);
+    super.dispose();
   }
 
   @override
@@ -53,7 +61,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () {
-                      widget.onYearTap(focusMonth);
+                      timeTableController.moveToYear(focusMonth);
                     },
                     child: Row(
                       children: [
@@ -90,8 +98,8 @@ class _MonthCalendarState extends State<MonthCalendar> {
                 final int monthOffset = index - _initialPage;
 
                 focusMonth = DateTime(
-                  widget.initialDate.year,
-                  widget.initialDate.month + monthOffset,
+                  initialMonth.year,
+                  initialMonth.month + monthOffset,
                   1,
                 );
               });
@@ -100,10 +108,9 @@ class _MonthCalendarState extends State<MonthCalendar> {
               return Container(
                 color: Colors.white,
                 child: _CalendarMonthWidget(
-                  year: focusMonth.year,
-                  month: focusMonth.month,
-                  onDateTap: widget.onDateTap,
-                ),
+                    year: focusMonth.year,
+                    month: focusMonth.month,
+                    onDateTap: (day) => timeTableController.moveToDay(day)),
               );
             },
           ),
@@ -159,8 +166,8 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
         // 날짜 그리드
         Expanded(
             child: FutureBuilder(
-                future: _eventProvider.getEventByMonth(
-                    DateTime(widget.year, widget.month, 1)),
+                future: _eventProvider
+                    .getEventByMonth(DateTime(widget.year, widget.month, 1)),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     Fluttertoast.showToast(msg: "오류가 발생했습니다");

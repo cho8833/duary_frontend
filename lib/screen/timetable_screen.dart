@@ -15,15 +15,12 @@ class TimetableScreen extends StatefulWidget {
 
 class _TimetableScreenState extends State<TimetableScreen> {
 
-  DateTime focus = DateUtils.dateOnly(DateTime.now());
+  DateTime focusDay  = DateUtils.dateOnly(DateTime.now());
+  late DateTime focusYear = focusDay;
+  late DateTime focusMonth = focusDay;
 
-  late final PageController _pageController;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: 2);
-  }
+  late final PageController _pageController = PageController(initialPage: 2);
+  late final TimeTableController _timeTableController = TimeTableController(_pageController);
 
   @override
   Widget build(BuildContext context) {
@@ -33,42 +30,13 @@ class _TimetableScreenState extends State<TimetableScreen> {
       controller: _pageController,
       children: [
         YearCalendar(
-          initialMonth: focus,
-          onMonthTap: (month) {
-            setState(() {
-              focus = DateTime(month.year, month.month, focus.day);
-              _pageController.animateToPage(1,
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.ease);
-            });
-          },
+          timeTableController: _timeTableController,
         ),
         MonthCalendar(
-          initialDate: focus,
-          onDateTap: (date) {
-            _pageController.animateToPage(2,
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.ease);
-            setState(() {
-              focus = date;
-            });
-          },
-          onYearTap: (DateTime year) {
-            _pageController.animateToPage(0,
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.ease);
-          },
+          timeTableController: _timeTableController,
         ),
         DuaryTimetable(
-          initialDate: focus,
-          onDateTap: (day) {
-            _pageController.animateToPage(1,
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.ease);
-            setState(() {
-              focus = day;
-            });
-          },
+          timeTableController: _timeTableController,
         )
       ],
     );
@@ -79,4 +47,30 @@ class _TimetableScreenState extends State<TimetableScreen> {
     _pageController.dispose();
     super.dispose();
   }
+}
+
+class TimeTableController {
+  ValueNotifier<DateTime> focusDay = ValueNotifier(DateUtils.dateOnly(DateTime.now()));
+  late ValueNotifier<DateTime> focusYear = ValueNotifier(focusDay.value);
+  late ValueNotifier<DateTime> focusMonth = ValueNotifier(focusDay.value);
+
+  final PageController _pageController;
+
+  TimeTableController(this._pageController);
+
+  void moveToYear(DateTime year) {
+    focusYear.value = year;
+    _pageController.animateToPage(0,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.ease);
+  }
+  void moveToMonth(DateTime month) {
+    focusMonth.value = month;
+    _pageController.animateToPage(1, duration: const Duration(milliseconds: 250), curve: Curves.ease);
+  }
+  void moveToDay(DateTime day) {
+    focusDay.value = day;
+    _pageController.animateToPage(2, duration: const Duration(milliseconds: 250), curve: Curves.ease);
+  }
+
 }

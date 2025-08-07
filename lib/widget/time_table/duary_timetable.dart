@@ -1,6 +1,7 @@
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
+import 'package:duary/screen/timetable_screen.dart';
 import 'package:duary/widget/time_table/day_view.dart';
 import 'package:duary/widget/time_table/title_bar.dart';
 import 'package:flutter/material.dart';
@@ -10,11 +11,9 @@ import 'package:provider/provider.dart';
 
 class DuaryTimetable extends StatefulWidget {
   const DuaryTimetable(
-      {super.key, required this.onDateTap, required this.initialDate});
+      {super.key, required this.timeTableController, });
 
-  final void Function(DateTime) onDateTap;
-
-  final DateTime initialDate;
+  final TimeTableController timeTableController;
 
   static const double hourHeight = 90;
 
@@ -25,6 +24,10 @@ class DuaryTimetable extends StatefulWidget {
 }
 
 class _DuaryTimetableState extends State<DuaryTimetable> {
+  late final TimeTableController _timeTableController = widget.timeTableController;
+  late final DateTime initialDate = _timeTableController.focusDay.value;
+
+
   late DateTime dayFocus;
   late int dayIndex;
   late int initialDayIndex;
@@ -59,7 +62,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
   void initState() {
     super.initState();
 
-    dayFocus = widget.initialDate;
+    dayFocus = initialDate;
     initialDayIndex = (dayFocus.difference(DateTime.now()).inHours / 24).ceil();
     dayIndex = initialDayIndex;
 
@@ -211,7 +214,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
         TitleBar(
             dayIndex: dayIndex,
             dayFocus: dayFocus,
-            onDateTap: () => widget.onDateTap(dayFocus),
+            onDateTap: () => _timeTableController.moveToMonth(dayFocus),
             refresh: refresh),
         // Two way(up, down) Infinite Scroll View
         Flexible(

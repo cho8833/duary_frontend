@@ -1,30 +1,47 @@
 import 'dart:ui' as ui;
 
+import 'package:duary/screen/timetable_screen.dart';
 import 'package:flutter/material.dart';
-import "package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart" show AlignedGridView;
+import "package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart"
+    show AlignedGridView;
 
 class YearCalendar extends StatefulWidget {
-  const YearCalendar(
-      {super.key, required this.initialMonth, required this.onMonthTap});
+  const YearCalendar({super.key, required this.timeTableController});
 
-  final DateTime initialMonth;
-  final void Function(DateTime) onMonthTap;
+  final TimeTableController timeTableController;
 
   @override
   State<YearCalendar> createState() => _YearCalendarState();
 }
 
 class _YearCalendarState extends State<YearCalendar> {
-  late final PageController _pageController;
   static const _totalPage = 500;
   static const _initialPage = 250;
+  late final PageController _pageController =
+      PageController(initialPage: _initialPage);
+
+  late final TimeTableController _timeTableController =
+      widget.timeTableController;
+  late DateTime initialYear = _timeTableController.focusYear.value;
 
   @override
   void initState() {
     super.initState();
-
-    _pageController = PageController(initialPage: _initialPage);
+    _timeTableController.focusYear.addListener(yearListener);
   }
+
+  void yearListener() {
+    setState(() {
+      initialYear = _timeTableController.focusYear.value;
+    });
+  }
+
+  @override
+  void dispose() {
+    _timeTableController.focusYear.removeListener(yearListener);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -33,17 +50,15 @@ class _YearCalendarState extends State<YearCalendar> {
           controller: _pageController,
           itemCount: _totalPage,
           itemBuilder: (context, index) {
-            // index와 initialPage의 차이를 이용해 현재 페이지의 년을 계산
             final int yearOffset = index - _initialPage;
             final focusYear = DateTime(
-              widget.initialMonth.year + yearOffset,
+              initialYear.year + yearOffset,
               1,
             );
             return _YearPage(
-              key: ValueKey(focusYear.year),
-                year: focusYear.year, onMonthTap: (month) {
-              widget.onMonthTap(month);
-            });
+                key: ValueKey(focusYear.year),
+                year: focusYear.year,
+                onMonthTap: _timeTableController.moveToMonth);
           }),
     );
   }
@@ -59,8 +74,8 @@ class _YearPage extends StatefulWidget {
   State<_YearPage> createState() => _YearPageState();
 }
 
-class _YearPageState extends State<_YearPage> with AutomaticKeepAliveClientMixin {
-
+class _YearPageState extends State<_YearPage>
+    with AutomaticKeepAliveClientMixin {
   // build 메서드가 다시 호출되어도 상태가 유지되도록
   @override
   bool get wantKeepAlive => true;
@@ -183,7 +198,8 @@ class SingleMonthPainter extends CustomPainter {
     final double monthHeaderHeight = size.height * 0.25; // 월 헤더 높이 (전체 높이의 25%)
     final double gridHeight = size.height - monthHeaderHeight;
     final double cellWidth = size.width / 7;
-    final double cellHeight = _weeks.isNotEmpty ? gridHeight / _weeks.length : 0;
+    final double cellHeight =
+        _weeks.isNotEmpty ? gridHeight / _weeks.length : 0;
 
     // ---- 2. 월(Month) 그리기 ----
     _drawText(
@@ -235,7 +251,8 @@ class SingleMonthPainter extends CustomPainter {
   }
 
   // 텍스트를 중앙에 그리는 헬퍼 함수
-  void _drawText(Canvas canvas, Size size, String text, Offset offset, TextStyle style) {
+  void _drawText(
+      Canvas canvas, Size size, String text, Offset offset, TextStyle style) {
     final textPainter = TextPainter(
       text: TextSpan(text: text, style: style),
       textAlign: TextAlign.center,
@@ -252,10 +269,11 @@ class SingleMonthPainter extends CustomPainter {
     textPainter.paint(canvas, textOffset);
   }
 
-
   @override
   bool shouldRepaint(covariant SingleMonthPainter oldDelegate) {
     // 년, 월이 변경될 때만 다시 그림
-    return oldDelegate.year != year || oldDelegate.month != month || oldDelegate.context != context;
+    return oldDelegate.year != year ||
+        oldDelegate.month != month ||
+        oldDelegate.context != context;
   }
 }
