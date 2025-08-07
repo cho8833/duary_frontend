@@ -185,11 +185,13 @@ class _DayViewState extends State<DayView> {
                     });
                     // Bubble 이 맨 위로 올라와 있으면 Detail Screen 으로 route
                   } else {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                EventDetailsScreen(event: event)));
+                    if (event.member.character != Character.none) {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  EventDetailsScreen(event: event)));
+                    }
                   }
                 },
                 child: bubble),

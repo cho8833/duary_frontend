@@ -431,10 +431,12 @@ class ComingEventCard extends StatelessWidget {
     Color color = event.member.character!.strokeColor;
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => EventDetailsScreen(event: event)));
+        if (event.member.character != Character.none) {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => EventDetailsScreen(event: event)));
+        }
       },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
