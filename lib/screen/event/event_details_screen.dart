@@ -179,37 +179,41 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                 ),
               ),
             ),
-            const SizedBox(
-              height: 15,
-            ),
-            FutureButton(
-              onTap: () async {
-                _eventProvider.deleteEvent(event).then((_) {
-                  Navigator.pop(context, true);
-                }).catchError((e) {
-                  Fluttertoast.showToast(msg: e.toString());
-                });
-              },
-              child: Container(
-                width: double.infinity,
-                height: 50,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: Colors.white,
-                  border: Border.all(color: const Color(0xFFFFBD64), width: 2),
+            Column(
+              children: [
+                const SizedBox(
+                  height: 15,
                 ),
-                child: const Center(
-                  child: Text("일정 삭제하기",
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF573200))),
+                FutureButton(
+                  onTap: () async {
+                    _eventProvider.deleteEvent(event).then((_) {
+                      Navigator.pop(context, true);
+                    }).catchError((e) {
+                      Fluttertoast.showToast(msg: e.toString());
+                    });
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: Colors.white,
+                      border: Border.all(color: const Color(0xFFFFBD64), width: 2),
+                    ),
+                    child: const Center(
+                      child: Text("일정 삭제하기",
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF573200))),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(
+                  height: 30,
+                )
+              ],
             ),
-            const SizedBox(
-              height: 30,
-            )
           ],
         ),
       ),
