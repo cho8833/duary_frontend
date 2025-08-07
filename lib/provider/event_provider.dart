@@ -49,62 +49,125 @@ class EventProvider {
     });
   }
 
+  /// 특정 날짜의 이벤트를 가져옵니다. 캐시가 없으면 월 단위로 가져와 채웁니다.
   Future<List<Event>> getEventByDay(DateTime date) async {
-    // 커플이 null 이면 Sign Out 했을 가능성 높음 -> null check error 회피
-    if (myCouple == null) {
-      return [];
+    if (myCouple == null) return [];
+
+    final dayKey = DateUtils.dateOnly(date);
+
+    // 1. 일별 캐시 확인
+    if (eventDataNotifier.contains(dayKey)) {
+      return eventDataNotifier.get(dayKey)!;
     }
 
-    // 캐싱된 이벤트가 있으면 반환
-    if (eventDataNotifier.contains(date)) {
-      return eventDataNotifier.get(date)!;
+    // 2. 월 단위 요청이 이미 진행 중인지 확인
+    final monthKey = DateTime(date.year, date.month, 1);
+    if (_eventRequest.containsKey(monthKey)) {
+      // 진행 중인 월 단위 요청을 기다린 후, 캐시에서 다시 데이터를 가져옵니다.
+      await _eventRequest[monthKey]!;
+      return eventDataNotifier.get(dayKey) ?? [];
     }
 
-    // 현재 요청 진행 중이면 그 요청의 결과 기다리고 반환
-    if (_eventRequest.containsKey(date)) {
-      return _eventRequest[date]!;
+    // 3. 캐시도 없고, 진행 중인 요청도 없으면 월 단위로 데이터를 가져옵니다.
+    await _fetchAndCacheMonth(date);
+
+    // 월 단위 캐싱이 완료된 후, 해당 날짜의 데이터를 반환합니다.
+    return eventDataNotifier.get(dayKey) ?? [];
+  }
+
+  /// 특정 월의 모든 이벤트를 가져옵니다. 캐시를 우선적으로 확인합니다.
+  Future<Map<DateTime, List<Event>>> getEventByMonth(DateTime month) async {
+    if (myCouple == null) return {}; // 커플 정보가 없으면 빈 맵을 반환
+
+    final daysInMonth = DateUtils.getDaysInMonth(month.year, month.month);
+    final monthKey = DateTime(month.year, month.month, 1);
+
+    if (_eventRequest.containsKey(monthKey)) {
+      // 진행 중인 월 단위 요청이 완료될 때까지 기다립니다.
+      // 이 Future가 완료되면 notifier는 채워진 상태가 됩니다.
+      await _eventRequest[monthKey]!;
     }
 
-    // 새로운 요청이면 Future 캐싱
-    DateTime startDate = DateTime(date.year, date.month, date.day);
-    DateTime endDate = DateTime(date.year, date.month, date.day + 1);
-    final Future<List<Event>> future = _eventRepository
+    // 해당 월의 모든 날짜가 캐시되어 있는지 확인
+    bool isFullyCached = true;
+    for (int i = 1; i <= daysInMonth; i++) {
+      final day = DateTime(month.year, month.month, i);
+      if (!eventDataNotifier.contains(day)) {
+        isFullyCached = false;
+        break;
+      }
+    }
+
+    if (!isFullyCached) {
+      await _fetchAndCacheMonth(month);
+    }
+
+    final Map<DateTime, List<Event>> resultMap = {};
+    for (int i = 1; i <= daysInMonth; i++) {
+      final day = DateTime(month.year, month.month, i);
+      resultMap[day] = eventDataNotifier.get(day) ?? [];
+    }
+
+    return resultMap;
+  }
+
+  /// 월 단위로 서버에서 이벤트를 가져와 일별로 캐싱
+  Future<List<Event>> _fetchAndCacheMonth(DateTime month) {
+    if (myCouple == null) return Future.value([]);
+
+    final monthKey = DateTime(month.year, month.month, 1);
+
+    if (_eventRequest.containsKey(monthKey)) {
+      return _eventRequest[monthKey]!;
+    }
+
+    final startDate = DateTime(month.year, month.month, 1);
+    final endDate = DateTime(month.year, month.month + 1, 1);
+
+    final future = _eventRepository
         .getEvent(myCouple!.id, startDate, endDate)
         .then((events) {
-      // 멤버 정보를 이벤트 데이터에 넣어줌
-      events = _initMemberInEvents(events);
 
-      // 이벤트 정렬
-      events.sort((e1, e2) {
-        return e1.startDateTime.compareTo(e2.startDateTime);
-      });
+      _initMemberInEvents(events);
 
-      eventDataNotifier.set(date, events); // 이벤트 캐싱
-      return eventDataNotifier.get(date) ?? List<Event>.empty();
+      // 1. 가져온 이벤트를 날짜별로 임시 분류 (기존과 동일)
+      final Map<DateTime, Set<Event>> tempMonthlyCache = {};
+      for (final event in events) {
+        DateTime currentDay = DateUtils.dateOnly(event.startDateTime);
+        final lastDay = DateUtils.dateOnly(event.endDateTime);
+
+        while (!currentDay.isAfter(lastDay)) {
+          if (currentDay.year == month.year && currentDay.month == month.month) {
+            tempMonthlyCache.putIfAbsent(currentDay, () => {}).add(event);
+          }
+          currentDay = currentDay.add(const Duration(days: 1));
+        }
+      }
+
+      // 2. [핵심 수정] 해당 월의 '모든 날짜'에 대해 캐시를 설정합니다.
+      final daysInMonth = DateUtils.getDaysInMonth(month.year, month.month);
+      for (int i = 1; i <= daysInMonth; i++) {
+        final day = DateTime(month.year, month.month, i);
+
+        // 임시 캐시에 해당 날짜의 이벤트가 있으면 가져오고, 없으면 빈 리스트를 사용합니다.
+        final dailyEvents = tempMonthlyCache[day]?.toList() ?? [];
+
+        // 이벤트 유무와 관계없이 '모든 날짜'에 대해 notifier에 set합니다.
+        eventDataNotifier.set(day, dailyEvents);
+      }
+
+      // 이 메소드의 반환 타입 유지를 위해 원본 events 리스트를 반환합니다.
+      return events;
+
     }).catchError((e) {
       print(e);
       throw e;
     }).whenComplete(() {
-      // 요청이 완료되면 Future cache 에서 제거
-      _eventRequest.remove(date);
+      _eventRequest.remove(monthKey);
     });
 
-    _eventRequest[date] = future;
-
+    _eventRequest[monthKey] = future;
     return future;
-  }
-
-  // TODO: 여기서 Map 에 날짜별로 분류해서 주는게 좋지 않을까?
-  // month 단위는 Caching 하지 않음
-  Future<List<Event>> getEventByMonth(DateTime month) async {
-    DateTime startDate = DateTime(month.year, month.month);
-    DateTime endDate = DateTime(month.year, month.month + 1);
-
-    List<Event> events =
-        await _eventRepository.getEvent(myCouple!.id, startDate, endDate);
-
-    _initMemberInEvents(events);
-    return events;
   }
 
   List<Event> _initMemberInEvents(List<Event> events) {
@@ -157,19 +220,19 @@ class EventProvider {
 }
 
 class EventDataNotifier extends ChangeNotifier {
-  final Map<DateTime, List<Event>> _eventMap = {};
+  final Map<DateTime, Set<Event>> _eventMap = {};
 
   List<Event>? get(DateTime date) {
-    return _eventMap[date];
+    return _eventMap[date]?.toList();
   }
 
   void set(DateTime date, List<Event> events) {
-    _eventMap[date] = events;
+    _eventMap[date] = Set.of(events);
     notifyListeners();
   }
 
   void add(DateTime date, Event event) {
-    List<Event>? events = _eventMap[date];
+    Set<Event>? events = _eventMap[date];
     if (events != null) {
       events.add(event);
     }

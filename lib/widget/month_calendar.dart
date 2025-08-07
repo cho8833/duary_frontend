@@ -24,8 +24,9 @@ class _MonthCalendarState extends State<MonthCalendar> {
       PageController(initialPage: _initialPage);
 
   late TimeTableController timeTableController = widget.timeTableController;
-  late DateTime focusMonth = widget.timeTableController.focusMonth.value;
-  late DateTime initialMonth = focusMonth;
+  late final ValueNotifier<DateTime> focusMonthNotifier =
+      ValueNotifier(timeTableController.focusMonth.value);
+  late DateTime initialMonth = focusMonthNotifier.value;
 
   @override
   void initState() {
@@ -50,41 +51,46 @@ class _MonthCalendarState extends State<MonthCalendar> {
     return Column(
       children: [
         // appbar
-        SizedBox(
-          width: double.infinity,
-          height: 58,
-          child: Stack(
-            children: [
-              Positioned(
-                  left: 20,
-                  top: 18,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      timeTableController.moveToYear(focusMonth);
-                    },
-                    child: Row(
-                      children: [
-                        const Icon(Icons.chevron_left),
-                        Text(
-                          "${focusMonth.year}년",
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600, fontSize: 16),
-                        )
-                      ],
+        ValueListenableBuilder(
+          builder: (context, value, child) {
+            return SizedBox(
+              width: double.infinity,
+              height: 58,
+              child: Stack(
+                children: [
+                  Positioned(
+                      left: 20,
+                      top: 18,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          timeTableController.moveToYear(value);
+                        },
+                        child: Row(
+                          children: [
+                            const Icon(Icons.chevron_left),
+                            Text(
+                              "${value.year}년",
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 16),
+                            )
+                          ],
+                        ),
+                      )),
+                  Center(
+                    child: Text(
+                      "${value.month}월",
+                      style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFFFE8F00)),
                     ),
-                  )),
-              Center(
-                child: Text(
-                  "${focusMonth.month}월",
-                  style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFFFE8F00)),
-                ),
-              )
-            ],
-          ),
+                  )
+                ],
+              ),
+            );
+          },
+          valueListenable: focusMonthNotifier,
         ),
 
         // body
@@ -93,23 +99,24 @@ class _MonthCalendarState extends State<MonthCalendar> {
             controller: _pageController,
             itemCount: _totalPage,
             onPageChanged: (index) {
-              setState(() {
-                // index와 initialPage의 차이를 이용해 현재 페이지의 달을 계산
-                final int monthOffset = index - _initialPage;
+              // index와 initialPage의 차이를 이용해 현재 페이지의 달을 계산
+              final int monthOffset = index - _initialPage;
 
-                focusMonth = DateTime(
-                  initialMonth.year,
-                  initialMonth.month + monthOffset,
-                  1,
-                );
-              });
+              focusMonthNotifier.value = DateTime(
+                initialMonth.year,
+                initialMonth.month + monthOffset,
+                1,
+              );
             },
             itemBuilder: (context, index) {
+              final int monthOffset = index - _initialPage;
+              final DateTime currentMonth = DateTime(
+                  initialMonth.year, initialMonth.month + monthOffset, 1);
               return Container(
                 color: Colors.white,
                 child: _CalendarMonthWidget(
-                    year: focusMonth.year,
-                    month: focusMonth.month,
+                    year: currentMonth.year,
+                    month: currentMonth.month,
                     onDateTap: (day) => timeTableController.moveToDay(day)),
               );
             },
@@ -163,6 +170,7 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
           width: double.infinity,
           color: const Color(0xFFF3F3F3),
         ),
+        const SizedBox(height: 12,),
         // 날짜 그리드
         Expanded(
             child: FutureBuilder(
@@ -171,7 +179,7 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     Fluttertoast.showToast(msg: "오류가 발생했습니다");
-                  }
+                  } else {}
                   return _buildCalendarBody(weeks, snapshot.data);
                 })),
       ],
@@ -201,7 +209,8 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
     );
   }
 
-  Widget _buildCalendarBody(List<List<DateTime?>> weeks, List<Event>? events) {
+  Widget _buildCalendarBody(
+      List<List<DateTime?>> weeks, Map<DateTime, List<Event>>? events) {
     return Table(
       children: weeks.map((week) {
         return TableRow(
@@ -211,49 +220,43 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
             } else {
               // 날짜 아래 점 찍기
               late Widget dot;
-              if (events == null) {
+              // 해당 날짜의 이벤트 필터링
+              List<Event>? dayEvents = events?[day];
+
+              if (dayEvents == null || dayEvents.isEmpty) {
                 dot = Container();
               } else {
-                // 해당 날짜의 이벤트 필터링
-                List<Event> dayEvents = events
-                    .where((event) => event.startDateTime.day == day.day)
-                    .toList();
-                if (dayEvents.isEmpty) {
-                  dot = Container();
-                } else {
-                  List<int> dotIndex = [-1, -1, -1];
-                  // 해당 날짜에 함께하는 일정이 아니고, 내 일정이 있는 경우 내 점 찍기
-                  dotIndex[0] = dayEvents.indexWhere((event) =>
-                      event.createdBy == _duaryContext.me.value!.getId() &&
-                      !event.isTogether);
-                  // 해당 날짜에 함께하는 일정이 아니고, 상대방 일정이 있는 경우 상대방 점 찍기
-                  dotIndex[1] = dayEvents.indexWhere((event) =>
-                      event.createdBy != _duaryContext.me.value!.getId() &&
-                      !event.isTogether);
-                  // 해당 날짜에 함께하는 일정이 있으면 분홍색 점 찍기
-                  dotIndex[2] =
-                      dayEvents.indexWhere((event) => event.isTogether);
+                List<int> dotIndex = [-1, -1, -1];
+                // 해당 날짜에 함께하는 일정이 아니고, 내 일정이 있는 경우 내 점 찍기
+                dotIndex[0] = dayEvents.indexWhere((event) =>
+                    event.createdBy == _duaryContext.me.value!.getId() &&
+                    !event.isTogether);
+                // 해당 날짜에 함께하는 일정이 아니고, 상대방 일정이 있는 경우 상대방 점 찍기
+                dotIndex[1] = dayEvents.indexWhere((event) =>
+                    event.createdBy != _duaryContext.me.value!.getId() &&
+                    !event.isTogether);
+                // 해당 날짜에 함께하는 일정이 있으면 분홍색 점 찍기
+                dotIndex[2] = dayEvents.indexWhere((event) => event.isTogether);
 
-                  dotIndex = dotIndex.where((i) => i != -1).toList();
-                  dot = ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    shrinkWrap: true,
-                    itemCount: dotIndex.length,
-                    itemBuilder: (context, index) {
-                      Event event = dayEvents[dotIndex[index]];
-                      if (event.isTogether) {
-                        return _CalendarDot(
-                            color: Character.together.characterColor);
-                      }
+                dotIndex = dotIndex.where((i) => i != -1).toList();
+                dot = ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true,
+                  itemCount: dotIndex.length,
+                  itemBuilder: (context, index) {
+                    Event event = dayEvents[dotIndex[index]];
+                    if (event.isTogether) {
                       return _CalendarDot(
-                          color: event.member.character!.characterColor);
-                    },
-                    separatorBuilder: (BuildContext context, int index) =>
-                        const SizedBox(
-                      width: 3,
-                    ),
-                  );
-                }
+                          color: Character.together.characterColor);
+                    }
+                    return _CalendarDot(
+                        color: event.member.character!.characterColor);
+                  },
+                  separatorBuilder: (BuildContext context, int index) =>
+                      const SizedBox(
+                    width: 3,
+                  ),
+                );
               }
               // 날짜 그리기
               return GestureDetector(

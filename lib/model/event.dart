@@ -62,6 +62,13 @@ class Event {
   });
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
+
+  @override
+  bool operator ==(covariant Event other) => id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
 }
 
 class Recurrence {}
