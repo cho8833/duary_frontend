@@ -149,10 +149,12 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               ),
             ),
 
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context)
-                    .push(SlideDownRoute(page: EditEventScreen(event: event,))).then((updated) {
+            event.eventType == EventType.normal ? Column(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context)
+                        .push(SlideDownRoute(page: EditEventScreen(event: event,))).then((updated) {
                       try {
                         if ((updated as Event?) != null) {
                           setState(() {
@@ -160,27 +162,25 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           });
                         }
                       } catch (_) {}
-                });
-              },
-              child: Container(
-                width: double.infinity,
-                height: 50,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    color: const Color(0xFFFFBD64)),
-                child: const Center(
-                  child: Text(
-                    "일정 수정하기",
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF573200)),
+                    });
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: 50,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: const Color(0xFFFFBD64)),
+                    child: const Center(
+                      child: Text(
+                        "일정 수정하기",
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF573200)),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            Column(
-              children: [
                 const SizedBox(
                   height: 15,
                 ),
@@ -213,7 +213,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                   height: 30,
                 )
               ],
-            ),
+            ) : Container()
           ],
         ),
       ),

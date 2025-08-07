@@ -6,7 +6,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'event.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class Event {
   String id;
   String coupleId;
@@ -34,6 +34,8 @@ class Event {
   bool isTogether;
   bool isAllDay;
 
+  EventType eventType;
+
   @JsonKey(includeToJson: false, includeFromJson: false)
   late Member member;
 
@@ -46,7 +48,8 @@ class Event {
     this.title,
     this.frequency,
     this.isTogether,
-    this.isAllDay, {
+    this.isAllDay,
+    this.eventType, {
     this.recurStartDate,
     this.recurEndDate,
     this.daily,
@@ -61,9 +64,7 @@ class Event {
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
 }
 
-class Recurrence {
-
-}
+class Recurrence {}
 
 @JsonSerializable()
 class DailyRecurrence extends Recurrence {
@@ -78,7 +79,7 @@ class DailyRecurrence extends Recurrence {
 }
 
 @JsonSerializable()
-class WeeklyRecurrence extends Recurrence{
+class WeeklyRecurrence extends Recurrence {
   List<Weekday> weekdays;
 
   WeeklyRecurrence(this.weekdays);
@@ -90,7 +91,7 @@ class WeeklyRecurrence extends Recurrence{
 }
 
 @JsonSerializable()
-class MonthlyRecurrence extends Recurrence{
+class MonthlyRecurrence extends Recurrence {
   List<int> days;
 
   MonthlyRecurrence(this.days);
@@ -113,4 +114,17 @@ class YearlyRecurrence extends Recurrence {
 
   factory YearlyRecurrence.fromJson(Map<String, dynamic> json) =>
       _$YearlyRecurrenceFromJson(json);
+}
+
+enum EventType {
+  normal("NORMAL"),
+  birthday("BIRTHDAY"),
+  anniversary("ANNIVERSARY");
+
+  final String value;
+
+  const EventType(this.value);
+
+  factory EventType.fromJson(String json) =>
+      EventType.values.firstWhere((t) => t.value == json);
 }
