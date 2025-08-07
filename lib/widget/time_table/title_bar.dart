@@ -187,12 +187,7 @@ class _TitleBarState extends State<TitleBar> {
                 onTap: () {
                   Navigator.of(context)
                       .push(MaterialPageRoute(
-                          builder: (context) => EventDetailsScreen(event: e)))
-                      .then((needRefresh) {
-                    if (needRefresh != null && needRefresh as bool) {
-                      widget.refresh();
-                    }
-                  });
+                          builder: (context) => EventDetailsScreen(event: e)));
                 },
                 child: Row(
                   children: [
@@ -219,7 +214,7 @@ class _TitleBarState extends State<TitleBar> {
   Widget loverAllDay(List<Event> events) {
     List<Event> lovers = events.where((e) {
       return e.isAllDay &&
-          (e.member.socialId == duaryContext.lover.value!.socialId ||
+          (e.member.socialId != duaryContext.me.value!.socialId ||
               e.isTogether);
     }).toList();
 
@@ -236,12 +231,7 @@ class _TitleBarState extends State<TitleBar> {
                 Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => EventDetailsScreen(event: e)))
-                    .then((needRefresh) {
-                  if (needRefresh != null && needRefresh as bool) {
-                    widget.refresh();
-                  }
-                });
+                            builder: (context) => EventDetailsScreen(event: e)));
               },
               child: Row(
                 children: [

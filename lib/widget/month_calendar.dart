@@ -228,7 +228,7 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
                       !event.isTogether);
                   // 해당 날짜에 함께하는 일정이 아니고, 상대방 일정이 있는 경우 상대방 점 찍기
                   dotIndex[1] = dayEvents.indexWhere((event) =>
-                      event.createdBy == _duaryContext.lover.value!.getId() &&
+                      event.createdBy != _duaryContext.me.value!.getId() &&
                       !event.isTogether);
                   // 해당 날짜에 함께하는 일정이 있으면 분홍색 점 찍기
                   dotIndex[2] =

@@ -189,11 +189,7 @@ class _DayViewState extends State<DayView> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                EventDetailsScreen(event: event))).then((needRefresh) {
-                                  if (needRefresh != null && needRefresh as bool) {
-                                    widget.refresh();
-                                  }
-                    });
+                                EventDetailsScreen(event: event)));
                   }
                 },
                 child: bubble),
@@ -262,7 +258,7 @@ class _DayViewState extends State<DayView> {
         return (_duaryContext.me.value!.getId() == event.member.getId() ||
             event.isTogether) && !event.isAllDay;
       } else {
-        return (_duaryContext.lover.value!.getId() == event.member.getId() ||
+        return (_duaryContext.me.value!.getId() != event.member.getId() ||
             event.isTogether) && !event.isAllDay;
       }
     }).toList();

@@ -7,17 +7,15 @@ part of 'member.dart';
 // **************************************************************************
 
 Member _$MemberFromJson(Map<String, dynamic> json) => Member(
-      json['name'] as String?,
-      json['character'] == null
-          ? null
-          : Character.fromJson(json['character'] as String),
-      json['coupleId'] as String?,
-      _$JsonConverterFromJson<String, DateTime>(
-          json['birthday'], const ISO8601TimeZoneFormatter().fromJson),
       json['socialId'] as String,
       json['provider'] as String,
-      AlarmOffset.fromJson(json['myAlarm'] as String),
-      AlarmOffset.fromJson(json['loverAlarm'] as String),
+      character: json['character'] == null
+          ? null
+          : Character.fromJson(json['character'] as String),
+      name: json['name'] as String?,
+      coupleId: json['coupleId'] as String?,
+      birthday: _$JsonConverterFromJson<String, DateTime>(
+          json['birthday'], const ISO8601TimeZoneFormatter().fromJson),
     );
 
 Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
@@ -28,8 +26,6 @@ Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
           instance.birthday, const ISO8601TimeZoneFormatter().toJson),
       'socialId': instance.socialId,
       'provider': instance.provider,
-      'myAlarm': instance.myAlarm,
-      'loverAlarm': instance.loverAlarm,
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

@@ -1,6 +1,7 @@
 import 'package:duary/base/ws_data.dart';
 import 'package:duary/data/event_req.dart';
 import 'package:duary/model/couple.dart';
+import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
@@ -10,7 +11,6 @@ import 'package:duary/support/custom_exception.dart';
 import 'package:flutter/material.dart';
 
 class EventProvider {
-
   final EventRepository _eventRepository;
 
   Member? me;
@@ -27,7 +27,8 @@ class EventProvider {
     DuaryContext duaryContext = DuaryContext();
     duaryContext.me.addListener(() {
       me = duaryContext.me.value;
-      if (me == null) {   // me 가 null 로 바뀌면 sign out or withdrawal
+      if (me == null) {
+        // me 가 null 로 바뀌면 sign out or withdrawal
         lover = null;
         myCouple = null;
       }
@@ -64,12 +65,12 @@ class EventProvider {
       return _eventRequest[date]!;
     }
 
-
     // 새로운 요청이면 Future 캐싱
     DateTime startDate = DateTime(date.year, date.month, date.day);
     DateTime endDate = DateTime(date.year, date.month, date.day + 1);
-    final Future<List<Event>> future =
-    _eventRepository.getEvent(myCouple!.id, startDate, endDate).then((events) {
+    final Future<List<Event>> future = _eventRepository
+        .getEvent(myCouple!.id, startDate, endDate)
+        .then((events) {
       // 멤버 정보를 이벤트 데이터에 넣어줌
       events = _initMemberInEvents(events);
 
@@ -99,8 +100,8 @@ class EventProvider {
     DateTime startDate = DateTime(month.year, month.month);
     DateTime endDate = DateTime(month.year, month.month + 1);
 
-
-    List<Event> events = await _eventRepository.getEvent(myCouple!.id, startDate, endDate);
+    List<Event> events =
+        await _eventRepository.getEvent(myCouple!.id, startDate, endDate);
 
     _initMemberInEvents(events);
     return events;
@@ -108,14 +109,16 @@ class EventProvider {
 
   List<Event> _initMemberInEvents(List<Event> events) {
     List<Event> temp = [];
+    final noneMember = Member("none", "none", character: Character.none);
     for (Event event in events) {
       try {
         event.member = myCouple!.members
             .firstWhere((member) => member.getId() == event.createdBy);
-        temp.add(event);
       } catch (_) {
+        event.member = noneMember;
         // createdby 와 member 가 매핑되는 event가 없으면 잘못된 데이터로 간주하고 무시
       }
+      temp.add(event);
     }
     return temp;
   }
@@ -153,7 +156,6 @@ class EventProvider {
   }
 }
 
-
 class EventDataNotifier extends ChangeNotifier {
   final Map<DateTime, List<Event>> _eventMap = {};
 
@@ -165,6 +167,7 @@ class EventDataNotifier extends ChangeNotifier {
     _eventMap[date] = events;
     notifyListeners();
   }
+
   void add(DateTime date, Event event) {
     List<Event>? events = _eventMap[date];
     if (events != null) {

@@ -187,7 +187,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                 FutureButton(
                   onTap: () async {
                     _eventProvider.deleteEvent(event).then((_) {
-                      Navigator.pop(context, true);
+                      Navigator.pop(context);
                     }).catchError((e) {
                       Fluttertoast.showToast(msg: e.toString());
                     });

@@ -182,7 +182,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       builder: (context) => const MyPageScreen()));
             },
             child: const Icon(Icons.menu)),
-        trailingBuilder: (context) => const Icon(Icons.notifications_outlined),
       ),
       body: LayoutBuilder(builder: (context, constraints) {
         return Stack(

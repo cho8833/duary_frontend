@@ -15,16 +15,12 @@ class Member {
   String socialId;
   String provider;
 
-  AlarmOffset myAlarm;
-  AlarmOffset loverAlarm;
-
   String getId() {
     return "$socialId-$provider";
   }
 
 
-  Member(this.name, this.character, this.coupleId, this.birthday, this.socialId,
-      this.provider, this.myAlarm, this.loverAlarm);
+  Member(this.socialId, this.provider,{ this.character, this.name, this.coupleId, this.birthday,});
 
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
 }
