@@ -7,9 +7,12 @@ import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/duary_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 
 class MyInfoScreen extends StatelessWidget {
   const MyInfoScreen({super.key});
+
+  String formatDateTime(DateTime req) => DateFormat('yy.MM.dd').format(req);
 
   @override
   Widget build(BuildContext context) {
@@ -23,17 +26,30 @@ class MyInfoScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            Row(
-              children: [
-                Text("로그인 방법"),
-                Spacer(),
-                SizedBox(
-                    width: 32,
-                    height: 32,
-                    child: Image.asset(socialProvider.iconPath)),
-                Text(socialProvider.title),
-              ],
+            InfoBox(
+                labelText: "로그인 방법",
+                value: Row(
+                  children: [
+                    Image.asset(socialProvider.iconPath, width: 24, height: 24,),
+                    _ValueText(currentValue: socialProvider.title),
+                  ],
+                )),
+            const SizedBox(
+              height: 8,
             ),
+            InfoBox(
+                labelText: "이름",
+                value: _ValueText(
+                  currentValue: duaryContext.me.value!.name!,
+                )),
+            const SizedBox(
+              height: 8,
+            ),
+            InfoBox(
+                labelText: "생일",
+                value: _ValueText(
+                    currentValue:
+                        formatDateTime(duaryContext.me.value!.birthday!))),
             const Spacer(),
             Center(
               child: FutureButton(
@@ -63,6 +79,60 @@ class MyInfoScreen extends StatelessWidget {
             )
           ],
         ),
+      ),
+    );
+  }
+}
+
+class InfoBox extends StatelessWidget {
+  const InfoBox({super.key, required this.labelText, required this.value});
+
+  final String labelText;
+  final Widget value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F3F3),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16, right: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              labelText,
+              style: const TextStyle(
+                color: Color(0xFF000000),
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            value
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ValueText extends StatelessWidget {
+  const _ValueText({super.key, required this.currentValue});
+
+  final String currentValue;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      currentValue,
+      style: const TextStyle(
+        color: Color(0xFFB6B6B6),
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
       ),
     );
   }

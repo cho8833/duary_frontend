@@ -185,8 +185,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
               const SizedBox(
                 height: 8,
               ),
-              FutureButton(
-                  onTap: () async {
+              GestureDetector(
+                  onTap: () {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -196,8 +196,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
               const SizedBox(
                 height: 10,
               ),
-              FutureButton(
-                  onTap: () async {
+              GestureDetector(
+                  onTap: () {
                     Navigator.push(
                         context,
                         MaterialPageRoute(

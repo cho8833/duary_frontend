@@ -17,7 +17,7 @@ class YearCalendar extends StatefulWidget {
 class _YearCalendarState extends State<YearCalendar> {
   static const _totalPage = 500;
   static const _initialPage = 250;
-  late final PageController _pageController =
+  final PageController _pageController =
       PageController(initialPage: _initialPage);
 
   late final TimeTableController _timeTableController =
@@ -31,9 +31,8 @@ class _YearCalendarState extends State<YearCalendar> {
   }
 
   void yearListener() {
-    setState(() {
-      initialYear = _timeTableController.focusYear.value;
-    });
+    final int focusYear = _timeTableController.focusYear.value.year;
+    _pageController.jumpToPage(focusYear - initialYear.year + _initialPage);
   }
 
   @override
@@ -50,14 +49,10 @@ class _YearCalendarState extends State<YearCalendar> {
           controller: _pageController,
           itemCount: _totalPage,
           itemBuilder: (context, index) {
-            final int yearOffset = index - _initialPage;
-            final focusYear = DateTime(
-              initialYear.year + yearOffset,
-              1,
-            );
+            final year = initialYear.year + index - _initialPage;
             return _YearPage(
-                key: ValueKey(focusYear.year),
-                year: focusYear.year,
+                key: ValueKey(year),
+                year: year,
                 onMonthTap: _timeTableController.moveToMonth);
           }),
     );
