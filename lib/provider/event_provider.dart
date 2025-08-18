@@ -1,3 +1,4 @@
+import 'package:device_calendar/device_calendar.dart' as dc;
 import 'package:duary/base/ws_data.dart';
 import 'package:duary/data/event_req.dart';
 import 'package:duary/model/couple.dart';
@@ -5,6 +6,7 @@ import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/repository/apple_calendar_repository.dart';
 import 'package:duary/repository/event_repository.dart';
 import 'package:duary/repository/impl/websocket_handler.dart';
 import 'package:duary/support/custom_exception.dart';
@@ -12,6 +14,7 @@ import 'package:flutter/material.dart';
 
 class EventProvider {
   final EventRepository _eventRepository;
+  final AppleCalendarRepository appleCalendarRepository;
 
   Member? me;
   Member? lover;
@@ -23,7 +26,7 @@ class EventProvider {
   // Future caching : 같은 인자로 호출된 비동기 작업이 진행 중이면, 그 작업의 결과를 기다렸다가 반환
   final Map<DateTime, Future<List<Event>>> _eventRequest = {};
 
-  EventProvider(this._eventRepository) {
+  EventProvider(this._eventRepository, this.appleCalendarRepository) {
     DuaryContext duaryContext = DuaryContext();
     duaryContext.me.addListener(() {
       me = duaryContext.me.value;
@@ -112,7 +115,7 @@ class EventProvider {
   }
 
   /// 월 단위로 서버에서 이벤트를 가져와 일별로 캐싱
-  Future<List<Event>> _fetchAndCacheMonth(DateTime month) {
+  Future<List<Event>> _fetchAndCacheMonth(DateTime month) async {
     if (myCouple == null) return Future.value([]);
 
     final monthKey = DateTime(month.year, month.month, 1);
@@ -127,7 +130,6 @@ class EventProvider {
     final future = _eventRepository
         .getEvent(myCouple!.id, startDate, endDate)
         .then((events) {
-
       _initMemberInEvents(events);
 
       // 1. 가져온 이벤트를 날짜별로 임시 분류 (기존과 동일)
@@ -137,14 +139,15 @@ class EventProvider {
         final lastDay = DateUtils.dateOnly(event.endDateTime);
 
         while (!currentDay.isAfter(lastDay)) {
-          if (currentDay.year == month.year && currentDay.month == month.month) {
+          if (currentDay.year == month.year &&
+              currentDay.month == month.month) {
             tempMonthlyCache.putIfAbsent(currentDay, () => {}).add(event);
           }
           currentDay = currentDay.add(const Duration(days: 1));
         }
       }
 
-      // 2. [핵심 수정] 해당 월의 '모든 날짜'에 대해 캐시를 설정합니다.
+      // 2.해당 월의 모든 날짜에 대해 캐시를 설정합니다.
       final daysInMonth = DateUtils.getDaysInMonth(month.year, month.month);
       for (int i = 1; i <= daysInMonth; i++) {
         final day = DateTime(month.year, month.month, i);
@@ -155,10 +158,10 @@ class EventProvider {
         // 이벤트 유무와 관계없이 '모든 날짜'에 대해 notifier에 set합니다.
         eventDataNotifier.set(day, dailyEvents);
       }
+      eventDataNotifier.notifyUpdate();
 
       // 이 메소드의 반환 타입 유지를 위해 원본 events 리스트를 반환합니다.
       return events;
-
     }).catchError((e) {
       print(e);
       throw e;
@@ -228,7 +231,6 @@ class EventDataNotifier extends ChangeNotifier {
 
   void set(DateTime date, List<Event> events) {
     _eventMap[date] = Set.of(events);
-    notifyListeners();
   }
 
   void add(DateTime date, Event event) {

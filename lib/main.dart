@@ -64,7 +64,7 @@ void main() async {
   WebSocketHandler().init(tokenProvider);
 
   // init Providers
-  EventProvider eventProvider = EventProvider(rc.eventRepository);
+  EventProvider eventProvider = EventProvider(rc.eventRepository, rc.appleCalendarRepository);
   DuaryContext duaryContext = DuaryContext();
   duaryContext.init(
       rc.coupleRepository, rc.authRepository, rc.memberRepository);

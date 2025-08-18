@@ -298,24 +298,6 @@ Future<List<DateTime?>?> showDuaryCalendarPicker(bool futureDateSelectable,
   );
 }
 
-class SubPageTitle extends StatelessWidget {
-  const SubPageTitle({super.key, required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontWeight: FontWeight.w700,
-        fontSize: 20,
-        color: Color(0xFFFE8F00),
-      ),
-    );
-  }
-}
-
 void showDuaryCalendarPicker2(
     BuildContext context, Function(DateTime) onSelect, DateTime initialDate) {
   BottomPicker.date(

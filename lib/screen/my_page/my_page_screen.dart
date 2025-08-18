@@ -1,10 +1,9 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:duary/model/couple.dart';
-import 'package:duary/model/enums/alarm_offset.dart';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/screen/my_page/apple_calendar_screen.dart';
 import 'package:duary/screen/my_page/change_character_screen.dart';
 import 'package:duary/screen/my_page/couple_info_screen.dart';
 import 'package:duary/screen/my_page/edit_birthday_screen.dart';
@@ -15,7 +14,6 @@ import 'package:duary/screen/my_page/my_info_screen.dart';
 import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
 class MyPageScreen extends StatefulWidget {
@@ -71,16 +69,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
               Navigator.pop(context);
             },
             child: const Icon(Icons.navigate_before)),
-        centerBuilder: (context) => const Text(
-          "마이페이지",
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 20,
-            color: Color(0xFFFE8F00),
-          ),
-        ),
+        centerBuilder: (context) => const SubPageTitle(title: "마이페이지")
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
@@ -166,7 +157,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 ),
               ),
               const SizedBox(
-                height: 48,
+                height: 32,
               ),
               GestureDetector(
                 onTap: () {
@@ -238,8 +229,23 @@ class _MyPageScreenState extends State<MyPageScreen> {
                       labelText: "사랑이 시작된 날",
                       currentValue: formatDateTime(myCouple.relationDate))),
               const SizedBox(
-                height: 56,
+                height: 27,
               ),
+              const SectionTitle(text: "캘린더 연동"),
+              const SizedBox(
+                height: 8,
+              ),
+              GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AppleCalendarScreen()));
+                  },
+                  child: InfoBox(
+                      labelText: "애플 캘린더",
+                      currentValue: me.syncedAppleCalendar.isEmpty ? "연동되지 않음" : "연동됨")),
+              const Spacer(),
               Align(
                 alignment: Alignment.center,
                 child: FutureButton(
@@ -263,7 +269,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 ),
               ),
               const SizedBox(
-                height: 15,
+                height: 16,
               ),
             ],
           ),
@@ -277,72 +283,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
     duaryContext.me.removeListener(meListener);
     duaryContext.myCouple.removeListener(coupleListener);
     super.dispose();
-  }
-}
-
-class AlarmOffsetDropdownButton extends StatefulWidget {
-  const AlarmOffsetDropdownButton(
-      {super.key,
-      required this.initialValue,
-      required this.onSelect,
-      required this.title});
-
-  final String title;
-
-  final AlarmOffset initialValue;
-
-  final Future<void> Function(AlarmOffset) onSelect;
-
-  @override
-  State<AlarmOffsetDropdownButton> createState() =>
-      _AlarmOffsetDropdownButtonState();
-}
-
-class _AlarmOffsetDropdownButtonState extends State<AlarmOffsetDropdownButton> {
-  // Future 캐싱을 통해 중복 호출 방지
-  Future<void>? _ongoingFuture;
-
-  static const List<AlarmOffset> alarmOffsets = AlarmOffset.values;
-
-  static final List<DropdownMenuItem<AlarmOffset>> items = alarmOffsets
-      .map((offset) =>
-          DropdownMenuItem(value: offset, child: Text(offset.title)))
-      .toList();
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonHideUnderline(
-      child: DropdownButton2(
-          items: items,
-          isExpanded: true,
-          value: widget.initialValue,
-          customButton: InfoBox(
-              labelText: widget.title, currentValue: widget.initialValue.title),
-          /*
-              요청 처리 중이면 버튼 비활성화
-             */
-          onChanged: _ongoingFuture != null
-              ? null
-              : (value) async {
-                  if (value != null) {
-                    if (_ongoingFuture != null) {
-                      return _ongoingFuture;
-                    }
-
-                    setState(() {
-                      _ongoingFuture = widget.onSelect(value as AlarmOffset);
-                    });
-
-                    _ongoingFuture!.whenComplete(() {
-                      setState(() {
-                        _ongoingFuture = null;
-                      });
-                    });
-
-                    return _ongoingFuture;
-                  }
-                }),
-    );
   }
 }
 
@@ -374,7 +314,6 @@ class InfoBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // width: double.infinity,
       height: 56,
       decoration: BoxDecoration(
         color: const Color(0xFFF3F3F3),

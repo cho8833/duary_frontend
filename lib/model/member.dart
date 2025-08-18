@@ -14,13 +14,28 @@ class Member {
   DateTime? birthday;
   String socialId;
   String provider;
+  List<AppleCalendar> syncedAppleCalendar = [];
 
   String getId() {
     return "$socialId-$provider";
   }
 
 
-  Member(this.socialId, this.provider,{ this.character, this.name, this.coupleId, this.birthday,});
+  Member(this.socialId, this.provider, { this.character, this.name, this.coupleId, this.birthday, List<AppleCalendar>? syncedAppleCalendar}) {
+    this.syncedAppleCalendar = syncedAppleCalendar ?? [];
+  }
 
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
+}
+
+@JsonSerializable()
+class AppleCalendar {
+  String id;
+  String name;
+
+  AppleCalendar(this.id, this.name);
+
+  Map<String, dynamic> toJson() => _$AppleCalendarToJson(this);
+
+  factory AppleCalendar.fromJson(Map<String, dynamic> json) => _$AppleCalendarFromJson(json);
 }

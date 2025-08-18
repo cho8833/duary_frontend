@@ -2,9 +2,11 @@ import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
+import 'package:duary/screen/home_screen.dart';
 import 'package:duary/screen/timetable_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class MonthCalendar extends StatefulWidget {
@@ -28,6 +30,13 @@ class _MonthCalendarState extends State<MonthCalendar> {
       ValueNotifier(timeTableController.focusMonth.value);
   late DateTime initialMonth = focusMonthNotifier.value;
 
+  late DateTime selectedDay = timeTableController.focusDay.value;
+
+  late List<Event> dayEvents =
+      eventProvider.eventDataNotifier.get(selectedDay) ?? [];
+
+  late final EventProvider eventProvider = context.read<EventProvider>();
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +58,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // appbar
         ValueListenableBuilder(
@@ -77,6 +87,26 @@ class _MonthCalendarState extends State<MonthCalendar> {
                           ],
                         ),
                       )),
+                  Positioned(
+                    right: 20,
+                    top: 18,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        timeTableController.moveToDay(selectedDay);
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            "${selectedDay.day}일",
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 16),
+                          ),
+                          const Icon(Icons.chevron_right),
+                        ],
+                      ),
+                    ),
+                  ),
                   Center(
                     child: Text(
                       "${value.month}월",
@@ -92,9 +122,9 @@ class _MonthCalendarState extends State<MonthCalendar> {
           },
           valueListenable: focusMonthNotifier,
         ),
-
         // body
-        Expanded(
+        SizedBox(
+          height: 256,
           child: PageView.builder(
             controller: _pageController,
             itemCount: _totalPage,
@@ -115,29 +145,91 @@ class _MonthCalendarState extends State<MonthCalendar> {
               return Container(
                 color: Colors.white,
                 child: _CalendarMonthWidget(
-                    year: currentMonth.year,
-                    month: currentMonth.month,
-                    onDateTap: (day) => timeTableController.moveToDay(day)),
+                  year: currentMonth.year,
+                  month: currentMonth.month,
+                  selectedDay: selectedDay,
+                  onSelectDay: (DateTime day) {
+                    if (DateUtils.isSameDay(day, selectedDay)) {
+                      timeTableController.moveToDay(day);
+                    } else {
+                      setState(() {
+                        selectedDay = day;
+                        dayEvents =
+                            eventProvider.eventDataNotifier.get(selectedDay) ??
+                                [];
+                      });
+                    }
+                  },
+                ),
               );
             },
           ),
         ),
+        const SizedBox(
+          height: 16,
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: dayEvents.isNotEmpty ? ListView.builder(
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  Event event = dayEvents[index];
+                  return Column(
+                    children: [
+                      ComingEventCard(event: event),
+                      const SizedBox(height: 8,),
+                    ],
+                  );
+                },
+                itemCount: dayEvents.length) : const Center(child: Text("일정이 없어요"),),
+          ),
+        ),
       ],
     );
+  }
+
+  Widget _dateText() {
+    late String title;
+
+    DateTime today = DateUtils.dateOnly(DateTime.now());
+    int dayIndex = selectedDay.difference(today).inDays;
+
+    switch (dayIndex) {
+      case 0:
+        title = "오늘";
+      case 1:
+        title = "내일";
+      case -1:
+        title = "어제";
+      default:
+        title = _formatDate(selectedDay);
+    }
+
+    return Text(
+      title,
+      style: const TextStyle(
+          fontWeight: FontWeight.w600, fontSize: 18, color: Colors.black),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return "${DateFormat("yyyy년 M월 dd일").format(date)} ${DateFormat.E("ko_KR").format(date)}요일";
   }
 }
 
 class _CalendarMonthWidget extends StatefulWidget {
   final int year;
   final int month;
-
-  final void Function(DateTime) onDateTap;
+  final void Function(DateTime) onSelectDay;
+  final DateTime selectedDay;
 
   const _CalendarMonthWidget(
       {super.key,
       required this.year,
       required this.month,
-      required this.onDateTap});
+      required this.onSelectDay,
+      required this.selectedDay});
 
   @override
   State<_CalendarMonthWidget> createState() => _CalendarMonthWidgetState();
@@ -170,18 +262,17 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
           width: double.infinity,
           color: const Color(0xFFF3F3F3),
         ),
-        const SizedBox(height: 12,),
+
         // 날짜 그리드
-        Expanded(
-            child: FutureBuilder(
-                future: _eventProvider
-                    .getEventByMonth(DateTime(widget.year, widget.month, 1)),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    Fluttertoast.showToast(msg: "오류가 발생했습니다");
-                  } else {}
-                  return _buildCalendarBody(weeks, snapshot.data);
-                })),
+        FutureBuilder(
+            future: _eventProvider
+                .getEventByMonth(DateTime(widget.year, widget.month, 1)),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                Fluttertoast.showToast(msg: "오류가 발생했습니다");
+              } else {}
+              return _buildCalendarBody(weeks, snapshot.data);
+            }),
       ],
     );
   }
@@ -216,7 +307,7 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
         return TableRow(
           children: week.map((day) {
             if (day == null) {
-              return const SizedBox(height: 40);
+              return const SizedBox(height: 32);
             } else {
               // 날짜 아래 점 찍기
               late Widget dot;
@@ -262,24 +353,35 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
-                  widget.onDateTap(day);
+                  widget.onSelectDay(day);
                 },
                 child: Container(
-                  height: 40,
+                  height: 36,
                   alignment: Alignment.center,
-                  child: Column(
+                  child: Stack(
                     children: [
-                      Text(
-                        "${day.day}",
-                        style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF656565)),
+                      Center(
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          alignment: Alignment.center,
+                          decoration: DateUtils.isSameDay(day, widget.selectedDay) ? BoxDecoration(
+                            color: const Color(0xFFFFEBD1), borderRadius: BorderRadius.circular(99)
+                          ) : null,
+                          child: Text(
+                            "${day.day}",
+                            style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF656565)),
+                          ),
+                        ),
                       ),
-                      const SizedBox(
-                        height: 4,
-                      ),
-                      SizedBox(height: 5, child: dot)
+                      Positioned(
+                        bottom: 4,
+                          left: 0,
+                          right: 0,
+                          child: Center(child: SizedBox(height: 5, child: dot)))
                     ],
                   ),
                 ),
@@ -340,6 +442,49 @@ class _CalendarDot extends StatelessWidget {
       ),
       height: 5,
       width: 5,
+    );
+  }
+}
+
+class HeightReporter extends StatefulWidget {
+  final Widget child;
+  final Function(double height) onHeightMeasured;
+
+  const HeightReporter({
+    super.key,
+    required this.child,
+    required this.onHeightMeasured,
+  });
+
+  @override
+  State<HeightReporter> createState() => _HeightReporterState();
+}
+
+class _HeightReporterState extends State<HeightReporter> {
+  final GlobalKey _key = GlobalKey();
+
+  @override
+  void didUpdateWidget(covariant HeightReporter oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _measureHeight();
+  }
+
+  void _measureHeight() {
+    // 위젯의 렌더링이 끝난 직후에 콜백을 실행하여 높이를 측정
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = _key.currentContext;
+      if (context != null) {
+        final box = context.findRenderObject() as RenderBox;
+        widget.onHeightMeasured(box.size.height);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: _key,
+      child: widget.child,
     );
   }
 }

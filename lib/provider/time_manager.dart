@@ -9,7 +9,7 @@ class TimeManager extends ChangeNotifier {
 
   TimeManager() {
     _now = DateTime.now();
-    timer = Timer.periodic(const Duration(seconds: 5), (time) {
+    timer = Timer.periodic(const Duration(minutes: 1), (time) {
       _now = DateTime.now();
       notifyListeners();
     });

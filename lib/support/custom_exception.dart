@@ -84,3 +84,14 @@ class ValidationException implements Exception {
     return message;
   }
 }
+
+class PermissionDeniedException implements Exception {
+  final String message;
+
+  PermissionDeniedException(this.message);
+
+  @override
+  String toString() {
+    return message;
+  }
+}

@@ -1,4 +1,5 @@
 import 'package:duary/model/enums/frequency.dart';
+import 'package:device_calendar/device_calendar.dart' as dc;
 import 'package:duary/model/enums/weekday.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/support/iso8601_time_zone_formatter.dart';
@@ -63,12 +64,27 @@ class Event {
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
 
+  factory Event.fromApple(String memberId, dc.Event dcEvent) {
+    Event event = Event(
+        dcEvent.eventId!,
+        "",
+        memberId,
+        dcEvent.start!,
+        dcEvent.end!,
+        dcEvent.title!,
+        Frequency.oneTime,
+        false,
+        dcEvent.allDay!,
+        EventType.normal);
+
+    return event;
+  }
+
   @override
   bool operator ==(covariant Event other) => id == other.id;
 
   @override
   int get hashCode => id.hashCode;
-
 }
 
 class Recurrence {}

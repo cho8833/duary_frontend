@@ -1,5 +1,7 @@
+import 'package:duary/repository/apple_calendar_repository.dart';
 import 'package:duary/repository/couple_repository.dart';
 import 'package:duary/repository/event_repository.dart';
+import 'package:duary/repository/impl/apple_calendar_repository_impl.dart';
 import 'package:duary/repository/impl/couple_repository_impl.dart';
 import 'package:duary/repository/impl/event_repository_impl.dart';
 import 'package:http/http.dart';
@@ -16,6 +18,7 @@ class RepositoryContainer {
   late final MemberRepository memberRepository;
   late final CoupleRepository coupleRepository;
   late final EventRepository eventRepository;
+  late final AppleCalendarRepository appleCalendarRepository;
 
   RepositoryContainer._internal();
 
@@ -30,6 +33,7 @@ class RepositoryContainer {
     memberRepository = MemberRepositoryImpl(interceptedClient);
     coupleRepository = CoupleRepositoryImpl(interceptedClient);
     eventRepository = EventRepositoryImpl(interceptedClient);
+    appleCalendarRepository = AppleCalendarRepositoryImpl();
     interceptor.authRepository = authRepository;
   }
 

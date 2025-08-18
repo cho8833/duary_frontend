@@ -169,6 +169,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
         dayFocus =
             DateUtils.dateOnly(DateTime.now()).add(Duration(days: dayIndex));
       });
+      _timeTableController.focusDay.value = dayFocus;
     }
   }
 

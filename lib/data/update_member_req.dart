@@ -1,5 +1,6 @@
 import 'package:duary/model/enums/alarm_offset.dart';
 import 'package:duary/model/enums/character.dart';
+import 'package:duary/model/member.dart';
 import 'package:duary/support/iso8601_time_zone_formatter.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -18,7 +19,9 @@ class UpdateMemberReq {
 
   AlarmOffset? loverAlarm;
 
-  UpdateMemberReq(this.name, this.birthday, this.character, this.myAlarm, this.loverAlarm);
+  List<AppleCalendar>? syncedAppleCalendar;
+
+  UpdateMemberReq(this.name, this.birthday, this.character, this.myAlarm, this.loverAlarm, this.syncedAppleCalendar);
 
   Map<String, dynamic> toJson() => _$UpdateMemberReqToJson(this);
 }

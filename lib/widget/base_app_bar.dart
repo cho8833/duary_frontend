@@ -94,6 +94,24 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => Size.fromHeight(appBarObj.preferredSize.height);
 }
 
+class SubPageTitle extends StatelessWidget {
+  const SubPageTitle({super.key, required this.title});
+
+  final String title;
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontWeight: FontWeight.w700,
+        fontSize: 20,
+        color: Color(0xFFFE8F00),
+      ),
+    );
+  }
+}
+
+
 class AppBarBase extends StatelessWidget
     with CheckTheme
     implements PreferredSizeWidget {

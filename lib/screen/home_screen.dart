@@ -421,6 +421,20 @@ class ComingEventCard extends StatelessWidget {
           ),
         ),
       );
+    } else if (event.member.character == Character.none) {
+      return Positioned(
+        top: 44,
+        left: -5,
+        child: Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.rotationY(pi),
+          child: const Blue(
+            width: 114,
+            height: 196,
+            opacity: 0.2,
+          ),
+        ),
+      );
     } else {
       throw Exception();
     }
