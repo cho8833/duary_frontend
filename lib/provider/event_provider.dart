@@ -127,9 +127,20 @@ class EventProvider {
     final startDate = DateTime(month.year, month.month, 1);
     final endDate = DateTime(month.year, month.month + 1, 1);
 
-    final future = _eventRepository
-        .getEvent(myCouple!.id, startDate, endDate)
-        .then((events) {
+    final List<Future<List<Event>>> eventFutures = [];
+
+    eventFutures
+        .add(_eventRepository.getEvent(myCouple!.id, startDate, endDate));
+
+    eventFutures.add(getAppleEvents(
+        me?.syncedAppleCalendar ?? [],
+        me!.getId(),
+        lover?.getId(),
+        startDate,
+        endDate));
+
+    final future = Future.wait(eventFutures).then((result) {
+      List<Event> events = result.expand((e) => e).toList();
       _initMemberInEvents(events);
 
       // 1. 가져온 이벤트를 날짜별로 임시 분류 (기존과 동일)
@@ -171,6 +182,27 @@ class EventProvider {
 
     _eventRequest[monthKey] = future;
     return future;
+  }
+
+  Future<bool> requestApplePermission() async {
+    return await appleCalendarRepository.requestPermission();
+  }
+
+  Future<List<dc.Calendar>> getAppleCalendars() {
+    return appleCalendarRepository.getCalendars();
+  }
+
+  Future<List<Event>> getAppleEvents(List<AppleCalendar> calendars, String memberId, String? loverId,
+      DateTime startDate, DateTime endDate) async {
+    if (calendars.isEmpty) {
+      return [];
+    }
+    final List<List<Event>> futures = await Future.wait(calendars.map((c) =>
+        appleCalendarRepository.getEvent(c, memberId, loverId, startDate, endDate)));
+
+    List<Event> flattened = futures.expand((e) => e).toList();
+
+    return flattened;
   }
 
   List<Event> _initMemberInEvents(List<Event> events) {

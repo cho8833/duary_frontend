@@ -54,6 +54,39 @@ class _DuaryTextInputBoxState extends State<DuaryTextInputBox> {
   }
 }
 
+class DuaryConfirmButton extends StatelessWidget {
+  const DuaryConfirmButton({super.key, required this.title, required this.onTap});
+
+  final String title;
+
+  final Future<void> Function() onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureButton(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFBD64),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Center(
+          child: Text(
+            title,
+            style: const TextStyle(
+                color: Color(0xFF573200),
+                fontWeight: FontWeight.w600,
+                fontSize: 15),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
 class DuaryDateInputBox extends StatefulWidget {
   const DuaryDateInputBox({
     super.key,

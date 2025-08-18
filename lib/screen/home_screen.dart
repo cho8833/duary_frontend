@@ -83,8 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
     duaryContext.lover.addListener(loverListener);
 
     eventDataListener = () {
-      List<Event>? todayEvents =
-          _eventProvider.eventDataNotifier.get(today);
+      List<Event>? todayEvents = _eventProvider.eventDataNotifier.get(today);
       if (todayEvents != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           refreshOnGoing(todayEvents);
@@ -124,26 +123,25 @@ class _HomeScreenState extends State<HomeScreen> {
         loverOnGoingEvent = null;
       } else {
         try {
-            myOnGoingEvent = todayEvents.lastWhere((e) =>
-                (e.createdBy == me.getId() || e.isTogether) &&
-                e.startDateTime.isBefore(now) &&
-                e.endDateTime.isAfter(now));
+          myOnGoingEvent = todayEvents.lastWhere((e) =>
+              (e.createdBy == me.getId() || e.isTogether) &&
+              e.startDateTime.isBefore(now) &&
+              e.endDateTime.isAfter(now));
         } catch (_) {
           myOnGoingEvent = null;
         }
 
         try {
-            if (lover != null) {
-              loverOnGoingEvent = todayEvents.lastWhere((e) =>
-                  (e.createdBy == lover!.getId() || e.isTogether) &&
-                  e.startDateTime.isBefore(now) &&
-                  e.endDateTime.isAfter(now));
-            }
+          if (lover != null) {
+            loverOnGoingEvent = todayEvents.lastWhere((e) =>
+                (e.createdBy == lover!.getId() || e.isTogether) &&
+                e.startDateTime.isBefore(now) &&
+                e.endDateTime.isAfter(now));
+          }
         } catch (_) {
           loverOnGoingEvent = null;
         }
       }
-
     });
   }
 
@@ -202,7 +200,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(99),
                             child: Character.characterCircleWidget(
                                 me.character!,
-                                size: 40, right: true)),
+                                size: 40,
+                                right: true)),
                       ),
                       const SizedBox(
                         width: 10,
@@ -481,29 +480,37 @@ class ComingEventCard extends StatelessWidget {
                       const SizedBox(
                         width: 8,
                       ),
-                      RichText(
-                        text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text:
-                                    DateFormat("a").format(event.startDateTime),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 11,
-                                    color: Colors.white),
-                              ),
-                              TextSpan(
-                                text:
-                                    " ${DateFormat("h:mm").format(event.startDateTime)}",
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16,
-                                    color: Colors.white),
-                              )
-                            ],
-                            style: const TextStyle(
-                                fontFamily: "NanumSquareRound")),
-                      ),
+                      event.isAllDay
+                          ? const Text(
+                              "종일",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                  color: Colors.white),
+                            )
+                          : RichText(
+                              text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: DateFormat("a")
+                                          .format(event.startDateTime),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 11,
+                                          color: Colors.white),
+                                    ),
+                                    TextSpan(
+                                      text:
+                                          " ${DateFormat("h:mm").format(event.startDateTime)}",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 16,
+                                          color: Colors.white),
+                                    )
+                                  ],
+                                  style: const TextStyle(
+                                      fontFamily: "NanumSquareRound")),
+                            ),
                     ],
                   ),
                 ),

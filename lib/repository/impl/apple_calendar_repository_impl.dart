@@ -1,5 +1,6 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:duary/model/event.dart' as duary;
+import 'package:duary/model/member.dart';
 import 'package:duary/repository/apple_calendar_repository.dart';
 import 'package:duary/support/custom_exception.dart';
 
@@ -9,7 +10,7 @@ final class AppleCalendarRepositoryImpl implements AppleCalendarRepository {
   @override
   Future<List<Calendar>> getCalendars() async {
     if (!await requestPermission()) {
-      throw PermissionDeniedException("권한을 허용해주세요");
+      throw PermissionDeniedException("권한을 허용해주세요.");
     }
 
     final calendarResult = await _plugin.retrieveCalendars();
@@ -18,18 +19,18 @@ final class AppleCalendarRepositoryImpl implements AppleCalendarRepository {
   }
 
   @override
-  Future<List<duary.Event>> getEvent(String calendarId, String memberId,
+  Future<List<duary.Event>> getEvent(AppleCalendar appleCalendar, String memberId, String? loverId,
       DateTime startDate, DateTime endDate) async {
     if (!await requestPermission()) {
       throw PermissionDeniedException("권한을 허용해주세요");
     }
 
-    final eventResult = await _plugin.retrieveEvents(calendarId,
+    final eventResult = await _plugin.retrieveEvents(appleCalendar.id,
         RetrieveEventsParams(startDate: startDate, endDate: endDate));
 
     List<Event> events = eventResult.data as List<Event>;
 
-    return events.map((e) => duary.Event.fromApple(memberId, e)).toList();
+    return events.map((e) => duary.Event.fromApple(appleCalendar, memberId, loverId,  e)).toList();
   }
 
   @override

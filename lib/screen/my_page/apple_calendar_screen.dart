@@ -1,15 +1,14 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:duary/model/member.dart';
-import 'package:duary/provider/apple_event_provider.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/my_page/my_info_screen.dart';
 import 'package:duary/screen/my_page/my_page_screen.dart' show SectionTitle;
+import 'package:duary/screen/my_page/select_calendar_owner_screen.dart';
 import 'package:duary/support/custom_exception.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/button_base.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -27,7 +26,8 @@ class _AppleCalendarScreenState extends State<AppleCalendarScreen> {
 
   bool _isPermissionGranted = false;
 
-  late List<AppleCalendar> syncedCalendar = duaryContext.me.value?.syncedAppleCalendar ?? [];
+  late List<AppleCalendar> syncedCalendar =
+      duaryContext.me.value?.syncedAppleCalendar ?? [];
 
   @override
   void initState() {
@@ -101,15 +101,13 @@ class _AppleCalendarScreenState extends State<AppleCalendarScreen> {
                         if (snapshot.hasData) {
                           return _CalendarList(
                               calendars: snapshot.data!,
-                              selectedIds: syncedCalendar
-                                      .map((c) => c.id)
-                                      .toList() ??
-                                  []);
+                              selectedCalendars:
+                                  syncedCalendar);
                         } else if (snapshot.hasError) {
                           if (snapshot.error is PermissionDeniedException) {
                             return Container();
                           }
-                          return const Center(child: Text("캘린더를 불러오지 못했습니다"));
+                          return const Center(child: Text("캘린더를 불러오지 못했습니다.\n권한을 허용해도 문제가 계속된다면,\n앱을 재실행해주세요."));
                         } else {
                           return Container();
                         }
@@ -126,11 +124,11 @@ class _AppleCalendarScreenState extends State<AppleCalendarScreen> {
 
 class _CalendarList extends StatelessWidget {
   const _CalendarList(
-      {super.key, required this.calendars, required this.selectedIds});
+      {super.key, required this.calendars, required this.selectedCalendars});
 
   final List<Calendar> calendars;
 
-  final List<String> selectedIds;
+  final List<AppleCalendar> selectedCalendars;
 
   Map<String, List<Calendar>> sortCalendars() {
     Map<String, List<Calendar>> result = {};
@@ -160,14 +158,17 @@ class _CalendarList extends StatelessWidget {
                 height: 8,
               ),
               ListView.separated(
+                  physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   itemBuilder: (context, calendarIndex) {
                     Calendar calendar = calendars[calendarIndex];
+                    AppleCalendar? userSetting;
+                    try {
+                      userSetting = selectedCalendars.firstWhere((c) => c.id == calendar.id);
+                    } catch (_) {}
                     return _Calendar(
                         calendar: calendar,
-                        isSelected: selectedIds
-                            .where((id) => calendar.id == id)
-                            .isNotEmpty);
+                        value: userSetting);
                   },
                   separatorBuilder: (context, index) => const SizedBox(
                         height: 8,
@@ -185,26 +186,23 @@ class _CalendarList extends StatelessWidget {
 
 class _Calendar extends StatelessWidget {
   const _Calendar(
-      {super.key, required this.calendar, required this.isSelected});
+      {super.key, required this.calendar, this.value});
 
   final Calendar calendar;
 
-  final bool isSelected;
+  final AppleCalendar? value;
 
   @override
   Widget build(BuildContext context) {
-    return FutureButton(
+    return GestureDetector(
       onTap: () async {
-        final duaryContext = DuaryContext();
-        List<AppleCalendar> calendars = duaryContext.me.value!.syncedAppleCalendar;
-        if (calendars.where((c) => c.id == calendar.id).isEmpty) {
-          calendars.add(AppleCalendar(calendar.id!, calendar.name!));
-        } else {
-          calendars.removeWhere((c) => c.id == calendar.id);
-        }
-        await duaryContext.updateMember(syncedAppleCalendar: calendars).catchError((e) {
-          Fluttertoast.showToast(msg: e.toString());
-        });
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => SelectCalendarOwnerScreen(
+                      calendar: calendar, initialValue: value,
+                    )));
+
       },
       child: Container(
         height: 56,
@@ -241,10 +239,28 @@ class _Calendar extends StatelessWidget {
                   ),
                 ],
               ),
-              isSelected ? const Icon(Icons.check) : Container(),
+              value != null ? _ValueText(currentValue: value!.owner.title) : Container(),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ValueText extends StatelessWidget {
+  const _ValueText({super.key, required this.currentValue});
+
+  final String currentValue;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      currentValue,
+      style: const TextStyle(
+        color: Color(0xFFB6B6B6),
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
       ),
     );
   }

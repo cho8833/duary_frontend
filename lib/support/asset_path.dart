@@ -20,4 +20,8 @@ class AssetPath {
   static const String kakaoIcon = "asset/kakao_icon.png";
   static const String appleIcon = "asset/apple_icon.png";
   static const String googleIcon = "asset/google_icon.png";
+  static const String togetherBubblePreview = "asset/together_bubble_preview.png";
+  static const String loverMeBubblePreview = "asset/lover_me_bubble_preview.png";
+  static const String togetherComingPreview = "asset/together_coming_preview.png";
+  static const String loverMeComingPreview = "asset/lover_me_coming_preview.png";
 }

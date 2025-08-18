@@ -64,18 +64,20 @@ class Event {
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
 
-  factory Event.fromApple(String memberId, dc.Event dcEvent) {
+  factory Event.fromApple(AppleCalendar calendar, String memberId, String? loverId, dc.Event dcEvent) {
+    String createdBy = calendar.owner == CalendarOwner.lover ? (loverId ?? "lover") : memberId;
+    bool isTogether = calendar.owner == CalendarOwner.together;
     Event event = Event(
         dcEvent.eventId!,
         "",
-        memberId,
+        createdBy,
         dcEvent.start!,
         dcEvent.end!,
         dcEvent.title!,
         Frequency.oneTime,
-        false,
+        isTogether,
         dcEvent.allDay!,
-        EventType.normal);
+        EventType.apple);
 
     return event;
   }
@@ -142,6 +144,7 @@ class YearlyRecurrence extends Recurrence {
 enum EventType {
   normal("NORMAL"),
   birthday("BIRTHDAY"),
+  apple("APPLE"),
   anniversary("ANNIVERSARY");
 
   final String value;
