@@ -1,10 +1,10 @@
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/screen/my_page/my_info_screen.dart';
 import 'package:duary/screen/start/connect_copule_screen.dart';
 import 'package:duary/screen/start/start_duary_screen.dart';
 import 'package:duary/support/custom_page_route.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/button_base.dart';
-import 'package:duary/widget/duary_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:fluttertoast/fluttertoast.dart';
@@ -13,7 +13,7 @@ class CoupleInfoScreen extends StatelessWidget {
   const CoupleInfoScreen({super.key});
 
   static const String codeMent =
-      "커플 코드는 추후 다시 커플에 연결하거나 커플 정보를 복원할 때 사용될 수 있습니다. 잃어버리지 않도록 안전한 곳에 저장해주세요.";
+      "커플 코드는 추후 다시 커플에 연결하거나,\n커플 정보를 복원할 때 사용될 수 있습니다.\n잃어버리지 않도록 안전한 곳에 저장해주세요.";
 
   @override
   Widget build(BuildContext context) {
@@ -33,26 +33,23 @@ class CoupleInfoScreen extends StatelessWidget {
                       Navigator.push(context,
                           SlideDownRoute(page: const ConnectCoupleScreen()));
                     },
-                    child: const Row(
-                      children: [Text("커플 연결하기"), Icon(Icons.chevron_right)],
-                    ),
+                    child: const InfoBox(
+                        labelText: "커플 연결하기", value: Icon(Icons.chevron_right)),
                   ),
             const SizedBox(
               height: 16,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("커플 코드"),
-                FutureButton(
-                  onTap: () async {
-                    Clipboard.setData(ClipboardData(
-                            text: duaryContext.myCouple.value!.code))
-                        .then((_) {
-                      Fluttertoast.showToast(msg: "복사되었습니다");
-                    });
-                  },
-                  child: Row(
+            FutureButton(
+              onTap: () async {
+                Clipboard.setData(
+                        ClipboardData(text: duaryContext.myCouple.value!.code))
+                    .then((_) {
+                  Fluttertoast.showToast(msg: "복사되었습니다");
+                });
+              },
+              child: InfoBox(
+                  labelText: "커플 코드",
+                  value: Row(
                     children: [
                       Text(duaryContext.myCouple.value!.code),
                       const SizedBox(
@@ -60,14 +57,19 @@ class CoupleInfoScreen extends StatelessWidget {
                       ),
                       const Icon(Icons.copy),
                     ],
-                  ),
-                )
-              ],
+                  )),
             ),
             const SizedBox(
               height: 8,
             ),
-            const Text(codeMent),
+            const Text(
+              codeMent,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFFBBBBBB),
+                  fontWeight: FontWeight.w500),
+            ),
             const Spacer(),
             FutureButton(
               onTap: () async {
