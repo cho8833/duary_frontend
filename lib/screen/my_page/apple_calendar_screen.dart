@@ -67,43 +67,43 @@ class _AppleCalendarScreenState extends State<AppleCalendarScreen> {
       appBar: SubPageAppBar(
           appBarObj: AppBar(), title: const SubPageTitle(title: "캘린더 연동")),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: SizedBox(
-            child: Column(
-              children: [
-                FutureButton(
-                  onTap: () async {
-                    if (!_isPermissionGranted) {
-                      await eventProvider
-                          .requestApplePermission()
-                          .then((value) {
-                            if (!value) {
-                              launchSettings();
-                            } else {
-                              setState(() {
-                                _isPermissionGranted = value;
-                              });
-                            }
-                      });
-                    } else {
-                      launchSettings();
-                    }
-                  },
-                  child: InfoBox(
-                      labelText: "권한",
-                      value: Row(
-                        children: [
-                          Text(_isPermissionGranted ? "허용됨" : "허용되지 않음"),
-                          const Icon(Icons.chevron_right)
-                        ],
-                      )),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                Expanded(
-                  child: FutureBuilder(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              child: Column(
+                children: [
+                  FutureButton(
+                    onTap: () async {
+                      if (!_isPermissionGranted) {
+                        await eventProvider
+                            .requestApplePermission()
+                            .then((value) {
+                              if (!value) {
+                                launchSettings();
+                              } else {
+                                setState(() {
+                                  _isPermissionGranted = value;
+                                });
+                              }
+                        });
+                      } else {
+                        launchSettings();
+                      }
+                    },
+                    child: InfoBox(
+                        labelText: "권한",
+                        value: Row(
+                          children: [
+                            Text(_isPermissionGranted ? "허용됨" : "허용되지 않음"),
+                            const Icon(Icons.chevron_right)
+                          ],
+                        )),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  FutureBuilder(
                       future: eventProvider.getAppleCalendars(),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
@@ -119,9 +119,9 @@ class _AppleCalendarScreenState extends State<AppleCalendarScreen> {
                         } else {
                           return Container();
                         }
-                      }),
-                )
-              ],
+                      })
+                ],
+              ),
             ),
           ),
         ),
@@ -154,6 +154,7 @@ class _CalendarList extends StatelessWidget {
     Map<String, List<Calendar>> sorted = sortCalendars();
     List<String> accounts = sorted.keys.toList();
     return ListView.separated(
+      physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         itemBuilder: (context, accountIndex) {
           String accountName = accounts[accountIndex];

@@ -170,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: MainAppBar(
         appBarObj: AppBar(),
-        leadingBuilder: (context) => FutureButton(
+        trailingBuilder: (context) => FutureButton(
             onTap: () async {
               Navigator.push(
                   context,

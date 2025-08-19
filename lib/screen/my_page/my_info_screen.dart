@@ -28,12 +28,7 @@ class MyInfoScreen extends StatelessWidget {
           children: [
             InfoBox(
                 labelText: "로그인 방법",
-                value: Row(
-                  children: [
-                    Image.asset(socialProvider.iconPath, width: 24, height: 24,),
-                    _ValueText(currentValue: socialProvider.title),
-                  ],
-                )),
+                value: _ValueText(currentValue: socialProvider.title)),
             const SizedBox(
               height: 8,
             ),

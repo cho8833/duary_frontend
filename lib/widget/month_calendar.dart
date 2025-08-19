@@ -195,9 +195,6 @@ class _MonthCalendarState extends State<MonthCalendar> {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return "${DateFormat("yyyy년 M월 dd일").format(date)} ${DateFormat.E("ko_KR").format(date)}요일";
-  }
 }
 
 class _CalendarMonthWidget extends StatefulWidget {
@@ -242,6 +239,12 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
         data = d;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _eventProvider.removeListener(_eventListener);
   }
 
 
