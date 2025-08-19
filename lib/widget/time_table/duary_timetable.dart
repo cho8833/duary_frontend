@@ -10,8 +10,10 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 
 class DuaryTimetable extends StatefulWidget {
-  const DuaryTimetable(
-      {super.key, required this.timeTableController, });
+  const DuaryTimetable({
+    super.key,
+    required this.timeTableController,
+  });
 
   final TimeTableController timeTableController;
 
@@ -24,9 +26,9 @@ class DuaryTimetable extends StatefulWidget {
 }
 
 class _DuaryTimetableState extends State<DuaryTimetable> {
-  late final TimeTableController _timeTableController = widget.timeTableController;
+  late final TimeTableController _timeTableController =
+      widget.timeTableController;
   late final DateTime initialDate = _timeTableController.focusDay.value;
-
 
   late DateTime dayFocus;
   late int dayIndex;
@@ -70,7 +72,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     nextDownPageKey = dayFocus;
 
     _eventProvider = context.read<EventProvider>();
-    _eventProvider.eventDataNotifier.addListener(eventDataListener);
+    _eventProvider.addListener(refresh);
 
     _pagingUpController = PagingController(getNextPageKey: (state) {
       return nextUpPageKey;
@@ -88,7 +90,8 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     // initialDay 가 오늘인 경우 현재 시간으로 스크롤 위치 이동
     if (initialDayIndex == 0) {
       _pagingDownController.addListener(() {
-        if (_pagingDownController.status == PagingStatus.ongoing && !_isInitialScrollHandled) {
+        if (_pagingDownController.status == PagingStatus.ongoing &&
+            !_isInitialScrollHandled) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             DateTime now = DateTime.now();
             _scrollController.jumpTo(now.hour * DuaryTimetable.hourHeight);
@@ -103,7 +106,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
       _scrollController.addListener(updateDayIndex);
     }
 
-
     // 유저 정보나 커플 정보가 바뀌면 다시 event 불러오기
     duaryContext.me.addListener(refresh);
     duaryContext.lover.addListener(refresh);
@@ -115,22 +117,17 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     super.dispose();
     _pagingDownController.dispose();
     _pagingUpController.dispose();
-    _eventProvider.eventDataNotifier.removeListener(eventDataListener);
+    _eventProvider.removeListener(refresh);
     duaryContext.me.removeListener(refresh);
     duaryContext.lover.removeListener(refresh);
     duaryContext.myCouple.removeListener(refresh);
   }
 
-  void eventDataListener() {
-    if (_eventProvider.eventDataNotifier.isClear()) {
-      refresh();
-    }
-  }
-
   void refresh() {
     setState(() {
       dayFocus = DateUtils.dateOnly(DateTime.now());
-      initialDayIndex = (dayFocus.difference(DateTime.now()).inHours / 24).ceil();
+      initialDayIndex =
+          (dayFocus.difference(DateTime.now()).inHours / 24).ceil();
       dayIndex = initialDayIndex;
     });
 
@@ -141,7 +138,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     _pagingUpController.refresh();
     fetchFlag.clear();
   }
-
 
   void updateDayIndex() {
     // 현재 어느 날짜 블록에 해당하는지 인덱스 구함
@@ -215,8 +211,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
         TitleBar(
             dayIndex: dayIndex,
             dayFocus: dayFocus,
-            onDateTap: () => _timeTableController.moveToMonth(dayFocus),
-            refresh: refresh),
+            onDateTap: () => _timeTableController.moveToMonth(dayFocus),),
         // Two way(up, down) Infinite Scroll View
         Flexible(
           child: Scrollable(
@@ -246,7 +241,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                             itemBuilder: (context, items, index) {
                               DateTime date = items.keys.first;
                               final List<Event> events = items[date]!;
-                              return LayoutBuilder(   // width 전달 목적
+                              return LayoutBuilder(// width 전달 목적
                                   builder: (context, constraints) {
                                 return DayView(
                                   currentDate: date,
@@ -290,16 +285,15 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                                 itemBuilder: (context, items, index) {
                                   DateTime date = items.keys.first;
                                   final List<Event> events = items[date]!;
-                                  return LayoutBuilder(     // width 전달 목적
-                                    builder: (context, constraints) {
-                                      return DayView(
-                                        width: constraints.maxWidth,
-                                        currentDate: date,
-                                        items: events,
-                                        refresh: refresh,
-                                      );
-                                    }
-                                  );
+                                  return LayoutBuilder(// width 전달 목적
+                                      builder: (context, constraints) {
+                                    return DayView(
+                                      width: constraints.maxWidth,
+                                      currentDate: date,
+                                      items: events,
+                                      refresh: refresh,
+                                    );
+                                  });
                                 },
                                 firstPageErrorIndicatorBuilder: (context) {
                                   return const Center(

@@ -83,15 +83,14 @@ class _HomeScreenState extends State<HomeScreen> {
     duaryContext.lover.addListener(loverListener);
 
     eventDataListener = () {
-      List<Event>? todayEvents = _eventProvider.eventDataNotifier.get(today);
-      if (todayEvents != null) {
+      _eventProvider.getEventByDay(today).then((todayEvents) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           refreshOnGoing(todayEvents);
           refreshComingEvents(todayEvents);
         });
-      }
+            });
     };
-    _eventProvider.eventDataNotifier.addListener(eventDataListener);
+    _eventProvider.addListener(eventDataListener);
 
     _timeManager = context.read<TimeManager>();
     _timeManager.addListener(_changeTime);
@@ -108,11 +107,10 @@ class _HomeScreenState extends State<HomeScreen> {
     if (now.minute != _timeManager.now.minute) {
       now = _timeManager.now;
       today = DateUtils.dateOnly(now);
-      List<Event>? todayEvents = _eventProvider.eventDataNotifier.get(today);
-      if (todayEvents != null) {
+      _eventProvider.getEventByDay(today).then((todayEvents) {
         refreshOnGoing(todayEvents);
         refreshComingEvents(todayEvents);
-      }
+            });
     }
   }
 
@@ -163,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
     duaryContext.me.removeListener(meListener);
     duaryContext.lover.removeListener(loverListener);
     _timeManager.removeListener(_changeTime);
-    _eventProvider.eventDataNotifier.removeListener(eventDataListener);
+    _eventProvider.removeListener(eventDataListener);
     super.dispose();
   }
 

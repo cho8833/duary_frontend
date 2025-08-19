@@ -15,7 +15,6 @@ class TitleBar extends StatefulWidget {
     required this.dayIndex,
     required this.dayFocus,
     required this.onDateTap,
-    required this.refresh,
   });
 
   final int dayIndex;
@@ -23,8 +22,6 @@ class TitleBar extends StatefulWidget {
   final DateTime dayFocus;
 
   final Function() onDateTap;
-
-  final Function() refresh;
 
   @override
   State<TitleBar> createState() => _TitleBarState();
@@ -35,10 +32,19 @@ class _TitleBarState extends State<TitleBar> {
 
   late final EventProvider _eventProvider;
 
+  List<Event> dayEvents = [];
+
   @override
   void initState() {
-    _eventProvider = context.read<EventProvider>();
     super.initState();
+    _eventProvider = context.read<EventProvider>();
+    _eventProvider.getEventByDay(widget.dayFocus).then((events) {
+      WidgetsBinding.instance.addPostFrameCallback((d) {
+        setState(() {
+          dayEvents = events;
+        });
+      });
+    });
   }
 
   @override
@@ -120,13 +126,7 @@ class _TitleBarState extends State<TitleBar> {
               onTap: () {
                 // 일정을 생성하고 pop 하면 hasCreated == true, 일정을 생성하지 않고 pop 하면 hasCreated == false
                 Navigator.of(context)
-                    .push(SlideDownRoute(page: const EditEventScreen()))
-                    .then((hasCreated) {
-                  if (hasCreated != null && hasCreated as bool) {
-                    // 일정을 생성하면 일정을 다시 불러오기
-                    widget.refresh();
-                  }
-                });
+                    .push(SlideDownRoute(page: const EditEventScreen()));
               },
               child: const Icon(
                 Icons.add,
@@ -140,21 +140,19 @@ class _TitleBarState extends State<TitleBar> {
             children: [
               titleWidget,
               ListenableBuilder(
-                  listenable: _eventProvider.eventDataNotifier,
+                  listenable: _eventProvider,
                   builder: (context, _) {
-                    final List<Event> events =
-                        _eventProvider.eventDataNotifier.get(widget.dayFocus) ?? [];
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(
                           width: 20,
                         ),
-                        Expanded(child: myAllDay(events)),
+                        Expanded(child: myAllDay(dayEvents)),
                         const SizedBox(
                           width: 22,
                         ),
-                        Expanded(child: loverAllDay(events)),
+                        Expanded(child: loverAllDay(dayEvents)),
                         const SizedBox(
                           width: 20,
                         ),

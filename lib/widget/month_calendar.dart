@@ -32,8 +32,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
 
   late DateTime selectedDay = timeTableController.focusDay.value;
 
-  late List<Event> dayEvents =
-      eventProvider.eventDataNotifier.get(selectedDay) ?? [];
+  List<Event> dayEvents = [];
 
   late final EventProvider eventProvider = context.read<EventProvider>();
 
@@ -41,6 +40,13 @@ class _MonthCalendarState extends State<MonthCalendar> {
   void initState() {
     super.initState();
     timeTableController.focusMonth.addListener(monthListener);
+    eventProvider.getEventByDay(selectedDay).then((events) {
+      WidgetsBinding.instance.addPostFrameCallback((d) {
+        setState(() {
+          dayEvents = events;
+        });
+      });
+    });
   }
 
   void monthListener() {
@@ -152,11 +158,11 @@ class _MonthCalendarState extends State<MonthCalendar> {
                     if (DateUtils.isSameDay(day, selectedDay)) {
                       timeTableController.moveToDay(day);
                     } else {
-                      setState(() {
-                        selectedDay = day;
-                        dayEvents =
-                            eventProvider.eventDataNotifier.get(selectedDay) ??
-                                [];
+                      selectedDay = day;
+                      eventProvider.getEventByDay(selectedDay).then((events) {
+                        setState(() {
+                          dayEvents = events;
+                        });
                       });
                     }
                   },
@@ -189,30 +195,6 @@ class _MonthCalendarState extends State<MonthCalendar> {
     );
   }
 
-  Widget _dateText() {
-    late String title;
-
-    DateTime today = DateUtils.dateOnly(DateTime.now());
-    int dayIndex = selectedDay.difference(today).inDays;
-
-    switch (dayIndex) {
-      case 0:
-        title = "오늘";
-      case 1:
-        title = "내일";
-      case -1:
-        title = "어제";
-      default:
-        title = _formatDate(selectedDay);
-    }
-
-    return Text(
-      title,
-      style: const TextStyle(
-          fontWeight: FontWeight.w600, fontSize: 18, color: Colors.black),
-    );
-  }
-
   String _formatDate(DateTime date) {
     return "${DateFormat("yyyy년 M월 dd일").format(date)} ${DateFormat.E("ko_KR").format(date)}요일";
   }
@@ -239,12 +221,29 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
   late EventProvider _eventProvider;
   final DuaryContext _duaryContext = DuaryContext();
 
+  Map<DateTime, List<Event>>? data;
+
   @override
   void initState() {
     super.initState();
 
     _eventProvider = context.read<EventProvider>();
+    _eventProvider.addListener(_eventListener);
+    _eventProvider.getEventByMonth(DateTime(widget.year, widget.month, 1)).then((events) {
+      WidgetsBinding.instance.addPostFrameCallback((d) {
+        data = events;
+      });
+    });
   }
+
+  void _eventListener() {
+    _eventProvider.getEventByMonth(DateTime(widget.year, widget.month, 1)).then((d) {
+      setState(() {
+        data = d;
+      });
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -264,15 +263,7 @@ class _CalendarMonthWidgetState extends State<_CalendarMonthWidget> {
         ),
 
         // 날짜 그리드
-        FutureBuilder(
-            future: _eventProvider
-                .getEventByMonth(DateTime(widget.year, widget.month, 1)),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                Fluttertoast.showToast(msg: "오류가 발생했습니다");
-              } else {}
-              return _buildCalendarBody(weeks, snapshot.data);
-            }),
+        _buildCalendarBody(weeks, data)
       ],
     );
   }

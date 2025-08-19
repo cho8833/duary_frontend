@@ -85,7 +85,7 @@ class Main extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         Provider(create: (_) => DeepLinkManager(AppLinks())),
         ChangeNotifierProvider(create: (_) => TimeManager()),
-        Provider.value(value: eventProvider)
+        ChangeNotifierProvider.value(value: eventProvider)
       ],
       builder: (context, _) =>
           Consumer<ThemeProvider>(builder: (context, provider, _) {

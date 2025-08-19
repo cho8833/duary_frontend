@@ -32,7 +32,7 @@ class _AppleCalendarScreenState extends State<AppleCalendarScreen> {
   @override
   void initState() {
     super.initState();
-    eventProvider.requestApplePermission().then((value) {
+    eventProvider.getApplePermission().then((value) {
       WidgetsBinding.instance.addPostFrameCallback((d) {
         setState(() {
           _isPermissionGranted = value;
@@ -54,6 +54,13 @@ class _AppleCalendarScreenState extends State<AppleCalendarScreen> {
     super.dispose();
   }
 
+  Future<void> launchSettings() async {
+    Uri settings = Uri.parse("app-settings:root=Duary");
+    if (await canLaunchUrl(settings)) {
+    launchUrl(settings);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,15 +78,16 @@ class _AppleCalendarScreenState extends State<AppleCalendarScreen> {
                       await eventProvider
                           .requestApplePermission()
                           .then((value) {
-                        setState(() {
-                          _isPermissionGranted = value;
-                        });
+                            if (!value) {
+                              launchSettings();
+                            } else {
+                              setState(() {
+                                _isPermissionGranted = value;
+                              });
+                            }
                       });
                     } else {
-                      Uri settings = Uri.parse("app-settings:root=Duary");
-                      if (await canLaunchUrl(settings)) {
-                        launchUrl(settings);
-                      }
+                      launchSettings();
                     }
                   },
                   child: InfoBox(

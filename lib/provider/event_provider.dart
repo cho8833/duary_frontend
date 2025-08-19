@@ -12,7 +12,7 @@ import 'package:duary/repository/impl/websocket_handler.dart';
 import 'package:duary/support/custom_exception.dart';
 import 'package:flutter/material.dart';
 
-class EventProvider {
+class EventProvider extends ChangeNotifier {
   final EventRepository _eventRepository;
   final AppleCalendarRepository appleCalendarRepository;
 
@@ -21,7 +21,7 @@ class EventProvider {
   Couple? myCouple;
 
   // 이벤트 캐싱
-  final EventDataNotifier eventDataNotifier = EventDataNotifier();
+  final Map<DateTime, Set<Event>> _eventMap = {};
 
   // Future caching : 같은 인자로 호출된 비동기 작업이 진행 중이면, 그 작업의 결과를 기다렸다가 반환
   final Map<DateTime, Future<List<Event>>> _eventRequest = {};
@@ -35,15 +35,15 @@ class EventProvider {
         lover = null;
         myCouple = null;
       }
-      eventDataNotifier.clear();
+      _clearData();
     });
     duaryContext.lover.addListener(() {
       lover = duaryContext.lover.value;
-      eventDataNotifier.clear();
+      _clearData();
     });
     duaryContext.myCouple.addListener(() {
       myCouple = duaryContext.myCouple.value;
-      eventDataNotifier.clear();
+      _clearData();
     });
 
     WebSocketHandler wsHandler = WebSocketHandler();
@@ -59,8 +59,8 @@ class EventProvider {
     final dayKey = DateUtils.dateOnly(date);
 
     // 1. 일별 캐시 확인
-    if (eventDataNotifier.contains(dayKey)) {
-      return eventDataNotifier.get(dayKey)!;
+    if (_eventMap.containsKey(dayKey)) {
+      return _eventMap[dayKey]!.toList();
     }
 
     // 2. 월 단위 요청이 이미 진행 중인지 확인
@@ -68,14 +68,14 @@ class EventProvider {
     if (_eventRequest.containsKey(monthKey)) {
       // 진행 중인 월 단위 요청을 기다린 후, 캐시에서 다시 데이터를 가져옵니다.
       await _eventRequest[monthKey]!;
-      return eventDataNotifier.get(dayKey) ?? [];
+      return _eventMap[dayKey]?.toList() ?? [];
     }
 
     // 3. 캐시도 없고, 진행 중인 요청도 없으면 월 단위로 데이터를 가져옵니다.
     await _fetchAndCacheMonth(date);
 
     // 월 단위 캐싱이 완료된 후, 해당 날짜의 데이터를 반환합니다.
-    return eventDataNotifier.get(dayKey) ?? [];
+    return _eventMap[dayKey]?.toList() ?? [];
   }
 
   /// 특정 월의 모든 이벤트를 가져옵니다. 캐시를 우선적으로 확인합니다.
@@ -95,7 +95,7 @@ class EventProvider {
     bool isFullyCached = true;
     for (int i = 1; i <= daysInMonth; i++) {
       final day = DateTime(month.year, month.month, i);
-      if (!eventDataNotifier.contains(day)) {
+      if (!_eventMap.containsKey(day)) {
         isFullyCached = false;
         break;
       }
@@ -108,7 +108,7 @@ class EventProvider {
     final Map<DateTime, List<Event>> resultMap = {};
     for (int i = 1; i <= daysInMonth; i++) {
       final day = DateTime(month.year, month.month, i);
-      resultMap[day] = eventDataNotifier.get(day) ?? [];
+      resultMap[day] = _eventMap[day]?.toList() ?? [];
     }
 
     return resultMap;
@@ -132,7 +132,7 @@ class EventProvider {
     eventFutures
         .add(_eventRepository.getEvent(myCouple!.id, startDate, endDate));
 
-    eventFutures.add(getAppleEvents(
+    eventFutures.add(_getAppleEvents(
         me?.syncedAppleCalendar ?? [],
         me!.getId(),
         lover?.getId(),
@@ -167,9 +167,9 @@ class EventProvider {
         final dailyEvents = tempMonthlyCache[day]?.toList() ?? [];
 
         // 이벤트 유무와 관계없이 '모든 날짜'에 대해 notifier에 set합니다.
-        eventDataNotifier.set(day, dailyEvents);
+        _eventMap[day] = Set.of(dailyEvents);
       }
-      eventDataNotifier.notifyUpdate();
+      notifyListeners();
 
       // 이 메소드의 반환 타입 유지를 위해 원본 events 리스트를 반환합니다.
       return events;
@@ -188,11 +188,15 @@ class EventProvider {
     return await appleCalendarRepository.requestPermission();
   }
 
+  Future<bool> getApplePermission() async {
+    return await appleCalendarRepository.getPermission();
+  }
+
   Future<List<dc.Calendar>> getAppleCalendars() {
     return appleCalendarRepository.getCalendars();
   }
 
-  Future<List<Event>> getAppleEvents(List<AppleCalendar> calendars, String memberId, String? loverId,
+  Future<List<Event>> _getAppleEvents(List<AppleCalendar> calendars, String memberId, String? loverId,
       DateTime startDate, DateTime endDate) async {
     if (calendars.isEmpty) {
       return [];
@@ -224,7 +228,7 @@ class EventProvider {
   Future<void> saveEvent(SaveEventReq req) async {
     req.validate();
     await _eventRepository.saveEvent(req).then((event) {
-      eventDataNotifier.clear();
+      _clearData();
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
@@ -234,7 +238,7 @@ class EventProvider {
     req.validate();
     return await _eventRepository.editEvent(id, req).then((event) {
       _initMemberInEvents([event]);
-      eventDataNotifier.clear();
+      _clearData();
       return event;
     }).catchError((e) {
       throw ServerResponseException(e.toString());
@@ -243,47 +247,18 @@ class EventProvider {
 
   Future<void> deleteEvent(Event event) async {
     await _eventRepository.deleteEvent(event.id).then((_) {
-      eventDataNotifier.clear();
+      _clearData();
     }).catchError((e) {
       throw ServerResponseException(e.toString());
     });
   }
 
   void _handleWS(WebSocketData<Event>? data) {
-    eventDataNotifier.clear();
-  }
-}
-
-class EventDataNotifier extends ChangeNotifier {
-  final Map<DateTime, Set<Event>> _eventMap = {};
-
-  List<Event>? get(DateTime date) {
-    return _eventMap[date]?.toList();
+    _clearData();
   }
 
-  void set(DateTime date, List<Event> events) {
-    _eventMap[date] = Set.of(events);
-  }
-
-  void add(DateTime date, Event event) {
-    Set<Event>? events = _eventMap[date];
-    if (events != null) {
-      events.add(event);
-    }
-  }
-
-  void clear() {
+  void _clearData() {
     _eventMap.clear();
     notifyListeners();
-  }
-
-  void notifyUpdate() => notifyListeners();
-
-  bool isClear() {
-    return _eventMap.isEmpty;
-  }
-
-  bool contains(DateTime date) {
-    return _eventMap.containsKey(date);
   }
 }

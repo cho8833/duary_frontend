@@ -9,28 +9,28 @@ final class AppleCalendarRepositoryImpl implements AppleCalendarRepository {
 
   @override
   Future<List<Calendar>> getCalendars() async {
-    if (!await requestPermission()) {
+    try {
+      final calendarResult = await _plugin.retrieveCalendars();
+      return calendarResult.data as List<Calendar>;
+    } catch (e) {
       throw PermissionDeniedException("권한을 허용해주세요.");
     }
 
-    final calendarResult = await _plugin.retrieveCalendars();
-
-    return calendarResult.data as List<Calendar>;
   }
 
   @override
   Future<List<duary.Event>> getEvent(AppleCalendar appleCalendar, String memberId, String? loverId,
       DateTime startDate, DateTime endDate) async {
-    if (!await requestPermission()) {
-      throw PermissionDeniedException("권한을 허용해주세요");
+    try {
+      final eventResult = await _plugin.retrieveEvents(appleCalendar.id,
+          RetrieveEventsParams(startDate: startDate, endDate: endDate));
+
+      List<Event> events = eventResult.data as List<Event>;
+
+      return events.map((e) => duary.Event.fromApple(appleCalendar, memberId, loverId,  e)).toList();
+    } catch (e) {
+      throw PermissionDeniedException("권한을 허용해주세요.");
     }
-
-    final eventResult = await _plugin.retrieveEvents(appleCalendar.id,
-        RetrieveEventsParams(startDate: startDate, endDate: endDate));
-
-    List<Event> events = eventResult.data as List<Event>;
-
-    return events.map((e) => duary.Event.fromApple(appleCalendar, memberId, loverId,  e)).toList();
   }
 
   @override
