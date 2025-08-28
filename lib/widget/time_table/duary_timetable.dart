@@ -1,12 +1,13 @@
+import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
+import 'package:duary/screen/event/event_details_screen.dart';
 import 'package:duary/screen/timetable_screen.dart';
 import 'package:duary/widget/time_table/day_view.dart';
 import 'package:duary/widget/time_table/title_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:fluttertoast/fluttertoast.dart' show Fluttertoast;
 import 'package:provider/provider.dart';
 
 class DuaryTimetable extends StatefulWidget {
@@ -28,175 +29,68 @@ class DuaryTimetable extends StatefulWidget {
 class _DuaryTimetableState extends State<DuaryTimetable> {
   late final TimeTableController _timeTableController =
       widget.timeTableController;
-  late final DateTime initialDate = _timeTableController.focusDay.value;
 
-  late DateTime dayFocus;
-  late int dayIndex;
-  late int initialDayIndex;
+  late DateTime dayFocus = _timeTableController.focusDay.value;
 
-  late final PagingController<DateTime, Map<DateTime, List<Event>>>
-      _pagingUpController;
-  late final PagingController<DateTime, Map<DateTime, List<Event>>>
-      _pagingDownController;
-  late ScrollController _scrollController;
+  List<Event> events = [];
 
-  late final EventProvider _eventProvider;
+  late final ScrollController _scrollController = ScrollController();
 
-  // 중복 fetch 를 방지하기 위한 flag
-  // 오늘 날짜 index 를 0으로, 내일 index 는 1, 어제 index 는 -1
-  // if fetchFlag[0] == true, already fetched
-  // else if fetchFlag[-2] == null, not fetched yet
-  Map<int, bool> fetchFlag = {};
-
-  final Key downListKey = UniqueKey();
-
-  static const double hourHeight = DuaryTimetable.hourHeight;
-
-  late DateTime nextUpPageKey;
-
-  late DateTime nextDownPageKey;
+  late final EventProvider _eventProvider = context.read<EventProvider>();
 
   final DuaryContext duaryContext = DuaryContext();
 
-  bool _isInitialScrollHandled = false;
+  // 충분히 큰 초기 페이지를 지정해서, 양쪽 방향으로 스와이프 가능하게 함.
+  static const _totalPage = 500;
+  static const _initialPage = 250;
+  late final PageController _pageController =
+      PageController(initialPage: _initialPage);
 
   @override
   void initState() {
     super.initState();
 
-    dayFocus = initialDate;
-    initialDayIndex = (dayFocus.difference(DateTime.now()).inHours / 24).ceil();
-    dayIndex = initialDayIndex;
-
-    nextUpPageKey = dayFocus.subtract(const Duration(days: 1));
-    nextDownPageKey = dayFocus;
-
-    _eventProvider = context.read<EventProvider>();
-    _eventProvider.addListener(refresh);
-
-    _pagingUpController = PagingController(getNextPageKey: (state) {
-      return nextUpPageKey;
-    }, fetchPage: (pageKey) {
-      return _fetchUpPage(pageKey);
-    });
-    _pagingDownController = PagingController(getNextPageKey: (state) {
-      return nextDownPageKey;
-    }, fetchPage: (pageKey) {
-      return _fetchDownPage(pageKey);
-    });
-
-    _scrollController = ScrollController();
-
-    // initialDay 가 오늘인 경우 현재 시간으로 스크롤 위치 이동
-    if (initialDayIndex == 0) {
-      _pagingDownController.addListener(() {
-        if (_pagingDownController.status == PagingStatus.ongoing &&
-            !_isInitialScrollHandled) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            DateTime now = DateTime.now();
-            _scrollController.jumpTo(now.hour * DuaryTimetable.hourHeight);
-
-            // 처음 스크롤이 끝난 후 update index 수행
-            _scrollController.addListener(updateDayIndex);
-          });
-          _isInitialScrollHandled = true;
-        }
+    // Events 초기화
+    _eventProvider.getEventByDay(dayFocus).then((list) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          events = list;
+        });
       });
-    } else {
-      _scrollController.addListener(updateDayIndex);
+    });
+
+    // DayFocus 가 오늘인 경우 현재 시간으로 스크롤 위치 이동
+    if (DateUtils.isSameDay(dayFocus, DateTime.now())) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        DateTime now = DateTime.now();
+        _scrollController.jumpTo(now.hour * DuaryTimetable.hourHeight);
+      });
     }
 
+    _eventProvider.addListener(getEvents);
     // 유저 정보나 커플 정보가 바뀌면 다시 event 불러오기
-    duaryContext.me.addListener(refresh);
-    duaryContext.lover.addListener(refresh);
-    duaryContext.myCouple.addListener(refresh);
+    duaryContext.me.addListener(getEvents);
+    duaryContext.lover.addListener(getEvents);
+    duaryContext.myCouple.addListener(getEvents);
   }
 
   @override
   void dispose() {
     super.dispose();
-    _pagingDownController.dispose();
-    _pagingUpController.dispose();
-    _eventProvider.removeListener(refresh);
-    duaryContext.me.removeListener(refresh);
-    duaryContext.lover.removeListener(refresh);
-    duaryContext.myCouple.removeListener(refresh);
+    _eventProvider.removeListener(getEvents);
+    duaryContext.me.removeListener(getEvents);
+    duaryContext.lover.removeListener(getEvents);
+    duaryContext.myCouple.removeListener(getEvents);
   }
 
-  void refresh() {
-    setState(() {
-      dayFocus = DateUtils.dateOnly(DateTime.now());
-      initialDayIndex =
-          (dayFocus.difference(DateTime.now()).inHours / 24).ceil();
-      dayIndex = initialDayIndex;
-    });
-
-    nextUpPageKey = dayFocus.subtract(const Duration(days: 1));
-    nextDownPageKey = dayFocus;
-
-    _pagingDownController.refresh();
-    _pagingUpController.refresh();
-    fetchFlag.clear();
-  }
-
-  void updateDayIndex() {
-    // 현재 어느 날짜 블록에 해당하는지 인덱스 구함
-    // 예: offset=0~1440px => dayIndex=0 (8/17)
-    //     offset=1441~2880px => dayIndex=1 (8/18)
-    const double dayBlockHeight = hourHeight * 24;
-    late final double offset;
-
-    // 위로 스크롤 중이면 화면 상단을 기준으로 어느 날짜 블록에 있는지 계산
-    if (_scrollController.position.userScrollDirection ==
-        ScrollDirection.forward) {
-      offset = _scrollController.offset;
-    }
-    // 아래로 스크롤 중이면 화면 하단을 기준으로 어느 날짜 블록에 있는지 계산
-    else {
-      offset = _scrollController.offset +
-          _scrollController.position.viewportDimension;
-    }
-
-    int index = (offset / dayBlockHeight).floor() + initialDayIndex;
-
-    if (dayIndex != index) {
-      dayIndex = index;
+  void getEvents() {
+    _eventProvider.getEventByDay(dayFocus).then((list) {
       setState(() {
-        dayFocus =
-            DateUtils.dateOnly(DateTime.now()).add(Duration(days: dayIndex));
+        events = list;
       });
-      _timeTableController.focusDay.value = dayFocus;
-    }
-  }
-
-  Future<List<Map<DateTime, List<Event>>>> _fetchDownPage(
-      DateTime pageKey) async {
-    // 하루동안의 event 불러옴
-    DateTime startDate = DateTime(pageKey.year, pageKey.month, pageKey.day);
-    final newItems = await _eventProvider.getEventByDay(startDate);
-
-    fetchFlag[dayIndex] = true;
-
-    nextDownPageKey = pageKey.add(const Duration(days: 1));
-
-    return [
-      {pageKey: newItems}
-    ];
-  }
-
-  Future<List<Map<DateTime, List<Event>>>> _fetchUpPage(
-      DateTime pageKey) async {
-    // 하루동안의 event 불러옴
-    DateTime startDate = DateTime(pageKey.year, pageKey.month, pageKey.day);
-    final newItems = await _eventProvider.getEventByDay(startDate);
-
-    fetchFlag[dayIndex] = true;
-
-    nextUpPageKey = pageKey.subtract(const Duration(days: 1));
-
-    return [
-      {pageKey: newItems}
-    ];
+    }).catchError((e) {
+      Fluttertoast.showToast(msg: e.toString());
+    });
   }
 
   @override
@@ -209,102 +103,35 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
           height: 16,
         ),
         TitleBar(
-            dayIndex: dayIndex,
-            dayFocus: dayFocus,
-            onDateTap: () => _timeTableController.moveToMonth(dayFocus),),
-        // Two way(up, down) Infinite Scroll View
+          dayFocus: dayFocus,
+          events: events,
+          onDateTap: () => _timeTableController.moveToMonth(dayFocus),
+        ),
         Flexible(
-          child: Scrollable(
-            controller: _scrollController,
-            viewportBuilder: (BuildContext context, ViewportOffset position) {
-              return Viewport(
-                offset: position,
-                center: downListKey,
-                slivers: [
-                  PagingListener(
-                    controller: _pagingUpController,
-                    builder: (context, state, fetchNextPage) {
-                      return PagedSliverList<DateTime,
-                          Map<DateTime, List<Event>>>(
-                        nextPageStrategy: () {
-                          if (dayIndex < initialDayIndex &&
-                              fetchFlag[dayIndex] == null) {
-                            return true;
-                          } else {
-                            return false;
-                          }
-                        },
-                        builderDelegate: PagedChildBuilderDelegate(
-                            animateTransitions: true,
-                            transitionDuration:
-                                const Duration(milliseconds: 250),
-                            itemBuilder: (context, items, index) {
-                              DateTime date = items.keys.first;
-                              final List<Event> events = items[date]!;
-                              return LayoutBuilder(// width 전달 목적
-                                  builder: (context, constraints) {
-                                return DayView(
-                                  currentDate: date,
-                                  items: events,
-                                  refresh: refresh,
-                                  width: constraints.maxWidth,
-                                );
-                              });
-                            },
-                            firstPageErrorIndicatorBuilder: (context) {
-                              return const Center(
-                                child: Text("일정을 불러오는 데에 실패했습니다"),
-                              );
-                            }),
-                        state: state,
-                        fetchNextPage: fetchNextPage,
+          child: PageView.builder(
+              onPageChanged: (index) {
+                setState(() {
+                  dayFocus = _timeTableController.focusDay.value
+                      .add(Duration(days: index - _initialPage));
+                });
+                getEvents();
+              },
+              controller: _pageController,
+              itemCount: _totalPage,
+              itemBuilder: (context, index) {
+                DateTime currentDate = _timeTableController.focusDay.value
+                    .add(Duration(days: index - _initialPage));
+                return SingleChildScrollView(
+                    controller: _scrollController,
+                    child: LayoutBuilder(// width 전달 목적
+                        builder: (context, constraints) {
+                      return DayView(
+                        currentDate: currentDate,
+                        items: events,
+                        width: constraints.maxWidth,
                       );
-                    },
-                  ),
-                  PagingListener(
-                      key: downListKey,
-                      controller: _pagingDownController,
-                      builder: (context, state, fetchNextPage) {
-                        return PagedSliverList<DateTime,
-                                Map<DateTime, List<Event>>>(
-                            nextPageStrategy: () {
-                              if (dayIndex >= initialDayIndex &&
-                                  fetchFlag[dayIndex] == null) {
-                                return true;
-                              } else {
-                                return false;
-                              }
-                            },
-                            key: downListKey,
-                            state: state,
-                            fetchNextPage: fetchNextPage,
-                            builderDelegate: PagedChildBuilderDelegate(
-                                animateTransitions: true,
-                                transitionDuration:
-                                    const Duration(milliseconds: 250),
-                                itemBuilder: (context, items, index) {
-                                  DateTime date = items.keys.first;
-                                  final List<Event> events = items[date]!;
-                                  return LayoutBuilder(// width 전달 목적
-                                      builder: (context, constraints) {
-                                    return DayView(
-                                      width: constraints.maxWidth,
-                                      currentDate: date,
-                                      items: events,
-                                      refresh: refresh,
-                                    );
-                                  });
-                                },
-                                firstPageErrorIndicatorBuilder: (context) {
-                                  return const Center(
-                                    child: Text("일정을 불러오는 데에 실패했습니다"),
-                                  );
-                                }));
-                      }),
-                ],
-              );
-            },
-          ),
+                    }));
+              }),
         ),
       ],
     );

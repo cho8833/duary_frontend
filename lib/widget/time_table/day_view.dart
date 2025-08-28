@@ -13,15 +13,13 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class DayView extends StatefulWidget {
-  const DayView({super.key, required this.items, required this.currentDate, required this.refresh, required this.width});
+  const DayView({super.key, required this.items, required this.currentDate, required this.width});
 
   final List<Event> items;
 
   final DateTime currentDate;
 
   final double width;
-
-  final void Function() refresh;
 
   @override
   State<DayView> createState() => _DayViewState();
@@ -34,14 +32,13 @@ class _DayViewState extends State<DayView> {
   static const hourHeight = DuaryTimetable.hourHeight;
   static const _timelineLength = DuaryTimetable.timelineLength;
 
-  late final List<Event> items;
+  late List<Event> items;
 
   DateTime? now;
 
   @override
   void initState() {
     _timeManager = context.read<TimeManager>();
-    items = widget.items;
     DateTime temp = DateTime.now();
     if (DateUtils.isSameDay(temp, widget.currentDate)) {
       now = DateTime.now();
@@ -81,6 +78,7 @@ class _DayViewState extends State<DayView> {
 
   @override
   Widget build(BuildContext context) {
+    items = widget.items;
     return SizedBox(
       height: hourHeight * 24,
       child: Stack(

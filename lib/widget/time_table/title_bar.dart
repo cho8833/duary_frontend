@@ -9,49 +9,30 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class TitleBar extends StatefulWidget {
+class TitleBar extends StatelessWidget {
   const TitleBar({
     super.key,
-    required this.dayIndex,
     required this.dayFocus,
     required this.onDateTap,
+    required this.events,
   });
 
-  final int dayIndex;
-
   final DateTime dayFocus;
+
+  final List<Event> events;
 
   final Function() onDateTap;
 
   @override
-  State<TitleBar> createState() => _TitleBarState();
-}
-
-class _TitleBarState extends State<TitleBar> {
-  final DuaryContext duaryContext = DuaryContext();
-
-  late final EventProvider _eventProvider;
-
-  List<Event> dayEvents = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _eventProvider = context.read<EventProvider>();
-    _eventProvider.getEventByDay(widget.dayFocus).then((events) {
-      WidgetsBinding.instance.addPostFrameCallback((d) {
-        setState(() {
-          dayEvents = events;
-        });
-      });
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final EventProvider eventProvider = context.read<EventProvider>();
+    final DuaryContext duaryContext = DuaryContext();
+
     late String title;
 
-    switch (widget.dayIndex) {
+    int dayIndex = (dayFocus.difference(DateTime.now()).inHours / 24).ceil();
+
+    switch (dayIndex) {
       case 0:
         title = "오늘";
       case 1:
@@ -59,12 +40,12 @@ class _TitleBarState extends State<TitleBar> {
       case -1:
         title = "어제";
       default:
-        title = _formatDate(widget.dayFocus);
+        title = _formatDate(dayFocus);
     }
 
     late Widget titleWidget;
 
-    if (-2 < widget.dayIndex && widget.dayIndex < 2) {
+    if (-2 < dayIndex && dayIndex < 2) {
       titleWidget = Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -76,7 +57,7 @@ class _TitleBarState extends State<TitleBar> {
                 color: Color(0xFFFE8F00)),
           ),
           Text(
-            _formatDate(widget.dayFocus),
+            _formatDate(dayFocus),
             style: const TextStyle(
                 fontWeight: FontWeight.w400,
                 fontSize: 11,
@@ -103,7 +84,7 @@ class _TitleBarState extends State<TitleBar> {
             left: 16,
             child: GestureDetector(
               onTap: () {
-                widget.onDateTap();
+                onDateTap();
               },
               child: Row(
                 children: [
@@ -112,7 +93,7 @@ class _TitleBarState extends State<TitleBar> {
                     size: 24,
                   ),
                   Text(
-                    "${widget.dayFocus.month}월",
+                    "${dayFocus.month}월",
                     style: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w600),
                   )
@@ -139,26 +120,22 @@ class _TitleBarState extends State<TitleBar> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               titleWidget,
-              ListenableBuilder(
-                  listenable: _eventProvider,
-                  builder: (context, _) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(
-                          width: 20,
-                        ),
-                        Expanded(child: myAllDay(dayEvents)),
-                        const SizedBox(
-                          width: 22,
-                        ),
-                        Expanded(child: loverAllDay(dayEvents)),
-                        const SizedBox(
-                          width: 20,
-                        ),
-                      ],
-                    );
-                  }),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  Expanded(child: myAllDay(events, duaryContext, context)),
+                  const SizedBox(
+                    width: 22,
+                  ),
+                  Expanded(child: loverAllDay(events, duaryContext, context)),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                ],
+              )
             ],
           )),
         ],
@@ -166,7 +143,8 @@ class _TitleBarState extends State<TitleBar> {
     );
   }
 
-  Widget myAllDay(List<Event> events) {
+  Widget myAllDay(
+      List<Event> events, DuaryContext duaryContext, BuildContext context) {
     List<Event> my = events.where((e) {
       return e.isAllDay &&
           (e.member.socialId == duaryContext.me.value!.socialId ||
@@ -183,9 +161,8 @@ class _TitleBarState extends State<TitleBar> {
           children: [
             GestureDetector(
                 onTap: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(
-                          builder: (context) => EventDetailsScreen(event: e)));
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => EventDetailsScreen(event: e)));
                 },
                 child: Row(
                   children: [
@@ -209,7 +186,8 @@ class _TitleBarState extends State<TitleBar> {
     }
   }
 
-  Widget loverAllDay(List<Event> events) {
+  Widget loverAllDay(
+      List<Event> events, DuaryContext duaryContext, BuildContext context) {
     List<Event> lovers = events.where((e) {
       return e.isAllDay &&
           (e.member.socialId != duaryContext.me.value!.socialId ||
@@ -227,17 +205,18 @@ class _TitleBarState extends State<TitleBar> {
             GestureDetector(
               onTap: () {
                 Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => EventDetailsScreen(event: e)));
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => EventDetailsScreen(event: e)));
               },
               child: Row(
                 children: [
                   Expanded(
                     child: _AllDayBox(
                         title: e.title,
-                        character:
-                            e.isTogether ? Character.together : e.member.character!),
+                        character: e.isTogether
+                            ? Character.together
+                            : e.member.character!),
                   ),
                 ],
               ),
@@ -254,7 +233,7 @@ class _TitleBarState extends State<TitleBar> {
   }
 
   String _formatDate(DateTime date) {
-    return "${DateFormat("yyyy년 M월 dd일").format(widget.dayFocus)} ${DateFormat.E("ko_KR").format(widget.dayFocus)}요일";
+    return "${DateFormat("yyyy년 M월 dd일").format(dayFocus)} ${DateFormat.E("ko_KR").format(dayFocus)}요일";
   }
 }
 

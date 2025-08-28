@@ -19,7 +19,6 @@ final class AuthRepositoryImpl
 
   @override
   Future<DuaryInfoRes> signInWithKakaoTalk(SignInReq req) async {
-
     Uri uri = getUri("/auth/signin/kakao");
 
     Response response =
