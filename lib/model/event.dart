@@ -64,8 +64,10 @@ class Event {
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
 
-  factory Event.fromApple(AppleCalendar calendar, String memberId, String? loverId, dc.Location location, dc.Event dcEvent) {
-    String createdBy = calendar.owner == CalendarOwner.lover ? (loverId ?? "lover") : memberId;
+  factory Event.fromApple(AppleCalendar calendar, String memberId,
+      String? loverId, dc.Location location, dc.Event dcEvent) {
+    String createdBy =
+        calendar.owner == CalendarOwner.lover ? (loverId ?? "lover") : memberId;
     bool isTogether = calendar.owner == CalendarOwner.together;
     Event event = Event(
         dcEvent.eventId!,
@@ -80,6 +82,30 @@ class Event {
         EventType.apple);
 
     return event;
+  }
+
+  factory Event.copy(Event event) {
+    return Event(
+        event.id,
+        event.coupleId,
+        event.createdBy,
+        event.startDateTime,
+        event.endDateTime,
+        event.title,
+        event.frequency,
+        event.isTogether,
+        event.isTogether,
+        event.eventType,
+      recurStartDate: event.recurStartDate,
+      recurEndDate: event.recurEndDate,
+      daily: event.daily,
+      weekly: event.weekly,
+      monthly: event.monthly,
+      yearly: event.yearly,
+      content: event.content,
+      location: event.location,
+      hangOutWith: event.hangOutWith
+    );
   }
 
   @override

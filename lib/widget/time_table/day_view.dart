@@ -13,7 +13,11 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class DayView extends StatefulWidget {
-  const DayView({super.key, required this.items, required this.currentDate, required this.width});
+  const DayView(
+      {super.key,
+      required this.items,
+      required this.currentDate,
+      required this.width});
 
   final List<Event> items;
 
@@ -65,12 +69,12 @@ class _DayViewState extends State<DayView> {
   Widget currentTimeBar() {
     if (now != null) {
       return Positioned(
-        top: hourHeight * now!.hour + (hourHeight / 60) * now!.minute,
+          top: hourHeight * now!.hour + (hourHeight / 60) * now!.minute,
           child: Container(
             width: widget.width,
-                  color: Colors.orange,
-                  height: 1,
-                ));
+            color: Colors.orange,
+            height: 1,
+          ));
     } else {
       return Container();
     }
@@ -139,7 +143,7 @@ class _DayViewState extends State<DayView> {
     DateTime currentDate = widget.currentDate;
 
     List<List<Event>> overlapGrouped =
-    groupOverlappingEvents(events, currentDate, isMine: isLeft);
+        groupOverlappingEvents(events, currentDate, isMine: isLeft);
 
     for (final List<Event> overlapEvents in overlapGrouped) {
       int overlapCount = overlapEvents.length;
@@ -147,21 +151,21 @@ class _DayViewState extends State<DayView> {
       for (int i = 0; i < overlapCount; i++) {
         Event event = overlapEvents[i];
         // 이벤트 위치 계산
-        DateTime startDate = DateUtils.dateOnly(event.startDateTime);
-        double dayPosition = startDate.compareTo(currentDate) *
-            currentDate.difference(startDate).inDays *
-            24 *
-            hourHeight;
-        double yPosition = dayPosition +
-            event.startDateTime.hour * hourHeight +
-            (event.startDateTime.minute * 3 / 2);
+
+        DateTime startTime = widget.currentDate.isAfter(event.startDateTime)
+            ? widget.currentDate
+            : event.startDateTime;
+        DateTime tomorrow = widget.currentDate.add(const Duration(days: 1));
+        DateTime endTime =
+            tomorrow.isBefore(event.endDateTime) ? tomorrow : event.endDateTime;
+        double yPosition =
+            startTime.hour * hourHeight + (startTime.minute * 3 / 2);
         double xPosition = isLeft ? i * 20 : (overlapCount - i - 1) * 20;
-        xPosition = min(maxWidth - 20 , xPosition);
+        xPosition = min(maxWidth - 20, xPosition);
         // 이벤트 높이 계산, 1분 = 1px
-        double height =
-            event.endDateTime.difference(event.startDateTime).inMinutes *
-                hourHeight /
-                60.toDouble();
+        double height = endTime.difference(startTime).inMinutes *
+            hourHeight /
+            60.toDouble();
 
         // 이벤트 너비 계산
         double width = maxWidth - (overlapCount - 1) * 20;
@@ -206,7 +210,7 @@ class _DayViewState extends State<DayView> {
     String time =
         "${DateFormat("hh:mm").format(event.startDateTime)} - ${DateFormat("hh:mm").format(event.endDateTime)}";
     Character character =
-    event.isTogether ? Character.together : event.member.character!;
+        event.isTogether ? Character.together : event.member.character!;
 
     Widget content = Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -256,10 +260,12 @@ class _DayViewState extends State<DayView> {
     List<Event> filtered = events.where((event) {
       if (isMine) {
         return (_duaryContext.me.value!.getId() == event.member.getId() ||
-            event.isTogether) && !event.isAllDay;
+                event.isTogether) &&
+            !event.isAllDay;
       } else {
         return (_duaryContext.me.value!.getId() != event.member.getId() ||
-            event.isTogether) && !event.isAllDay;
+                event.isTogether) &&
+            !event.isAllDay;
       }
     }).toList();
 
@@ -273,11 +279,11 @@ class _DayViewState extends State<DayView> {
           ? 0
           : event.startDateTime.hour * 60 + event.startDateTime.minute;
       int end =
-      event.endDateTime.isAfter(currentDate.add(const Duration(days: 1)))
-          ? maxTime
-          : event.endDateTime.hour == 0
-          ? maxTime
-          : event.endDateTime.hour * 60 + event.endDateTime.minute;
+          event.endDateTime.isAfter(currentDate.add(const Duration(days: 1)))
+              ? maxTime
+              : event.endDateTime.hour == 0
+                  ? maxTime
+                  : event.endDateTime.hour * 60 + event.endDateTime.minute;
       startEvents[start].add(event);
       endEvents[end].add(event);
     }

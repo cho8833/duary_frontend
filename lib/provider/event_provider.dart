@@ -143,7 +143,7 @@ class EventProvider extends ChangeNotifier {
       List<Event> events = result.expand((e) => e).toList();
       _initMemberInEvents(events);
 
-      // 1. 가져온 이벤트를 날짜별로 임시 분류 (기존과 동일)
+      // 1. 가져온 이벤트를 날짜별로 임시 분류
       final Map<DateTime, Set<Event>> tempMonthlyCache = {};
       for (final event in events) {
         DateTime currentDay = DateUtils.dateOnly(event.startDateTime);
