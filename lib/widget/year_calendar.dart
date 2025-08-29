@@ -2,44 +2,51 @@ import 'dart:ui' as ui;
 
 import 'package:duary/screen/timetable_screen.dart';
 import 'package:flutter/material.dart';
-import "package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart"
-    show AlignedGridView;
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 class YearCalendar extends StatefulWidget {
   const YearCalendar({super.key, required this.timeTableController});
 
   final TimeTableController timeTableController;
 
+
   @override
   State<YearCalendar> createState() => _YearCalendarState();
 }
 
 class _YearCalendarState extends State<YearCalendar> {
+
   static const _totalPage = 500;
   static const _initialPage = 250;
+
+  late TimeTableController timeTableController = widget.timeTableController;
+
+  late final DateTime initialYear = timeTableController.focusDay.value;
+
   final PageController _pageController =
       PageController(initialPage: _initialPage);
 
-  late final TimeTableController _timeTableController =
-      widget.timeTableController;
-  late DateTime initialYear = _timeTableController.focusYear.value;
 
   @override
   void initState() {
     super.initState();
-    _timeTableController.focusYear.addListener(yearListener);
-  }
-
-  void yearListener() {
-    final int focusYear = _timeTableController.focusYear.value.year;
-    _pageController.jumpToPage(focusYear - initialYear.year + _initialPage);
+    timeTableController.focusDay.addListener(onFocusDayChange);
   }
 
   @override
   void dispose() {
-    _timeTableController.focusYear.removeListener(yearListener);
     super.dispose();
+    _pageController.dispose();
+    timeTableController.focusDay.removeListener(onFocusDayChange);
   }
+
+  void onFocusDayChange() {
+
+    int index = timeTableController.focusDay.value.year - initialYear.year  + _initialPage;
+    _pageController.jumpToPage(index);
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +60,7 @@ class _YearCalendarState extends State<YearCalendar> {
             return _YearPage(
                 key: ValueKey(year),
                 year: year,
-                onMonthTap: _timeTableController.moveToMonth);
+                onMonthTap: timeTableController.moveToMonth);
           }),
     );
   }
@@ -103,12 +110,13 @@ class _YearPageState extends State<_YearPage>
                 DateTime tapped = DateTime(
                   widget.year,
                   month,
+                  1,
                 );
                 widget.onMonthTap(tapped);
               },
               child: SingleMonthWidget(
-                key: ValueKey("${widget.year}-month"),
-                year: 2025,
+                key: ValueKey("${widget.year}-$month"),
+                year: widget.year,
                 month: month,
               ),
             );

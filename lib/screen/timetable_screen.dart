@@ -51,21 +51,19 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
 class TimeTableController {
   ValueNotifier<DateTime> focusDay = ValueNotifier(DateUtils.dateOnly(DateTime.now()));
-  late ValueNotifier<DateTime> focusYear = ValueNotifier(focusDay.value);
-  late ValueNotifier<DateTime> focusMonth = ValueNotifier(focusDay.value);
 
   final PageController _pageController;
 
   TimeTableController(this._pageController);
 
   void moveToYear(DateTime year) {
-    focusYear.value = year;
+    focusDay.value = year;
     _pageController.animateToPage(0,
         duration: const Duration(milliseconds: 250),
         curve: Curves.ease);
   }
   void moveToMonth(DateTime month) {
-    focusMonth.value = month;
+    focusDay.value = month;
     _pageController.animateToPage(1, duration: const Duration(milliseconds: 250), curve: Curves.ease);
   }
   void moveToDay(DateTime day) {

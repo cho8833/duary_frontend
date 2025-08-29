@@ -30,7 +30,8 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
   late final TimeTableController _timeTableController =
       widget.timeTableController;
 
-  late DateTime dayFocus = _timeTableController.focusDay.value;
+  late final DateTime initialDay = _timeTableController.focusDay.value;
+  late DateTime dayFocus = initialDay;
 
   List<Event> events = [];
 
@@ -111,7 +112,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
           child: PageView.builder(
               onPageChanged: (index) {
                 setState(() {
-                  dayFocus = _timeTableController.focusDay.value
+                  dayFocus = initialDay
                       .add(Duration(days: index - _initialPage));
                 });
                 getEvents();
@@ -119,7 +120,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
               controller: _pageController,
               itemCount: _totalPage,
               itemBuilder: (context, index) {
-                DateTime currentDate = _timeTableController.focusDay.value
+                DateTime currentDate = initialDay
                     .add(Duration(days: index - _initialPage));
                 return SingleChildScrollView(
                     controller: _scrollController,
