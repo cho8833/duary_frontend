@@ -64,15 +64,15 @@ class Event {
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
 
-  factory Event.fromApple(AppleCalendar calendar, String memberId, String? loverId, dc.Event dcEvent) {
+  factory Event.fromApple(AppleCalendar calendar, String memberId, String? loverId, dc.Location location, dc.Event dcEvent) {
     String createdBy = calendar.owner == CalendarOwner.lover ? (loverId ?? "lover") : memberId;
     bool isTogether = calendar.owner == CalendarOwner.together;
     Event event = Event(
         dcEvent.eventId!,
         "",
         createdBy,
-        dcEvent.start!,
-        dcEvent.end!,
+        dc.TZDateTime.from(dcEvent.start!, location),
+        dc.TZDateTime.from(dcEvent.end!, location),
         dcEvent.title!,
         Frequency.oneTime,
         isTogether,

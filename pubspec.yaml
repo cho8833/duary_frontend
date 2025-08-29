@@ -62,6 +62,7 @@ dependencies:
   web_socket_channel: ^3.0.3
   device_calendar: ^4.3.3
   url_launcher: ^6.3.2
+  flutter_native_timezone: ^2.0.0
 
 
 dev_dependencies:
