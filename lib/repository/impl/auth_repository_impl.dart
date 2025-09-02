@@ -95,7 +95,7 @@ final class AuthRepositoryImpl
   Future<void> withdrawal() async {
     Uri uri = getUri("/auth/withdrawal");
 
-    Response response = await client.post(uri);
+    Response response = await interceptedClient.post(uri);
 
     checkResponse(response);
   }

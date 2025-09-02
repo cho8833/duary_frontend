@@ -132,16 +132,12 @@ class EventProvider extends ChangeNotifier {
     eventFutures
         .add(_eventRepository.getEvent(myCouple!.id, startDate, endDate));
 
-    eventFutures.add(_getAppleEvents(
-        me?.syncedAppleCalendar ?? [],
-        me!.getId(),
-        lover?.getId(),
-        startDate,
-        endDate));
+    eventFutures.add(_getAppleEvents(me?.syncedAppleCalendar ?? [], me!.getId(),
+        lover?.getId(), startDate, endDate));
 
     final future = Future.wait(eventFutures).then((result) {
       List<Event> events = result.expand((e) => e).toList();
-      _initMemberInEvents(events);
+      _processEvents(events);
 
       // 1. 가져온 이벤트를 날짜별로 임시 분류
       final Map<DateTime, Set<Event>> tempMonthlyCache = {};
@@ -196,29 +192,40 @@ class EventProvider extends ChangeNotifier {
     return appleCalendarRepository.getCalendars();
   }
 
-  Future<List<Event>> _getAppleEvents(List<AppleCalendar> calendars, String memberId, String? loverId,
-      DateTime startDate, DateTime endDate) async {
+  Future<List<Event>> _getAppleEvents(
+      List<AppleCalendar> calendars,
+      String memberId,
+      String? loverId,
+      DateTime startDate,
+      DateTime endDate) async {
     if (calendars.isEmpty) {
       return [];
     }
     final List<List<Event>> futures = await Future.wait(calendars.map((c) =>
-        appleCalendarRepository.getEvent(c, memberId, loverId, startDate, endDate)));
+        appleCalendarRepository.getEvent(
+            c, memberId, loverId, startDate, endDate)));
 
     List<Event> flattened = futures.expand((e) => e).toList();
 
     return flattened;
   }
 
-  List<Event> _initMemberInEvents(List<Event> events) {
+  List<Event> _processEvents(List<Event> events) {
     List<Event> temp = [];
-    final noneMember = Member("none", "none", character: Character.none);
+    final noneMember = Member("", "", character: Character.none);
     for (Event event in events) {
       try {
         event.member = myCouple!.members
             .firstWhere((member) => member.getId() == event.createdBy);
+        if (event.eventType == EventType.birthday) {
+          event.title = "${event.member.name} 생일 🎂";
+        }
       } catch (_) {
         event.member = noneMember;
         // createdby 와 member 가 매핑되는 event가 없으면 잘못된 데이터로 간주하고 무시
+        if (event.eventType == EventType.birthday) {
+          event.title = "생일 🎂";
+        }
       }
       temp.add(event);
     }
@@ -237,7 +244,7 @@ class EventProvider extends ChangeNotifier {
   Future<Event?> editEvent(String id, SaveEventReq req) async {
     req.validate();
     return await _eventRepository.editEvent(id, req).then((event) {
-      _initMemberInEvents([event]);
+      _processEvents([event]);
       _clearData();
       return event;
     }).catchError((e) {

@@ -2,9 +2,7 @@ import 'package:duary/model/enums/character.dart';
 import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/home_screen.dart';
-import 'package:duary/screen/start/connect_copule_screen.dart';
 import 'package:duary/screen/login_screen.dart';
-import 'package:duary/support/custom_page_route.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/character_widget.dart';
@@ -31,6 +29,12 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
   bool blue = true;
 
   late Character myCharacter;
+
+  @override
+  void initState() {
+    name = duaryContext.me.value!.name;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

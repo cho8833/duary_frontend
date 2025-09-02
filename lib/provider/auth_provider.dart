@@ -16,9 +16,9 @@ extension AuthProvider on DuaryContext {
   Future<void> signInWithApple() async {
     AuthorizationCredentialAppleID? credential;
     try {
-      credential = await SignInWithApple.getAppleIDCredential(scopes: [
-        AppleIDAuthorizationScopes.email,
-      ], nonce: nonce);
+      credential = await SignInWithApple.getAppleIDCredential(nonce: nonce, scopes: [
+        AppleIDAuthorizationScopes.fullName
+      ]);
     } catch (e) {
       if (e is SignInWithAppleAuthorizationException) {
         if (e.code == AuthorizationErrorCode.canceled) {
@@ -30,6 +30,9 @@ extension AuthProvider on DuaryContext {
       final String? fcmToken = await _requestFcmToken();
       SignInReq req = SignInReq(appleOAuthToken: credential, fcmToken: fcmToken);
       await authRepository.signInWithApple(req).then((res) async {
+        if (res.member.name != null) {
+          res.member.name = credential!.givenName;
+        }
         refreshDuaryInfo(res);
       }).catchError((e) {
         throw ServerResponseException(e.toString());
@@ -45,6 +48,9 @@ extension AuthProvider on DuaryContext {
         final String? fcmToken = await _requestFcmToken();
         SignInReq req = SignInReq(googleOAuthToken: account, fcmToken: fcmToken);
         await authRepository.signInWithGoogle(req).then((res) async {
+          if (res.member.name != null) {
+            res.member.name = account.displayName;
+          }
           refreshDuaryInfo(res);
         }).catchError((e) {
           throw ServerResponseException(e.toString());
