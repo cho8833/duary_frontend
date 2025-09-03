@@ -73,8 +73,11 @@ class DuaryContext {
     validateName(name);
     validateBirthday(birthday);
     validateRelationDate(relationDate);
-    DateTime birthdayReq =
-        DateTime(birthday!.year, birthday.month, birthday.day);
+    DateTime? birthdayReq;
+    if (birthday != null) {
+      birthdayReq =
+          DateTime(birthday.year, birthday.month, birthday.day);
+    }
     DateTime relationDateReq =
         DateTime(relationDate!.year, relationDate.month, relationDate.day);
     StartDuaryReq req =
@@ -148,10 +151,7 @@ class DuaryContext {
 
   void validateBirthday(DateTime? birthday) {
     DateTime now = DateTime.now();
-    if (birthday == null) {
-      throw ValidationException("생일을 입력해주세요");
-    }
-    if (birthday.isAfter(now)) {
+    if (birthday != null && birthday.isAfter(now)) {
       throw ValidationException("생일을 다시 설정해주세요");
     }
   }

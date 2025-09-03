@@ -9,8 +9,15 @@ part of 'start_duary_req.dart';
 Map<String, dynamic> _$StartDuaryReqToJson(StartDuaryReq instance) =>
     <String, dynamic>{
       'name': instance.name,
-      'birthday': const ISO8601TimeZoneFormatter().toJson(instance.birthday),
+      'birthday': _$JsonConverterToJson<String, DateTime>(
+          instance.birthday, const ISO8601TimeZoneFormatter().toJson),
       'relationDate':
           const ISO8601TimeZoneFormatter().toJson(instance.relationDate),
       'myCharacter': instance.myCharacter,
     };
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);

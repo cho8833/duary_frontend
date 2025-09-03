@@ -196,7 +196,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   },
                   child: InfoBox(
                       labelText: "생일",
-                      currentValue: formatDateTime(me.birthday!))),
+                      currentValue: me.birthday != null ? formatDateTime(me.birthday!) : "생일을 설정해주세요")),
               const SizedBox(
                 height: 27,
               ),

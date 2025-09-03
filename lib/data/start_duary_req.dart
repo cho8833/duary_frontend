@@ -8,7 +8,7 @@ part 'start_duary_req.g.dart';
 class StartDuaryReq {
   String name;
   @ISO8601TimeZoneFormatter()
-  DateTime birthday;
+  DateTime? birthday;
   @ISO8601TimeZoneFormatter()
   DateTime relationDate;
   Character myCharacter;

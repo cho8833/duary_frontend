@@ -91,7 +91,7 @@ class DuaryDateInputBox extends StatefulWidget {
   const DuaryDateInputBox({
     super.key,
     this.initialValue,
-    this.hintText,
+    required this.hintText,
     required this.onSelect,
     this.futureDateSelectable = true,
   });
@@ -100,7 +100,7 @@ class DuaryDateInputBox extends StatefulWidget {
 
   final void Function(DateTime) onSelect;
 
-  final String? hintText;
+  final String hintText;
 
   final bool futureDateSelectable;
 

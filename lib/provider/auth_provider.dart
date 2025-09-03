@@ -30,7 +30,11 @@ extension AuthProvider on DuaryContext {
       final String? fcmToken = await _requestFcmToken();
       SignInReq req = SignInReq(appleOAuthToken: credential, fcmToken: fcmToken);
       await authRepository.signInWithApple(req).then((res) async {
-        res.member.name ??= credential!.givenName;
+        // couple 이 없으면 Start Duary 를 하지 않은 유저로 간주하고 UserCredential 의 이름으로 유저의 이름을 설정(앱에서만, DB 에는 저장되지 않음)
+        // TODO: StartDuary 한 유저인지 검사하는 로직이 명확하지 않음
+        if (res.couple == null) {
+          res.member.name ??= credential!.givenName;
+        }
         refreshDuaryInfo(res);
       }).catchError((e) {
         throw ServerResponseException(e.toString());
@@ -46,7 +50,11 @@ extension AuthProvider on DuaryContext {
         final String? fcmToken = await _requestFcmToken();
         SignInReq req = SignInReq(googleOAuthToken: account, fcmToken: fcmToken);
         await authRepository.signInWithGoogle(req).then((res) async {
-          res.member.name ??= account.displayName;
+          // couple 이 없으면 Start Duary 를 하지 않은 유저로 간주하고 UserCredential 의 이름으로 유저의 이름을 설정(앱에서만, DB 에는 저장되지 않음)
+          // TODO: StartDuary 한 유저인지 검사하는 로직이 명확하지 않음
+          if (res.couple == null) {
+            res.member.name ??= account.displayName;
+          }
           refreshDuaryInfo(res);
         }).catchError((e) {
           throw ServerResponseException(e.toString());

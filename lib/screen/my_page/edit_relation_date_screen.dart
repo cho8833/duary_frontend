@@ -67,7 +67,7 @@ class _EditRelationDateScreenState extends State<EditRelationDateScreen> {
                     initialValue: relationDate,
                     onSelect: (value) {
                       relationDate = value;
-                    })
+                    }, hintText: '우리가 처음 만난 날',)
               ],
             ),
             FutureButton(

@@ -70,6 +70,8 @@ class _EditBirthdayScreenState extends State<EditBirthdayScreen> {
                 ),
                 DuaryDateInputBox(
                     initialValue: birthday,
+                    hintText: "내 생년월일",
+                    futureDateSelectable: false,
                     onSelect: (value) {
                       birthday = value;
                     })

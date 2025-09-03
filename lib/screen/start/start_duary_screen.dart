@@ -91,7 +91,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
                 onSelect: (value) {
                   birthday = value;
                 },
-                hintText: "내 생년월일",
+                hintText: "내 생년월일(선택사항)",
                 futureDateSelectable: false,
               ),
               const SizedBox(
