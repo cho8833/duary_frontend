@@ -78,6 +78,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
                 height: 40,
               ),
               DuaryTextInputBox(
+                initialValue: name,
                 onChange: (value) {
                   name = value;
                 },
