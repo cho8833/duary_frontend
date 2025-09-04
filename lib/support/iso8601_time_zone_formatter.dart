@@ -19,7 +19,7 @@ class ISO8601TimeZoneFormatter implements JsonConverter<DateTime, String> {
       if (object.timeZoneOffset.inHours >= 0) {
         return '$timeString+${object.timeZoneOffset.inHours.toString().padLeft(2, "0")}:00';
       } else {
-        return '$timeString${object.timeZoneOffset.inHours.toString().padLeft(2, "0")}:00';
+        return '$timeString-${(-object.timeZoneOffset.inHours).toString().padLeft(2, "0")}:00';
       }
     }
   }
