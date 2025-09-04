@@ -78,8 +78,11 @@ class DuaryContext {
       birthdayReq =
           DateTime(birthday.year, birthday.month, birthday.day);
     }
-    DateTime relationDateReq =
-        DateTime(relationDate!.year, relationDate.month, relationDate.day);
+    DateTime? relationDateReq;
+    if (relationDate != null) {
+      relationDateReq =
+          DateTime(relationDate.year, relationDate.month, relationDate.day);
+    }
     StartDuaryReq req =
         StartDuaryReq(name!, birthdayReq, relationDateReq, myCharacter);
     await _coupleRepository.startDuary(req).then((res) {
@@ -158,10 +161,7 @@ class DuaryContext {
 
   void validateRelationDate(DateTime? relationDate) {
     DateTime now = DateTime.now();
-    if (relationDate == null) {
-      throw ValidationException("처음 만난 날을 입력해주세요");
-    }
-    if (relationDate.isAfter(now)) {
+    if (relationDate != null && relationDate.isAfter(now)) {
       throw ValidationException("생일을 다시 설정해주세요");
     }
   }
@@ -190,9 +190,9 @@ class DuaryContext {
     });
   }
 
-  Future<void> updateCouple({DateTime? relationDate}) async {
+  Future<void> updateCouple(DateTime relationDate) async {
     validateRelationDate(relationDate);
-    UpdateCoupleReq req = UpdateCoupleReq(relationDate!);
+    UpdateCoupleReq req = UpdateCoupleReq(relationDate);
     await _coupleRepository.updateCouple(req).then((couple) {
       myCouple.value = couple;
     });

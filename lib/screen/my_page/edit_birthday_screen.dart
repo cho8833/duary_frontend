@@ -79,7 +79,7 @@ class _EditBirthdayScreenState extends State<EditBirthdayScreen> {
             ),
             FutureButton(
               onTap: () async {
-                if (birthday != me.birthday) {
+                if (birthday != me.birthday && birthday != null) {
                   await duaryContext.updateMember(birthday: birthday).then((_) {
                     Navigator.pop(context);
                   }).catchError((e) {

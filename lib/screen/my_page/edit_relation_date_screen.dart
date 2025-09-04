@@ -14,7 +14,7 @@ class EditRelationDateScreen extends StatefulWidget {
 
 class _EditRelationDateScreenState extends State<EditRelationDateScreen> {
   DuaryContext duaryContext = DuaryContext();
-  late DateTime relationDate;
+  DateTime? relationDate;
 
   @override
   void initState() {
@@ -72,8 +72,8 @@ class _EditRelationDateScreenState extends State<EditRelationDateScreen> {
             ),
             FutureButton(
               onTap: () async {
-                if (relationDate != duaryContext.myCouple.value!.relationDate) {
-                  await duaryContext.updateCouple(relationDate: relationDate).then((_) {
+                if (relationDate != duaryContext.myCouple.value!.relationDate && relationDate != null) {
+                  await duaryContext.updateCouple(relationDate!).then((_) {
                     Navigator.pop(context);
                   }).catchError((e) {
                     Fluttertoast.showToast(msg: e.toString());

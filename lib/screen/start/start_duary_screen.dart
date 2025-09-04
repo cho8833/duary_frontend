@@ -89,9 +89,9 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
               ),
               DuaryDateInputBox(
                 onSelect: (value) {
-                  birthday = value;
+                  relationDate = value;
                 },
-                hintText: "내 생년월일(선택사항)",
+                hintText: "우리가 처음 만난 날(선택사항)",
                 futureDateSelectable: false,
               ),
               const SizedBox(
@@ -99,9 +99,9 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
               ),
               DuaryDateInputBox(
                 onSelect: (value) {
-                  relationDate = value;
+                  birthday = value;
                 },
-                hintText: "우리가 처음 만난 날",
+                hintText: "내 생년월일(선택사항)",
                 futureDateSelectable: false,
               ),
               const SizedBox(

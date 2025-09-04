@@ -5,6 +5,7 @@ import 'package:duary/screen/start/start_duary_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/widget/button_base.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -109,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 //       height: 48,
                 //       child: TextField(
                 //         onSubmitted: (value) {
-                //           if (value != null || value.isEmpty == false) {
+                //           if (value.isEmpty == false) {
                 //             username = value;
                 //           } else {
                 //             username = null;

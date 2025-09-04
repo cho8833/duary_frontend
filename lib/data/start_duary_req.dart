@@ -10,7 +10,7 @@ class StartDuaryReq {
   @ISO8601TimeZoneFormatter()
   DateTime? birthday;
   @ISO8601TimeZoneFormatter()
-  DateTime relationDate;
+  DateTime? relationDate;
   Character myCharacter;
 
   StartDuaryReq(this.name, this.birthday, this.relationDate, this.myCharacter);

@@ -7,7 +7,7 @@ part 'couple.g.dart';
 @JsonSerializable()
 class Couple {
   @ISO8601TimeZoneFormatter()
-  DateTime relationDate;
+  DateTime? relationDate;
 
   List<Member> members;
 

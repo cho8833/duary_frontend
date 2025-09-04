@@ -44,7 +44,7 @@ class MyInfoScreen extends StatelessWidget {
                 labelText: "생일",
                 value: _ValueText(
                     currentValue:
-                        formatDateTime(duaryContext.me.value!.birthday!))),
+                    duaryContext.me.value!.birthday != null ? formatDateTime(duaryContext.me.value!.birthday!) : "설정되지 않음")),
             const Spacer(),
             Center(
               child: FutureButton(

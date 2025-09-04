@@ -196,7 +196,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   },
                   child: InfoBox(
                       labelText: "생일",
-                      currentValue: me.birthday != null ? formatDateTime(me.birthday!) : "생일을 설정해주세요")),
+                      currentValue: me.birthday != null ? formatDateTime(me.birthday!) : "설정해주세요")),
               const SizedBox(
                 height: 27,
               ),
@@ -227,7 +227,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   },
                   child: InfoBox(
                       labelText: "사랑이 시작된 날",
-                      currentValue: formatDateTime(myCouple.relationDate))),
+                      currentValue: myCouple.relationDate != null ? formatDateTime(myCouple.relationDate!) : "설정해주세요")),
               const SizedBox(
                 height: 27,
               ),

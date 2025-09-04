@@ -11,8 +11,8 @@ Map<String, dynamic> _$StartDuaryReqToJson(StartDuaryReq instance) =>
       'name': instance.name,
       'birthday': _$JsonConverterToJson<String, DateTime>(
           instance.birthday, const ISO8601TimeZoneFormatter().toJson),
-      'relationDate':
-          const ISO8601TimeZoneFormatter().toJson(instance.relationDate),
+      'relationDate': _$JsonConverterToJson<String, DateTime>(
+          instance.relationDate, const ISO8601TimeZoneFormatter().toJson),
       'myCharacter': instance.myCharacter,
     };
 

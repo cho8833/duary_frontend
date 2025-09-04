@@ -1,3 +1,4 @@
+import 'package:duary/model/couple.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/screen/my_page/my_info_screen.dart';
 import 'package:duary/screen/start/connect_copule_screen.dart';
@@ -9,15 +10,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:fluttertoast/fluttertoast.dart';
 
-class CoupleInfoScreen extends StatelessWidget {
+class CoupleInfoScreen extends StatefulWidget {
   const CoupleInfoScreen({super.key});
 
   static const String codeMent =
       "커플 코드는 추후 다시 커플에 연결하거나,\n커플 정보를 복원할 때 사용될 수 있습니다.\n잃어버리지 않도록 안전한 곳에 저장해주세요.";
 
   @override
+  State<CoupleInfoScreen> createState() => _CoupleInfoScreenState();
+}
+
+class _CoupleInfoScreenState extends State<CoupleInfoScreen> {
+
+  final DuaryContext duaryContext = DuaryContext();
+
+  late Couple couple = duaryContext.myCouple.value!;
+
+  @override
+  void initState() {
+    duaryContext.lover.addListener(_coupleListener);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    duaryContext.lover.removeListener(_coupleListener);
+    super.dispose();
+  }
+  void _coupleListener() {
+    setState(() {
+      couple = duaryContext.myCouple.value!;
+    });
+  }
+  @override
   Widget build(BuildContext context) {
-    final DuaryContext duaryContext = DuaryContext();
 
     return Scaffold(
       appBar: SubPageAppBar(
@@ -63,7 +89,7 @@ class CoupleInfoScreen extends StatelessWidget {
               height: 8,
             ),
             const Text(
-              codeMent,
+              CoupleInfoScreen.codeMent,
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 12,
