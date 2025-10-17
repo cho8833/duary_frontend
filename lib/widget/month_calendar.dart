@@ -30,9 +30,9 @@ class _MonthCalendarState extends State<MonthCalendar> {
   late DateTime focusMonth = initialMonth;
   late DateTime selectedDay = initialMonth;
 
-  List<Event> dayEvents = [];
-
   late final EventProvider eventProvider = context.read<EventProvider>();
+
+  List<Event> dayEvents = [];
 
   @override
   void initState() {
@@ -44,6 +44,36 @@ class _MonthCalendarState extends State<MonthCalendar> {
         });
       });
     });
+    eventProvider.addListener(refresh);
+  }
+
+  void refresh() {
+    eventProvider.getEventByDay(selectedDay).then((events) {
+      setState(() {
+        dayEvents = events;
+      });
+    });
+  }
+
+  void changeDay(DateTime day) {
+    setState(() {
+      selectedDay = day;
+    });
+    refresh();
+  }
+
+  void changeMonth(DateTime month) {
+    setState(() {
+      focusMonth = month;
+      selectedDay = focusMonth;
+    });
+    refresh();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    eventProvider.removeListener(refresh);
   }
 
   @override
@@ -126,18 +156,11 @@ class _MonthCalendarState extends State<MonthCalendar> {
                 );
                 selectedDay = focusMonth;
               });
-              eventProvider.getEventByDay(selectedDay).then((list) {
-                dayEvents = list;
-              }).catchError((e) {
-                Fluttertoast.showToast(msg: e.toString());
-              });
             },
             itemBuilder: (context, index) {
               final int monthOffset = index - _initialPage;
               final DateTime currentMonth = DateTime(
-                  initialMonth.year,
-                  initialMonth.month + monthOffset,
-                  1);
+                  initialMonth.year, initialMonth.month + monthOffset, 1);
               return Container(
                 color: Colors.white,
                 child: _CalendarMonthWidget(
@@ -148,12 +171,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
                     if (DateUtils.isSameDay(day, selectedDay)) {
                       timeTableController.moveToDay(day);
                     } else {
-                      selectedDay = day;
-                      eventProvider.getEventByDay(selectedDay).then((events) {
-                        setState(() {
-                          dayEvents = events;
-                        });
-                      });
+                      changeDay(day);
                     }
                   },
                 ),
