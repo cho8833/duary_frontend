@@ -1,6 +1,6 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:duary/model/event.dart' as duary;
-import 'package:duary/model/member.dart';
+import 'package:duary/model/third_party_calendar.dart';
 import 'package:duary/repository/apple_calendar_repository.dart';
 import 'package:duary/support/custom_exception.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';

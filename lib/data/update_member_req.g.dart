@@ -14,7 +14,6 @@ Map<String, dynamic> _$UpdateMemberReqToJson(UpdateMemberReq instance) =>
       'character': instance.character,
       'myAlarm': instance.myAlarm,
       'loverAlarm': instance.loverAlarm,
-      'syncedAppleCalendar': instance.syncedAppleCalendar,
     };
 
 Json? _$JsonConverterToJson<Json, Value>(

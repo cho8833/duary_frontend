@@ -1,12 +1,15 @@
 import 'package:device_calendar/device_calendar.dart' show Calendar;
 import 'package:duary/model/member.dart';
+import 'package:duary/model/third_party_calendar.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/my_page/my_page_screen.dart';
 import 'package:duary/support/asset_path.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:duary/widget/duary_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart' show Fluttertoast;
+import 'package:provider/provider.dart';
 
 class SelectCalendarOwnerScreen extends StatefulWidget {
   const SelectCalendarOwnerScreen(
@@ -23,6 +26,8 @@ class SelectCalendarOwnerScreen extends StatefulWidget {
 
 class _SelectCalendarOwnerScreenState extends State<SelectCalendarOwnerScreen> {
   static const List<CalendarOwner> owners = CalendarOwner.values;
+
+  late final EventProvider _eventProvider = context.read<EventProvider>();
 
   CalendarOwner? value;
 
@@ -107,22 +112,23 @@ class _SelectCalendarOwnerScreenState extends State<SelectCalendarOwnerScreen> {
                   DuaryConfirmButton(
                       title: "설정하기",
                       onTap: () async {
-                        final duaryContext = DuaryContext();
-                        Calendar calendar = widget.calendar;
-                        List<AppleCalendar> calendars =
-                            duaryContext.me.value!.syncedAppleCalendar;
-                        calendars.removeWhere((c) => c.id == calendar.id);
-                        if (value != null) {
-                          calendars.add(
-                              AppleCalendar(calendar.id!, calendar.name!, value!));
+                        Future<void> process() async {
+                          // 설정하지 않음 -> sync 해제
+                          if (value != null) {
+                            _eventProvider.updateSyncedAppleCalendar(AppleCalendar.fromApple(widget.calendar, value!));
+                          }
+                          // update or add
+                          else {
+                            _eventProvider.removeSyncedAppleCalendar(widget.calendar.id!);
+                          }
                         }
-                        await duaryContext
-                            .updateMember(syncedAppleCalendar: calendars)
-                            .then((_) {
+
+                        await process().then((_) {
                           Navigator.pop(context);
                         }).catchError((e) {
                           Fluttertoast.showToast(msg: e.toString());
                         });
+
                       })
                 ],
               ),

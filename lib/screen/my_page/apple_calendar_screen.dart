@@ -1,5 +1,6 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:duary/model/member.dart';
+import 'package:duary/model/third_party_calendar.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/my_page/my_info_screen.dart';
@@ -20,14 +21,16 @@ class AppleCalendarScreen extends StatefulWidget {
 }
 
 class _AppleCalendarScreenState extends State<AppleCalendarScreen> {
-  late EventProvider eventProvider = context.read<EventProvider>();
+  late final EventProvider eventProvider = context.read<EventProvider>();
 
   final duaryContext = DuaryContext();
 
   bool _isPermissionGranted = false;
 
-  late List<AppleCalendar> syncedCalendar =
-      duaryContext.me.value?.syncedAppleCalendar ?? [];
+  List<AppleCalendar> syncedCalendar = [];
+
+  late final void Function() appleCalendarListener;
+
 
   @override
   void initState() {
@@ -39,19 +42,22 @@ class _AppleCalendarScreenState extends State<AppleCalendarScreen> {
         });
       });
     });
-    duaryContext.me.addListener(myInfoListener);
+
+    // Init syncedCalendar and listen changes
+    syncedCalendar = eventProvider.appleCalendars.value;
+    appleCalendarListener = () {
+      setState(() {
+        syncedCalendar = eventProvider.appleCalendars.value;
+      });
+    };
+    eventProvider.appleCalendars.addListener(appleCalendarListener);
   }
 
-  void myInfoListener() {
-    setState(() {
-      syncedCalendar = duaryContext.me.value?.syncedAppleCalendar ?? [];
-    });
-  }
 
   @override
   void dispose() {
-    duaryContext.me.removeListener(myInfoListener);
     super.dispose();
+    eventProvider.appleCalendars.removeListener(appleCalendarListener);
   }
 
   Future<void> launchSettings() async {

@@ -4,11 +4,11 @@ import 'package:http_interceptor/http_interceptor.dart';
 import 'package:duary/data/authorization_token_res.dart';
 import 'package:duary/provider/token_provider.dart';
 import 'package:duary/repository/auth_repository.dart';
-import 'package:duary/repository/secure_storage.dart';
+import 'package:duary/repository/local_storage.dart';
 import 'package:duary/support/custom_exception.dart';
 
 class TokenInterceptor implements InterceptorContract {
-  final SecureStorage secureStorage;
+  final LocalStorage secureStorage;
   final TokenProvider tokenProvider = TokenProvider();
   final DuaryContext duaryContext = DuaryContext();
   late final AuthRepository _authRepository;

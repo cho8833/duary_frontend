@@ -171,8 +171,7 @@ class DuaryContext {
       DateTime? birthday,
       Character? character,
       AlarmOffset? myAlarm,
-      AlarmOffset? loverAlarm,
-      List<AppleCalendar>? syncedAppleCalendar}) async {
+      AlarmOffset? loverAlarm,}) async {
     if (name != null) {
       validateName(name);
     }
@@ -181,7 +180,7 @@ class DuaryContext {
     }
 
     UpdateMemberReq req =
-        UpdateMemberReq(name, birthday, character, myAlarm, loverAlarm, syncedAppleCalendar);
+        UpdateMemberReq(name, birthday, character, myAlarm, loverAlarm);
     await _memberRepository.updateMember(req).then((res) {
       me.value = res.member;
       myCouple.value = res.couple;

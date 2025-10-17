@@ -15,9 +15,13 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class EditEventScreen extends StatefulWidget {
-  const EditEventScreen({super.key, this.event});
+  const EditEventScreen({super.key, this.event, this.dayFocus});
 
+  // edit event 이면 event 가 전달되어야 함.
   final Event? event;
+
+  // create event 이면 dayFocus 가 전달되어야 함.
+  final DateTime? dayFocus;
 
   @override
   State<EditEventScreen> createState() => _EditEventScreenState();
@@ -44,9 +48,6 @@ class _EditEventScreenState extends State<EditEventScreen> {
   late DateTime startDateTime;
   late DateTime endDateTime;
 
-  DateTime? startDateTimeTemp;
-  DateTime? endDateTimeTemp;
-
   Frequency frequency = Frequency.oneTime;
 
   late EventProvider eventProvider;
@@ -61,7 +62,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
   @override
   void initState() {
     super.initState();
-    isEdit = widget.event != null;
+    isEdit = widget.event != null && widget.dayFocus == null;
 
     if (isEdit) {
       Event event = widget.event!;
@@ -81,7 +82,9 @@ class _EditEventScreenState extends State<EditEventScreen> {
       monthly = event.monthly;
       yearly = event.yearly;
     } else {
-      startDateTime = removeSeconds(DateTime.now());
+      DateTime now = DateTime.now();
+
+      startDateTime = widget.dayFocus!.copyWith(hour: now.hour, minute: now.minute);
       endDateTime = startDateTime.add(const Duration(hours: 1));
     }
 
@@ -90,19 +93,6 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
   void setAllDay(bool value) {
     isAllDay = value;
-    if (value) {
-      startDateTimeTemp = startDateTime;
-      endDateTimeTemp = endDateTime;
-      startDateTime = DateUtils.dateOnly(startDateTime);
-      endDateTime = DateUtils.dateOnly(endDateTime);
-    } else {
-      startDateTime = startDateTimeTemp ??
-          widget.event?.startDateTime ??
-          removeSeconds(DateTime.now());
-      endDateTime = endDateTimeTemp ??
-          widget.event?.endDateTime ??
-          startDateTime.add(const Duration(hours: 1));
-    }
     isStartTimeEnabled = !value;
     isEndTimeEnabled = !value;
   }

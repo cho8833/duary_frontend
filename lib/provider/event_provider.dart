@@ -5,20 +5,29 @@ import 'package:duary/model/couple.dart';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
+import 'package:duary/model/third_party_calendar.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/repository/apple_calendar_repository.dart';
 import 'package:duary/repository/event_repository.dart';
+import 'package:duary/repository/impl/secure_storage_impl.dart';
 import 'package:duary/repository/impl/websocket_handler.dart';
+import 'package:duary/repository/local_storage.dart';
 import 'package:duary/support/custom_exception.dart';
 import 'package:flutter/material.dart';
+
+part 'apple_calendar_provider.dart';
 
 class EventProvider extends ChangeNotifier {
   final EventRepository _eventRepository;
   final AppleCalendarRepository appleCalendarRepository;
+  final LocalStorage localStorage = SecureStorage();
 
   Member? me;
   Member? lover;
   Couple? myCouple;
+
+  // Apple Calendar
+  ValueNotifier<List<AppleCalendar>> appleCalendars = ValueNotifier([]);
 
   // 이벤트 캐싱
   final Map<DateTime, Set<Event>> _eventMap = {};
@@ -132,8 +141,10 @@ class EventProvider extends ChangeNotifier {
     eventFutures
         .add(_eventRepository.getEvent(myCouple!.id, startDate, endDate));
 
-    eventFutures.add(_getAppleEvents(me?.syncedAppleCalendar ?? [], me!.getId(),
-        lover?.getId(), startDate, endDate));
+    try {
+      eventFutures.add(_getAppleEvents(me!.getId(),
+          lover?.getId(), startDate, endDate));
+    } catch (ignored) {}
 
     final future = Future.wait(eventFutures).then((result) {
       List<Event> events = result.expand((e) => e).toList();
@@ -178,36 +189,6 @@ class EventProvider extends ChangeNotifier {
 
     _eventRequest[monthKey] = future;
     return future;
-  }
-
-  Future<bool> requestApplePermission() async {
-    return await appleCalendarRepository.requestPermission();
-  }
-
-  Future<bool> getApplePermission() async {
-    return await appleCalendarRepository.getPermission();
-  }
-
-  Future<List<dc.Calendar>> getAppleCalendars() {
-    return appleCalendarRepository.getCalendars();
-  }
-
-  Future<List<Event>> _getAppleEvents(
-      List<AppleCalendar> calendars,
-      String memberId,
-      String? loverId,
-      DateTime startDate,
-      DateTime endDate) async {
-    if (calendars.isEmpty) {
-      return [];
-    }
-    final List<List<Event>> futures = await Future.wait(calendars.map((c) =>
-        appleCalendarRepository.getEvent(
-            c, memberId, loverId, startDate, endDate)));
-
-    List<Event> flattened = futures.expand((e) => e).toList();
-
-    return flattened;
   }
 
   List<Event> _processEvents(List<Event> events) {

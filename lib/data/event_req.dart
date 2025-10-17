@@ -57,6 +57,7 @@ class SaveEventReq {
   void validate() {
 
     if (isAllDay) {
+      startDateTime = startDateTime.copyWith(hour: 0, minute: 0);
       endDateTime = endDateTime.copyWith(hour: 23, minute: 59);
     }
 

@@ -107,7 +107,7 @@ class TitleBar extends StatelessWidget {
               onTap: () {
                 // 일정을 생성하고 pop 하면 hasCreated == true, 일정을 생성하지 않고 pop 하면 hasCreated == false
                 Navigator.of(context)
-                    .push(SlideDownRoute(page: const EditEventScreen()));
+                    .push(SlideDownRoute(page: EditEventScreen(dayFocus: dayFocus,)));
               },
               child: const Icon(
                 Icons.add,

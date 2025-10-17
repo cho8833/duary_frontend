@@ -2,6 +2,7 @@ import 'package:duary/model/enums/frequency.dart';
 import 'package:device_calendar/device_calendar.dart' as dc;
 import 'package:duary/model/enums/weekday.dart';
 import 'package:duary/model/member.dart';
+import 'package:duary/model/third_party_calendar.dart';
 import 'package:duary/support/iso8601_time_zone_formatter.dart';
 import 'package:json_annotation/json_annotation.dart';
 

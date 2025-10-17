@@ -19,9 +19,7 @@ class UpdateMemberReq {
 
   AlarmOffset? loverAlarm;
 
-  List<AppleCalendar>? syncedAppleCalendar;
-
-  UpdateMemberReq(this.name, this.birthday, this.character, this.myAlarm, this.loverAlarm, this.syncedAppleCalendar);
+  UpdateMemberReq(this.name, this.birthday, this.character, this.myAlarm, this.loverAlarm);
 
   Map<String, dynamic> toJson() => _$UpdateMemberReqToJson(this);
 }

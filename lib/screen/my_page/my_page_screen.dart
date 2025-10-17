@@ -1,8 +1,10 @@
 import 'package:duary/model/couple.dart';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/member.dart';
+import 'package:duary/model/third_party_calendar.dart';
 import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/provider/event_provider.dart';
 import 'package:duary/screen/my_page/apple_calendar_screen.dart';
 import 'package:duary/screen/my_page/change_character_screen.dart';
 import 'package:duary/screen/my_page/couple_info_screen.dart';
@@ -15,6 +17,7 @@ import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/base_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
@@ -25,6 +28,7 @@ class MyPageScreen extends StatefulWidget {
 
 class _MyPageScreenState extends State<MyPageScreen> {
   DuaryContext duaryContext = DuaryContext();
+  late final EventProvider _eventProvider = context.read<EventProvider>();
 
   late Member me;
 
@@ -32,11 +36,14 @@ class _MyPageScreenState extends State<MyPageScreen> {
 
   late final void Function() meListener;
   late final void Function() coupleListener;
+  late final void Function() appleCalendarListener;
+
+  List<AppleCalendar> syncedAppleCalendar = [];
 
   @override
   void initState() {
+    // Init my info and Listen my info changes
     me = duaryContext.me.value!;
-    myCouple = duaryContext.myCouple.value!;
     meListener = () {
       if (duaryContext.me.value != null) {
         setState(() {
@@ -45,6 +52,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
       }
       return;
     };
+    duaryContext.me.addListener(meListener);
+
+    // Init couple info and Listen couple info changes
+    myCouple = duaryContext.myCouple.value!;
     coupleListener = () {
       if (duaryContext.myCouple.value != null) {
         setState(() {
@@ -52,8 +63,17 @@ class _MyPageScreenState extends State<MyPageScreen> {
         });
       }
     };
-    duaryContext.me.addListener(meListener);
     duaryContext.myCouple.addListener(coupleListener);
+
+    // Init synced apple calendar and Listen synced apple calendar changes
+    syncedAppleCalendar = _eventProvider.appleCalendars.value;
+    appleCalendarListener = () {
+      setState(() {
+        syncedAppleCalendar = _eventProvider.appleCalendars.value;
+      });
+    };
+    _eventProvider.appleCalendars.addListener(appleCalendarListener);
+
     super.initState();
   }
 
@@ -244,7 +264,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   },
                   child: InfoBox(
                       labelText: "애플 캘린더",
-                      currentValue: me.syncedAppleCalendar.isEmpty ? "연동되지 않음" : "연동됨")),
+                      currentValue: syncedAppleCalendar.isEmpty ? "연동되지 않음" : "연동됨")),
               const Spacer(),
               Align(
                 alignment: Alignment.center,
@@ -282,6 +302,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
   void dispose() {
     duaryContext.me.removeListener(meListener);
     duaryContext.myCouple.removeListener(coupleListener);
+    _eventProvider.appleCalendars.removeListener(appleCalendarListener);
     super.dispose();
   }
 }

@@ -1,7 +1,7 @@
-import 'package:duary/repository/secure_storage.dart';
+import 'package:duary/repository/local_storage.dart';
 
 class TokenProvider {
-  late final SecureStorage secureStorage;
+  late final LocalStorage secureStorage;
 
   // singleton
   static final TokenProvider _instance = TokenProvider._internal();

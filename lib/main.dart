@@ -16,7 +16,7 @@ import 'package:duary/provider/theme_provider.dart';
 import 'package:duary/provider/token_provider.dart';
 import 'package:duary/repository/impl/secure_storage_impl.dart';
 import 'package:duary/support/repository_container.dart';
-import 'package:duary/repository/secure_storage.dart';
+import 'package:duary/repository/local_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
@@ -33,9 +33,6 @@ void main() async {
   KakaoSdk.init(
     nativeAppKey: SecretKey.kakaoNativeAppKey,
   );
-  // secure storage
-  FlutterSecureStorage ss = const FlutterSecureStorage();
-  final SecureStorage secureStorage = SecureStorageImpl(ss);
 
   // init Firebase(FCM)
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -51,6 +48,9 @@ void main() async {
   const loader = SvgAssetLoader(AssetPath.duarySplashLogo);
   await svg.cache
       .putIfAbsent(loader.cacheKey(null), () => loader.loadBytes(null));
+
+  // local storage
+  final LocalStorage secureStorage = SecureStorage();
 
   // token provider
   TokenProvider tokenProvider = TokenProvider();
@@ -69,6 +69,8 @@ void main() async {
   duaryContext.init(
       rc.coupleRepository, rc.authRepository, rc.memberRepository);
 
+  // init synced apple calendar
+  await eventProvider.getSyncedAppleCalendar();
 
   runApp(Main(eventProvider: eventProvider));
 }

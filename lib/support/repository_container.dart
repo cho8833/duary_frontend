@@ -10,7 +10,7 @@ import 'package:duary/repository/auth_repository.dart';
 import 'package:duary/repository/impl/auth_repository_impl.dart';
 import 'package:duary/repository/impl/member_repository_impl.dart';
 import 'package:duary/repository/member_repository.dart';
-import 'package:duary/repository/secure_storage.dart';
+import 'package:duary/repository/local_storage.dart';
 import 'package:duary/support/http_request_interceptor.dart';
 
 class RepositoryContainer {
@@ -22,7 +22,7 @@ class RepositoryContainer {
 
   RepositoryContainer._internal();
 
-  void initialize(SecureStorage secureStorage) {
+  void initialize(LocalStorage secureStorage) {
     TokenInterceptor interceptor = TokenInterceptor(secureStorage);
     ContentTypeInterceptor contentTypeInterceptor = ContentTypeInterceptor();
     Client client = InterceptedClient.build(
