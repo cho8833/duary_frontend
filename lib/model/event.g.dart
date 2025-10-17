@@ -39,11 +39,51 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
       hangOutWith: json['hangOutWith'] as String?,
     )..recurCount = (json['recurCount'] as num?)?.toInt();
 
+Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
+      'id': instance.id,
+      'coupleId': instance.coupleId,
+      'createdBy': instance.createdBy,
+      'startDateTime':
+          const ISO8601TimeZoneFormatter().toJson(instance.startDateTime),
+      'endDateTime':
+          const ISO8601TimeZoneFormatter().toJson(instance.endDateTime),
+      'frequency': instance.frequency,
+      'recurStartDate': _$JsonConverterToJson<String, DateTime>(
+          instance.recurStartDate, const ISO8601TimeZoneFormatter().toJson),
+      'recurEndDate': _$JsonConverterToJson<String, DateTime>(
+          instance.recurEndDate, const ISO8601TimeZoneFormatter().toJson),
+      'daily': instance.daily,
+      'weekly': instance.weekly,
+      'monthly': instance.monthly,
+      'yearly': instance.yearly,
+      'recurCount': instance.recurCount,
+      'title': instance.title,
+      'content': instance.content,
+      'location': instance.location,
+      'hangOutWith': instance.hangOutWith,
+      'isTogether': instance.isTogether,
+      'isAllDay': instance.isAllDay,
+      'eventType': _$EventTypeEnumMap[instance.eventType]!,
+    };
+
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,
   Value? Function(Json json) fromJson,
 ) =>
     json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);
+
+const _$EventTypeEnumMap = {
+  EventType.normal: 'normal',
+  EventType.birthday: 'birthday',
+  EventType.apple: 'apple',
+  EventType.anniversary: 'anniversary',
+};
 
 DailyRecurrence _$DailyRecurrenceFromJson(Map<String, dynamic> json) =>
     DailyRecurrence(

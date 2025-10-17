@@ -8,7 +8,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'event.g.dart';
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class Event {
   String id;
   String coupleId;
@@ -63,6 +63,8 @@ class Event {
     this.hangOutWith,
   });
 
+  Map<String, dynamic> toJson() => _$EventToJson(this);
+
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
 
   factory Event.fromApple(AppleCalendar calendar, String memberId,
@@ -114,6 +116,34 @@ class Event {
 
   @override
   int get hashCode => id.hashCode;
+
+  bool hasChange(Event? event) {
+    if (event == null) {
+      return true;
+    }
+    if (id != event.id) return true;
+    if (coupleId != event.coupleId) return true;
+    if (createdBy != event.createdBy) return true;
+    if (startDateTime != event.startDateTime) return true;
+    if (endDateTime != event.endDateTime) return true;
+    if (frequency != event.frequency) return true;
+    if (recurStartDate != event.recurStartDate) return true;
+    if (recurEndDate != event.recurEndDate) return true;
+    if (daily != event.daily) return true;
+    if (weekly != event.weekly) return true;
+    if (monthly != event.monthly) return true;
+    if (yearly != event.yearly) return true;
+    if (recurCount != event.recurCount) return true;
+    if (title != event.title) return true;
+    if (content != event.content) return true;
+    if (location != event.location) return true;
+    if (hangOutWith != event.hangOutWith) return true;
+    if (isTogether != event.isTogether) return true;
+    if (isAllDay != event.isAllDay) return true;
+    if (eventType != event.eventType) return true;
+
+    return false;
+  }
 }
 
 class Recurrence {}

@@ -6,6 +6,8 @@ import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/provider/time_manager.dart';
+import 'package:duary/repository/impl/gemini_repository.dart';
+import 'package:duary/repository/llm_repository.dart';
 import 'package:duary/screen/event/event_details_screen.dart';
 import 'package:duary/screen/my_page/my_page_screen.dart';
 import 'package:duary/screen/start/connect_copule_screen.dart';
@@ -17,6 +19,7 @@ import 'package:duary/widget/button_base.dart';
 import 'package:duary/widget/character_widget.dart';
 import 'package:duary/widget/set_character.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -32,10 +35,15 @@ class _HomeScreenState extends State<HomeScreen> {
   late final TimeManager _timeManager;
   final DuaryContext duaryContext = DuaryContext();
 
+  late final LLMRepository llmRepository = GeminiRepository(Client());
+
   static const String _noOngoingEventMent = "쉬는 중이야";
 
   Event? myOnGoingEvent;
+  String? myOnGoingEventMent;
   Event? loverOnGoingEvent;
+  String? loverOnGoingEventMent;
+
   List<Event> comingEvents = [];
 
   DateTime now = DateTime.now();
@@ -88,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
           refreshOnGoing(todayEvents);
           refreshComingEvents(todayEvents);
         });
-            });
+      });
     };
     _eventProvider.addListener(eventDataListener);
 
@@ -110,37 +118,53 @@ class _HomeScreenState extends State<HomeScreen> {
       _eventProvider.getEventByDay(today).then((todayEvents) {
         refreshOnGoing(todayEvents);
         refreshComingEvents(todayEvents);
-            });
+      });
     }
   }
 
   void refreshOnGoing(List<Event> todayEvents) {
-    setState(() {
       if (todayEvents.isEmpty) {
         myOnGoingEvent = null;
         loverOnGoingEvent = null;
       } else {
         try {
-          myOnGoingEvent = todayEvents.lastWhere((e) =>
-              (e.createdBy == me.getId() || e.isTogether) &&
+          Event myEvent = todayEvents.lastWhere((e) =>
+          (e.createdBy == me.getId() || e.isTogether) &&
               e.startDateTime.isBefore(now) &&
               e.endDateTime.isAfter(now));
+          if (myEvent.hasChange(myOnGoingEvent)) {
+            setState(() {
+              myOnGoingEvent = myEvent;
+            });
+            llmRepository.getTalk(myOnGoingEvent!).then((ment) {
+              setState(() {
+                myOnGoingEventMent = ment;
+              });
+            });
+          }
         } catch (_) {
           myOnGoingEvent = null;
         }
 
         try {
           if (lover != null) {
-            loverOnGoingEvent = todayEvents.lastWhere((e) =>
-                (e.createdBy == lover!.getId() || e.isTogether) &&
+            Event loverEvent = todayEvents.lastWhere((e) =>
+            (e.createdBy == lover!.getId() || e.isTogether) &&
                 e.startDateTime.isBefore(now) &&
                 e.endDateTime.isAfter(now));
+            if (loverEvent.hasChange(loverOnGoingEvent)) {
+              setState(() {
+                loverOnGoingEvent = loverEvent;
+                llmRepository.getTalk(loverOnGoingEvent!).then((ment) {
+                  loverOnGoingEventMent = ment;
+                });
+              });
+            }
           }
         } catch (_) {
           loverOnGoingEvent = null;
         }
       }
-    });
   }
 
   void refreshComingEvents(List<Event> todayEvents) {
@@ -238,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 5,
                             ),
                             Text(
-                              myOnGoingEvent?.title ?? _noOngoingEventMent,
+                              myOnGoingEventMent ?? _noOngoingEventMent,
                               style: const TextStyle(
                                   color: Color(0xFF111111),
                                   fontWeight: FontWeight.w600,
@@ -331,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? Row(
                   children: [
                     Text(
-                      loverOnGoingEvent?.title ?? _noOngoingEventMent,
+                      loverOnGoingEventMent ?? _noOngoingEventMent,
                       textAlign: TextAlign.end,
                       style: const TextStyle(
                           color: Color(0xFF111111),
