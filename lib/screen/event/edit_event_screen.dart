@@ -139,376 +139,382 @@ class _EditEventScreenState extends State<EditEventScreen> {
               color: Color(0xFF9A9A9A),
             )),
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const _SubTitle(text: "일정 제목"),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    _TextFieldBox(
-                        initialValue: title,
-                        hintText: "일정 제목을 입력해주세요",
-                        onChange: (text) => title = text),
+      body: GestureDetector(
+        onTap: () {
+          // TextField Focus 중 바깥 영역 터치 시 dismiss keyboard 위함
+          FocusScope.of(context).unfocus();
+        },
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const _SubTitle(text: "일정 제목"),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      _TextFieldBox(
+                          initialValue: title,
+                          hintText: "일정 제목을 입력해주세요",
+                          onChange: (text) => title = text),
 
-                    const SizedBox(height: 11),
+                      const SizedBox(height: 11),
 
-                    // 공동 일정으로 설정하기
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        setState(() {
-                          isTogether = !isTogether;
-                        });
-                      },
-                      child: Row(
+                      // 공동 일정으로 설정하기
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          setState(() {
+                            isTogether = !isTogether;
+                          });
+                        },
+                        child: Row(
+                          children: [
+                            const SizedBox(
+                              width: 15,
+                            ),
+                            Icon(
+                              Icons.task_alt,
+                              color: isTogether
+                                  ? const Color(0xFFFFBD64)
+                                  : const Color(0xFFD0D0D0),
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              "공동 일정으로 설정하기",
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: isTogether
+                                      ? const Color(0xFFFFBD64)
+                                      : const Color(0xFFD0D0D0)),
+                            )
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(
+                        height: 37,
+                      ),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          Icon(
-                            Icons.task_alt,
-                            color: isTogether
-                                ? const Color(0xFFFFBD64)
-                                : const Color(0xFFD0D0D0),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            "공동 일정으로 설정하기",
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: isTogether
-                                    ? const Color(0xFFFFBD64)
-                                    : const Color(0xFFD0D0D0)),
+                          const _SubTitle(text: "진행 시간"),
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () {
+                              setState(() {
+                                setAllDay(!isAllDay);
+                              });
+                            },
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.task_alt,
+                                  color: isAllDay
+                                      ? const Color(0xFFFFBD64)
+                                      : const Color(0xFFD0D0D0),
+                                ),
+                                const SizedBox(
+                                  width: 6,
+                                ),
+                                Text("하루종일",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: isAllDay
+                                            ? const Color(0xFFFFBD64)
+                                            : const Color(0xFFD0D0D0))),
+                              ],
+                            ),
                           )
                         ],
                       ),
-                    ),
 
-                    const SizedBox(
-                      height: 37,
-                    ),
+                      const SizedBox(
+                        height: 15,
+                      ),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const _SubTitle(text: "진행 시간"),
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            setState(() {
-                              setAllDay(!isAllDay);
-                            });
-                          },
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.task_alt,
-                                color: isAllDay
-                                    ? const Color(0xFFFFBD64)
-                                    : const Color(0xFFD0D0D0),
-                              ),
-                              const SizedBox(
-                                width: 6,
-                              ),
-                              Text("하루종일",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: isAllDay
-                                          ? const Color(0xFFFFBD64)
-                                          : const Color(0xFFD0D0D0))),
-                            ],
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "시작",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                                color: Color(0xFF646464)),
                           ),
-                        )
-                      ],
-                    ),
-
-                    const SizedBox(
-                      height: 15,
-                    ),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "시작",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
-                              color: Color(0xFF646464)),
-                        ),
-                        Row(
-                          children: [
-                            _TimeBox(
-                                text: _formatDate(startDateTime),
-                                onTap: () async {
-                                  final List<DateTime?>? value =
-                                      await showDuaryCalendarPicker(
-                                          true, context, []);
-                                  if (value != null) {
-                                    DateTime selected = value.first!;
-                                    setState(() {
-                                      startDateTime =
-                                          _changeDate(startDateTime, selected);
-                                      if (selected.isAfter(endDateTime)) {
+                          Row(
+                            children: [
+                              _TimeBox(
+                                  text: _formatDate(startDateTime),
+                                  onTap: () async {
+                                    final List<DateTime?>? value =
+                                        await showDuaryCalendarPicker(
+                                            true, context, []);
+                                    if (value != null) {
+                                      DateTime selected = value.first!;
+                                      setState(() {
+                                        startDateTime =
+                                            _changeDate(startDateTime, selected);
+                                        if (selected.isAfter(endDateTime)) {
+                                          endDateTime =
+                                              _changeDate(endDateTime, selected);
+                                        }
+                                        if (frequency != Frequency.oneTime) {
+                                          recurStartDate =
+                                              DateUtils.dateOnly(startDateTime);
+                                        }
+                                      });
+                                    }
+                                  },
+                                  isEnabled: isStartDateEnabled),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                              _TimeBox(
+                                  text: _formatTime(startDateTime),
+                                  onTap: () async {
+                                    showDuaryTimePicker(context, (time) {
+                                      setState(() {
+                                        startDateTime =
+                                            _changeTime(startDateTime, time);
+                                        if (startDateTime.isAfter(endDateTime)) {
+                                          endDateTime = _changeTime(endDateTime,
+                                              time.add(const Duration(hours: 1)));
+                                        }
+                                      });
+                                    },
+                                        Time(
+                                            hours: startDateTime.hour,
+                                            minutes: startDateTime.minute));
+                                  },
+                                  isEnabled: isStartTimeEnabled)
+                            ],
+                          )
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "종료",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                                color: Color(0xFF646464)),
+                          ),
+                          Row(
+                            children: [
+                              _TimeBox(
+                                  text: _formatDate(endDateTime),
+                                  onTap: () async {
+                                    final List<DateTime?>? value =
+                                        await showDuaryCalendarPicker(
+                                            true, context, [],
+                                            firstDate: startDateTime);
+                                    if (value != null) {
+                                      DateTime selected = value.first!;
+                                      setState(() {
                                         endDateTime =
                                             _changeDate(endDateTime, selected);
-                                      }
-                                      if (frequency != Frequency.oneTime) {
-                                        recurStartDate =
-                                            DateUtils.dateOnly(startDateTime);
-                                      }
-                                    });
-                                  }
-                                },
-                                isEnabled: isStartDateEnabled),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            _TimeBox(
-                                text: _formatTime(startDateTime),
-                                onTap: () async {
-                                  showDuaryTimePicker(context, (time) {
-                                    setState(() {
-                                      startDateTime =
-                                          _changeTime(startDateTime, time);
-                                      if (startDateTime.isAfter(endDateTime)) {
-                                        endDateTime = _changeTime(endDateTime,
-                                            time.add(const Duration(hours: 1)));
-                                      }
-                                    });
+                                        if (startDateTime.isAfter(endDateTime)) {
+                                          startDateTime = endDateTime
+                                              .subtract(const Duration(hours: 1));
+                                        }
+                                      });
+                                    }
                                   },
-                                      Time(
-                                          hours: startDateTime.hour,
-                                          minutes: startDateTime.minute));
-                                },
-                                isEnabled: isStartTimeEnabled)
-                          ],
-                        )
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "종료",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
-                              color: Color(0xFF646464)),
-                        ),
-                        Row(
-                          children: [
-                            _TimeBox(
-                                text: _formatDate(endDateTime),
-                                onTap: () async {
-                                  final List<DateTime?>? value =
-                                      await showDuaryCalendarPicker(
-                                          true, context, [],
-                                          firstDate: startDateTime);
-                                  if (value != null) {
-                                    DateTime selected = value.first!;
-                                    setState(() {
-                                      endDateTime =
-                                          _changeDate(endDateTime, selected);
-                                      if (startDateTime.isAfter(endDateTime)) {
-                                        startDateTime = endDateTime
-                                            .subtract(const Duration(hours: 1));
-                                      }
-                                    });
-                                  }
-                                },
-                                isEnabled: isEndDateEnabled),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            _TimeBox(
-                                text: _formatTime(endDateTime),
-                                onTap: () {
-                                  showDuaryTimePicker(context, (time) {
-                                    setState(() {
-                                      endDateTime = endDateTime.copyWith(
-                                          hour: time.hour, minute: time.minute);
-                                      if (endDateTime.isBefore(startDateTime)) {
-                                        endDateTime = endDateTime
-                                            .add(const Duration(days: 1));
-                                      } else if (endDateTime
-                                              .isAfter(startDateTime) &&
-                                          (frequency == Frequency.daily ||
-                                              frequency == Frequency.weekly ||
-                                              frequency == Frequency.monthly)) {
-                                        endDateTime = _changeDate(
-                                            endDateTime, startDateTime);
-                                      }
-                                    });
+                                  isEnabled: isEndDateEnabled),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                              _TimeBox(
+                                  text: _formatTime(endDateTime),
+                                  onTap: () {
+                                    showDuaryTimePicker(context, (time) {
+                                      setState(() {
+                                        endDateTime = endDateTime.copyWith(
+                                            hour: time.hour, minute: time.minute);
+                                        if (endDateTime.isBefore(startDateTime)) {
+                                          endDateTime = endDateTime
+                                              .add(const Duration(days: 1));
+                                        } else if (endDateTime
+                                                .isAfter(startDateTime) &&
+                                            (frequency == Frequency.daily ||
+                                                frequency == Frequency.weekly ||
+                                                frequency == Frequency.monthly)) {
+                                          endDateTime = _changeDate(
+                                              endDateTime, startDateTime);
+                                        }
+                                      });
+                                    },
+                                        Time(
+                                            hours: endDateTime.hour,
+                                            minutes: endDateTime.minute));
                                   },
-                                      Time(
-                                          hours: endDateTime.hour,
-                                          minutes: endDateTime.minute));
-                                },
-                                isEnabled: isEndTimeEnabled)
-                          ],
-                        )
-                      ],
-                    ),
+                                  isEnabled: isEndTimeEnabled)
+                            ],
+                          )
+                        ],
+                      ),
 
-                    const SizedBox(
-                      height: 30,
-                    ),
+                      const SizedBox(
+                        height: 30,
+                      ),
 
-                    const _SubTitle(text: "반복"),
-                    const SizedBox(
-                      height: 10,
-                    ),
+                      const _SubTitle(text: "반복"),
+                      const SizedBox(
+                        height: 10,
+                      ),
 
-                    _RecurSection(
-                      recurEndDate: recurEndDate,
-                      recurrence: () {
-                        switch (frequency) {
-                          case Frequency.daily:
-                            return daily;
-                          case Frequency.weekly:
-                            return weekly;
-                          case Frequency.monthly:
-                            return monthly;
-                          case Frequency.yearly:
-                            return yearly;
-                          default:
-                            return null;
-                        }
-                      }(),
-                      frequency: frequency,
-                      onChange: (frequency, recurEndDate, recurrence) {
-                        setState(() {
-                          setFrequency(frequency);
-                        });
-                        this.recurEndDate = recurEndDate;
-                        if (frequency != Frequency.oneTime) {
-                          recurStartDate = DateUtils.dateOnly(startDateTime);
-                        }
-                        switch (frequency) {
-                          case Frequency.daily:
-                            daily = recurrence as DailyRecurrence?;
-                          case Frequency.weekly:
-                            weekly = recurrence as WeeklyRecurrence?;
-                          case Frequency.monthly:
-                            monthly = recurrence as MonthlyRecurrence?;
-                          case Frequency.yearly:
-                            yearly = recurrence as YearlyRecurrence?;
-                          default:
-                            recurStartDate = null;
-                        }
-                      },
-                      startDateTime: startDateTime,
-                      endDateTime: endDateTime,
-                    ),
+                      _RecurSection(
+                        recurEndDate: recurEndDate,
+                        recurrence: () {
+                          switch (frequency) {
+                            case Frequency.daily:
+                              return daily;
+                            case Frequency.weekly:
+                              return weekly;
+                            case Frequency.monthly:
+                              return monthly;
+                            case Frequency.yearly:
+                              return yearly;
+                            default:
+                              return null;
+                          }
+                        }(),
+                        frequency: frequency,
+                        onChange: (frequency, recurEndDate, recurrence) {
+                          setState(() {
+                            setFrequency(frequency);
+                          });
+                          this.recurEndDate = recurEndDate;
+                          if (frequency != Frequency.oneTime) {
+                            recurStartDate = DateUtils.dateOnly(startDateTime);
+                          }
+                          switch (frequency) {
+                            case Frequency.daily:
+                              daily = recurrence as DailyRecurrence?;
+                            case Frequency.weekly:
+                              weekly = recurrence as WeeklyRecurrence?;
+                            case Frequency.monthly:
+                              monthly = recurrence as MonthlyRecurrence?;
+                            case Frequency.yearly:
+                              yearly = recurrence as YearlyRecurrence?;
+                            default:
+                              recurStartDate = null;
+                          }
+                        },
+                        startDateTime: startDateTime,
+                        endDateTime: endDateTime,
+                      ),
 
-                    const SizedBox(
-                      height: 30,
-                    ),
+                      const SizedBox(
+                        height: 30,
+                      ),
 
-                    const _SubTitle(text: "장소"),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    _TextFieldBox(
-                        initialValue: location,
-                        hintText: "일정이 진행되는 장소를 입력해주세요",
-                        onChange: (text) => location = text),
+                      const _SubTitle(text: "장소"),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      _TextFieldBox(
+                          initialValue: location,
+                          hintText: "일정이 진행되는 장소를 입력해주세요",
+                          onChange: (text) => location = text),
 
-                    const SizedBox(
-                      height: 30,
-                    ),
+                      const SizedBox(
+                        height: 30,
+                      ),
 
-                    const _SubTitle(text: "만나는 사람"),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    _TextFieldBox(
-                        initialValue: hangOutWith,
-                        hintText: "만나는 사람을 입력해주세요",
-                        onChange: (text) => hangOutWith = text),
+                      const _SubTitle(text: "만나는 사람"),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      _TextFieldBox(
+                          initialValue: hangOutWith,
+                          hintText: "만나는 사람을 입력해주세요",
+                          onChange: (text) => hangOutWith = text),
 
-                    const SizedBox(
-                      height: 30,
-                    ),
+                      const SizedBox(
+                        height: 30,
+                      ),
 
-                    const _SubTitle(text: "메모"),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    _TextFieldBox(
-                        initialValue: content,
-                        hintText: "메모를 입력해주세요",
-                        onChange: (text) => content = text,
-                        maxLines: 4),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                  ],
+                      const _SubTitle(text: "메모"),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      _TextFieldBox(
+                          initialValue: content,
+                          hintText: "메모를 입력해주세요",
+                          onChange: (text) => content = text,
+                          maxLines: 4),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Column(
-              children: [
-                FutureButton(
-                  onTap: () async {
-                    if (isEdit) {
-                      SaveEventReq req = getSaveReq();
-                      await eventProvider
-                          .editEvent(widget.event!.id, req)
-                          .then((updated) {
-                        Navigator.pop(context, updated);
-                      }).catchError((e) {
-                        Fluttertoast.showToast(msg: e.toString());
-                      });
-                    } else {
-                      SaveEventReq req = getSaveReq();
-                      await eventProvider.saveEvent(req).then((_) {
-                        Navigator.pop(context, true);
-                      }).catchError((e) {
-                        Fluttertoast.showToast(msg: e.toString());
-                      });
-                    }
-                  },
-                  child: Container(
-                    // margin: const EdgeInsets.fromLTRB(0, 30, 0, 30),
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFBD64),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Center(
-                      child: Text(
-                        isEdit ? "일정 수정하기" : "새 일정 등록하기",
-                        style: const TextStyle(
-                            color: Color(0xFF573200),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15),
+              Column(
+                children: [
+                  FutureButton(
+                    onTap: () async {
+                      if (isEdit) {
+                        SaveEventReq req = getSaveReq();
+                        await eventProvider
+                            .editEvent(widget.event!.id, req)
+                            .then((updated) {
+                          Navigator.pop(context, updated);
+                        }).catchError((e) {
+                          Fluttertoast.showToast(msg: e.toString());
+                        });
+                      } else {
+                        SaveEventReq req = getSaveReq();
+                        await eventProvider.saveEvent(req).then((_) {
+                          Navigator.pop(context, true);
+                        }).catchError((e) {
+                          Fluttertoast.showToast(msg: e.toString());
+                        });
+                      }
+                    },
+                    child: Container(
+                      // margin: const EdgeInsets.fromLTRB(0, 30, 0, 30),
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFBD64),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Center(
+                        child: Text(
+                          isEdit ? "일정 수정하기" : "새 일정 등록하기",
+                          style: const TextStyle(
+                              color: Color(0xFF573200),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(
-                  height: 30,
-                )
-              ],
-            ),
-          ],
+                  const SizedBox(
+                    height: 30,
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -566,6 +572,11 @@ class _TimeBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        // textfield 의 키보드 focus 를 가진 채, time/date dialog 를 열고, dialog 를 dismiss 하면 이전 textfield 로 다시 focus 가 가는 문제 발생,
+        // 아래 코드로 문제를 해결했지만,
+        // https://stackoverflow.com/questions/73750582/when-i-open-a-dialog-the-app-autofocus-the-latest-textfield
+        // TODO: 에 의하면 PopScope 로 해결할 수 있다고 함
+        FocusScope.of(context).requestFocus(FocusNode());
         if (isEnabled) {
           onTap();
         }
