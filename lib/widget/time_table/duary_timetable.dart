@@ -1,8 +1,8 @@
-import 'package:duary/model/enums/character.dart';
+import 'dart:math' as Math show min;
+
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
-import 'package:duary/screen/event/event_details_screen.dart';
 import 'package:duary/screen/timetable_screen.dart';
 import 'package:duary/widget/time_table/day_view.dart';
 import 'package:duary/widget/time_table/title_bar.dart';
@@ -47,6 +47,11 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
   late final PageController _pageController =
       PageController(initialPage: _initialPage);
 
+  late double layoutBuilderHeight;
+
+  final GlobalKey scrollViewKey = GlobalKey();
+
+
   @override
   void initState() {
     super.initState();
@@ -64,7 +69,17 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     if (DateUtils.isSameDay(dayFocus, DateTime.now())) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         DateTime now = DateTime.now();
-        _scrollController.jumpTo(now.hour * DuaryTimetable.hourHeight);
+        // _scrollController.jumpTo(now.hour * DuaryTimetable.hourHeight);
+        // 위 코드는 스크롤 맨 하단을 벗어나 jump 를 시도(overscroll) 하기 때문에, 튕겨져 올라옴
+        // SingleChildScrollView   구조에서, LayoutBuilder.constraints.maxHeight 는 2160(DuaryTimetable.hourHeight * 24) 이고,
+        //      ㄴ LayoutBuilder           SingleChildScrollView 의 height 를 구하면 화면의 맨 하단부터 title bar 까지의 거리가 나온다.
+        // 따라서, min(now.hour * DuaryTimeTable.hourHeight, LayoutBuilder.constraints.maxHeight - SingleChildScrollView.height)
+        // 를 통해 튕겨저 올라오는 것을 방지한다.
+        // - 20 은 여유 값
+        double attempt = now.hour * DuaryTimetable.hourHeight;
+        double max = DuaryTimetable.hourHeight * 24 - _getScrollViewHeight() - 20;
+        double value = Math.min(attempt, max);
+        _scrollController.jumpTo(value);
       });
     }
 
@@ -82,6 +97,11 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
     duaryContext.me.removeListener(getEvents);
     duaryContext.lover.removeListener(getEvents);
     duaryContext.myCouple.removeListener(getEvents);
+  }
+
+  double _getScrollViewHeight() {
+    final RenderBox renderBox = scrollViewKey.currentContext!.findRenderObject() as RenderBox;
+    return renderBox.size.height;
   }
 
   void getEvents() {
@@ -123,6 +143,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                 DateTime currentDate = initialDay
                     .add(Duration(days: index - _initialPage));
                 return SingleChildScrollView(
+                  key: scrollViewKey,
                     controller: _scrollController,
                     child: LayoutBuilder(// width 전달 목적
                         builder: (context, constraints) {
