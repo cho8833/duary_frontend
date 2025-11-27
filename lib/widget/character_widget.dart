@@ -20,7 +20,7 @@ class Yellow extends StatelessWidget {
       width: width,
       height: height,
       child: Transform(
-        transform: Matrix4.rotationY(pi),
+        transform: Matrix4.rotationY(right ? 0 : pi),
         alignment: Alignment.center,
         child: Image.asset(
           AssetPath.yellow,

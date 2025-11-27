@@ -1,11 +1,9 @@
 import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
-import 'package:duary/screen/start/connect_copule_screen.dart';
 import 'package:duary/screen/home_screen.dart';
 import 'package:duary/screen/login_screen.dart';
 import 'package:duary/screen/start/start_duary_screen.dart';
 import 'package:duary/support/asset_path.dart';
-import 'package:duary/support/custom_page_route.dart';
 import 'package:duary/widget/character_widget.dart';
 
 import 'package:flutter/material.dart';
@@ -115,6 +113,7 @@ class _SplashScreenState extends State<SplashScreen>
                       _yellowBounceYAnimation.value),
                   child: const Yellow(
                     color: null,
+                    right: true,
                     width: 190,
                     height: 190,
                   ),
