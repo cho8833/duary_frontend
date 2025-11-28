@@ -6,31 +6,75 @@ import 'package:duary/screen/event/edit_event_screen.dart';
 import 'package:duary/screen/event/event_details_screen.dart';
 import 'package:duary/support/custom_page_route.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class TitleBar extends StatelessWidget {
+class TitleBar extends StatefulWidget {
   const TitleBar({
     super.key,
     required this.dayFocus,
     required this.onDateTap,
-    required this.events,
   });
 
   final DateTime dayFocus;
 
-  final List<Event> events;
-
   final Function() onDateTap;
 
   @override
+  State<TitleBar> createState() => _TitleBarState();
+}
+
+class _TitleBarState extends State<TitleBar> {
+  List<Event> events = [];
+  late final EventProvider _eventProvider = context.read<EventProvider>();
+  final DuaryContext _duaryContext = DuaryContext();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _eventProvider.addListener(getEvents);
+    // 유저 정보나 커플 정보가 바뀌면 다시 event 불러오기
+    _duaryContext.me.addListener(getEvents);
+    _duaryContext.lover.addListener(getEvents);
+    _duaryContext.myCouple.addListener(getEvents);
+
+    _eventProvider.getEventByDay(widget.dayFocus).then((list) {
+      WidgetsBinding.instance.addPostFrameCallback((d) {
+        setState(() {
+          events = list;
+        });
+      });
+    });
+  }
+
+  void getEvents() {
+    _eventProvider.getEventByDay(widget.dayFocus).then((list) {
+      setState(() {
+        events = list;
+      });
+    }).catchError((e) {
+      Fluttertoast.showToast(msg: e.toString());
+    });
+  }
+
+  @override
+  void dispose() {
+    _eventProvider.removeListener(getEvents);
+    _duaryContext.me.removeListener(getEvents);
+    _duaryContext.lover.removeListener(getEvents);
+    _duaryContext.myCouple.removeListener(getEvents);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final EventProvider eventProvider = context.read<EventProvider>();
     final DuaryContext duaryContext = DuaryContext();
 
     late String title;
 
-    int dayIndex = (dayFocus.difference(DateTime.now()).inHours / 24).ceil();
+    int dayIndex = (widget.dayFocus.difference(DateTime.now()).inHours / 24).ceil();
 
     switch (dayIndex) {
       case 0:
@@ -40,7 +84,7 @@ class TitleBar extends StatelessWidget {
       case -1:
         title = "어제";
       default:
-        title = _formatDate(dayFocus);
+        title = _formatDate(widget.dayFocus);
     }
 
     late Widget titleWidget;
@@ -57,7 +101,7 @@ class TitleBar extends StatelessWidget {
                 color: Color(0xFFFE8F00)),
           ),
           Text(
-            _formatDate(dayFocus),
+            _formatDate(widget.dayFocus),
             style: const TextStyle(
                 fontWeight: FontWeight.w400,
                 fontSize: 11,
@@ -84,7 +128,7 @@ class TitleBar extends StatelessWidget {
             left: 16,
             child: GestureDetector(
               onTap: () {
-                onDateTap();
+                widget.onDateTap();
               },
               child: Row(
                 children: [
@@ -93,7 +137,7 @@ class TitleBar extends StatelessWidget {
                     size: 24,
                   ),
                   Text(
-                    "${dayFocus.month}월",
+                    "${widget.dayFocus.month}월",
                     style: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w600),
                   )
@@ -107,7 +151,7 @@ class TitleBar extends StatelessWidget {
               onTap: () {
                 // 일정을 생성하고 pop 하면 hasCreated == true, 일정을 생성하지 않고 pop 하면 hasCreated == false
                 Navigator.of(context)
-                    .push(SlideDownRoute(page: EditEventScreen(dayFocus: dayFocus,)));
+                    .push(SlideDownRoute(page: EditEventScreen(dayFocus: widget.dayFocus,)));
               },
               child: const Icon(
                 Icons.add,
@@ -233,7 +277,7 @@ class TitleBar extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    return "${DateFormat("yyyy년 M월 dd일").format(dayFocus)} ${DateFormat.E("ko_KR").format(dayFocus)}요일";
+    return "${DateFormat("yyyy년 M월 dd일").format(widget.dayFocus)} ${DateFormat.E("ko_KR").format(widget.dayFocus)}요일";
   }
 }
 

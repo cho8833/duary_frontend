@@ -33,11 +33,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
   late final DateTime initialDay = _timeTableController.focusDay.value;
   late DateTime dayFocus = initialDay;
 
-  List<Event> events = [];
-
   late final ScrollController _scrollController = ScrollController();
-
-  late final EventProvider _eventProvider = context.read<EventProvider>();
 
   final DuaryContext duaryContext = DuaryContext();
 
@@ -55,15 +51,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
   @override
   void initState() {
     super.initState();
-
-    // Events 초기화
-    _eventProvider.getEventByDay(dayFocus).then((list) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          events = list;
-        });
-      });
-    });
 
     // DayFocus 가 오늘인 경우 현재 시간으로 스크롤 위치 이동
     if (DateUtils.isSameDay(dayFocus, DateTime.now())) {
@@ -83,37 +70,12 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
       });
     }
 
-    _eventProvider.addListener(getEvents);
-    // 유저 정보나 커플 정보가 바뀌면 다시 event 불러오기
-    duaryContext.me.addListener(getEvents);
-    duaryContext.lover.addListener(getEvents);
-    duaryContext.myCouple.addListener(getEvents);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _eventProvider.removeListener(getEvents);
-    duaryContext.me.removeListener(getEvents);
-    duaryContext.lover.removeListener(getEvents);
-    duaryContext.myCouple.removeListener(getEvents);
   }
 
   double _getScrollViewHeight() {
     final RenderBox renderBox = tableFlexibleKey.currentContext!.findRenderObject() as RenderBox;
     return renderBox.size.height;
   }
-
-  void getEvents() {
-    _eventProvider.getEventByDay(dayFocus).then((list) {
-      setState(() {
-        events = list;
-      });
-    }).catchError((e) {
-      Fluttertoast.showToast(msg: e.toString());
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -125,7 +87,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
         ),
         TitleBar(
           dayFocus: dayFocus,
-          events: events,
           onDateTap: () => _timeTableController.moveToMonth(dayFocus),
         ),
         Flexible(
@@ -136,7 +97,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                   dayFocus = initialDay
                       .add(Duration(days: index - _initialPage));
                 });
-                getEvents();
               },
               controller: _pageController,
               itemCount: _totalPage,
@@ -145,14 +105,10 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                     .add(Duration(days: index - _initialPage));
                 return SingleChildScrollView(
                     controller: _scrollController,
-                    child: LayoutBuilder(// width 전달 목적
-                        builder: (context, constraints) {
-                      return DayView(
-                        currentDate: currentDate,
-                        items: events,
-                        width: constraints.maxWidth,
-                      );
-                    }));
+                    child: DayView(
+                      currentDate: currentDate,
+                      width: MediaQuery.of(context).size.width,
+                    ));
               }),
         ),
       ],

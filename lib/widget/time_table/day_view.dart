@@ -4,22 +4,21 @@ import 'dart:math';
 import 'package:duary/model/enums/character.dart';
 import 'package:duary/model/event.dart';
 import 'package:duary/provider/duary_context.dart';
+import 'package:duary/provider/event_provider.dart';
 import 'package:duary/provider/time_manager.dart';
 import 'package:duary/screen/event/event_details_screen.dart';
 import 'package:duary/widget/time_table/duary_timetable.dart';
 import 'package:duary/widget/time_table/bubble.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class DayView extends StatefulWidget {
   const DayView(
       {super.key,
-      required this.items,
       required this.currentDate,
       required this.width});
-
-  final List<Event> items;
 
   final DateTime currentDate;
 
@@ -31,29 +30,60 @@ class DayView extends StatefulWidget {
 
 class _DayViewState extends State<DayView> {
   final DuaryContext _duaryContext = DuaryContext();
+
+  late final EventProvider _eventProvider = context.read<EventProvider>();
+
   late final TimeManager _timeManager;
 
   static const hourHeight = DuaryTimetable.hourHeight;
   static const _timelineLength = DuaryTimetable.timelineLength;
 
-  late List<Event> items;
+  List<Event> items = [];
 
   DateTime? now;
 
   @override
   void initState() {
+    super.initState();
     _timeManager = context.read<TimeManager>();
     DateTime temp = DateTime.now();
     if (DateUtils.isSameDay(temp, widget.currentDate)) {
       now = DateTime.now();
       _timeManager.addListener(_changeTime);
     }
-    super.initState();
+
+    _eventProvider.getEventByDay(widget.currentDate).then((list) {
+      WidgetsBinding.instance.addPostFrameCallback((d) {
+        setState(() {
+          items = list;
+        });
+      });
+    });
+
+    _eventProvider.addListener(getEvents);
+    // 유저 정보나 커플 정보가 바뀌면 다시 event 불러오기
+    _duaryContext.me.addListener(getEvents);
+    _duaryContext.lover.addListener(getEvents);
+    _duaryContext.myCouple.addListener(getEvents);
+  }
+
+  void getEvents() {
+    _eventProvider.getEventByDay(widget.currentDate).then((list) {
+      setState(() {
+        items = list;
+      });
+    }).catchError((e) {
+      Fluttertoast.showToast(msg: e.toString());
+    });
   }
 
   @override
   void dispose() {
     _timeManager.removeListener(_changeTime);
+    _eventProvider.removeListener(getEvents);
+    _duaryContext.me.removeListener(getEvents);
+    _duaryContext.lover.removeListener(getEvents);
+    _duaryContext.myCouple.removeListener(getEvents);
     super.dispose();
   }
 
@@ -82,7 +112,6 @@ class _DayViewState extends State<DayView> {
 
   @override
   Widget build(BuildContext context) {
-    items = widget.items;
     return SizedBox(
       height: hourHeight * 24,
       child: Stack(
