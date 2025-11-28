@@ -49,7 +49,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
 
   late double layoutBuilderHeight;
 
-  final GlobalKey scrollViewKey = GlobalKey();
+  final GlobalKey tableFlexibleKey = GlobalKey();
 
 
   @override
@@ -100,7 +100,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
   }
 
   double _getScrollViewHeight() {
-    final RenderBox renderBox = scrollViewKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox renderBox = tableFlexibleKey.currentContext!.findRenderObject() as RenderBox;
     return renderBox.size.height;
   }
 
@@ -129,6 +129,7 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
           onDateTap: () => _timeTableController.moveToMonth(dayFocus),
         ),
         Flexible(
+          key: tableFlexibleKey,
           child: PageView.builder(
               onPageChanged: (index) {
                 setState(() {
@@ -143,7 +144,6 @@ class _DuaryTimetableState extends State<DuaryTimetable> {
                 DateTime currentDate = initialDay
                     .add(Duration(days: index - _initialPage));
                 return SingleChildScrollView(
-                  key: scrollViewKey,
                     controller: _scrollController,
                     child: LayoutBuilder(// width 전달 목적
                         builder: (context, constraints) {
