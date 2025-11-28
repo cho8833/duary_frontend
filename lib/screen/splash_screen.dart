@@ -22,20 +22,16 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<Offset> _blueSlideUpAnimation;
   late Animation<double> _yellowBounceYAnimation;
   late Animation<double> _yellowBounceXAnimation;
-  late DuaryContext duaryContext;
+  final DuaryContext duaryContext = DuaryContext();
 
-  late Future<void> signInFuture;
-
-  bool _isSIgnInDone = false;
+  bool _isSignInDone = false;
   bool _isAnimationDone = false;
 
   @override
   void initState() {
-    duaryContext = DuaryContext();
-
     // 로그인
-    signInFuture = duaryContext.signInWithToken().whenComplete(() {
-      _isSIgnInDone = true;
+    duaryContext.signInWithToken().whenComplete(() {
+      _isSignInDone = true;
       whenTaskComplete();
     });
 
@@ -58,8 +54,8 @@ class _SplashScreenState extends State<SplashScreen>
     // route screen when animation end
     _controller.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        _isAnimationDone = true;
         await Future.delayed(const Duration(milliseconds: 500));
+        _isAnimationDone = true;
         whenTaskComplete();
       }
     });
@@ -67,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void whenTaskComplete() async {
-    if (_isAnimationDone && _isSIgnInDone) {
+    if (_isAnimationDone && _isSignInDone) {
       late Widget routeScreen;
       if (duaryContext.isLoggedIn()) {
         // 커플이 생성되어 있는지 확인
