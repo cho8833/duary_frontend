@@ -69,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen>
         // 커플이 생성되어 있는지 확인
         if (duaryContext.isCoupleCreated()) {
           // 커플이 생성되어 있는 경우 커플이 연결되어 있는지 확인
-          routeScreen = const HomeScreen();
+          routeScreen = const HomeScreen(isTokenSignIn: true,);
 
           // 커플이 생성되어 있지 않은 경우 StartDuaryScreen 으로 route
         } else {

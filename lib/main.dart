@@ -3,6 +3,7 @@ import 'package:duary/firebase_options.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
 import 'package:duary/provider/deep_link_manager.dart';
+import 'package:duary/provider/notification_provider.dart';
 import 'package:duary/provider/time_manager.dart';
 import 'package:duary/repository/impl/websocket_handler.dart';
 import 'package:duary/screen/splash_screen.dart';
@@ -37,11 +38,13 @@ void main() async {
   // init Firebase(FCM)
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // init notification provider
+  NotificationProvider notificationProvider = NotificationProvider();
+  notificationProvider.getPermission();
+
   // init Google Sign In
   final GoogleSignIn signIn = GoogleSignIn.instance;
-  await signIn.initialize(
-    nonce: SecretKey.oidcNonce
-  );
+  await signIn.initialize(nonce: SecretKey.oidcNonce);
 
   // pre cache splash logo
   // Native Splash Screen -> SplashScreen.dart 전환 중 로고 깜빡임 제거
@@ -64,7 +67,8 @@ void main() async {
   WebSocketHandler().init(tokenProvider);
 
   // init Providers
-  EventProvider eventProvider = EventProvider(rc.eventRepository, rc.appleCalendarRepository);
+  EventProvider eventProvider =
+      EventProvider(rc.eventRepository, rc.appleCalendarRepository);
   DuaryContext duaryContext = DuaryContext();
   duaryContext.init(
       rc.coupleRepository, rc.authRepository, rc.memberRepository);
@@ -72,13 +76,21 @@ void main() async {
   // init synced apple calendar
   await eventProvider.getSyncedAppleCalendar();
 
-  runApp(Main(eventProvider: eventProvider));
+  runApp(Main(
+    eventProvider: eventProvider,
+    notificationProvider: notificationProvider,
+  ));
 }
 
 class Main extends StatelessWidget {
-  const Main({super.key, required this.eventProvider});
+  const Main(
+      {super.key,
+      required this.eventProvider,
+      required this.notificationProvider});
 
   final EventProvider eventProvider;
+
+  final NotificationProvider notificationProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -87,15 +99,16 @@ class Main extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         Provider(create: (_) => DeepLinkManager(AppLinks())),
         ChangeNotifierProvider(create: (_) => TimeManager()),
-        ChangeNotifierProvider.value(value: eventProvider)
+        ChangeNotifierProvider.value(value: eventProvider),
+        Provider.value(value: notificationProvider)
       ],
       builder: (context, _) =>
           Consumer<ThemeProvider>(builder: (context, provider, _) {
         return MaterialApp(
-            theme: provider.selected,
-            debugShowCheckedModeBanner: false,
-            // darkTheme: ThemeProvider.dark,
-            home: const SplashScreen(),
+          theme: provider.selected,
+          debugShowCheckedModeBanner: false,
+          // darkTheme: ThemeProvider.dark,
+          home: const SplashScreen(),
           navigatorObservers: [routeObserver],
         );
       }),

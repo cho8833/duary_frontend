@@ -167,7 +167,7 @@ class _StartDuaryScreenState extends State<StartDuaryScreen> {
                     Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const HomeScreen()),
+                            builder: (context) => const HomeScreen(isTokenSignIn: false,)),
                             (p) => false);
                   }).catchError((e) {
                     Fluttertoast.showToast(msg: e.toString());

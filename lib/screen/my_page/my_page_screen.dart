@@ -5,7 +5,7 @@ import 'package:duary/model/third_party_calendar.dart';
 import 'package:duary/provider/auth_provider.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
-import 'package:duary/screen/my_page/apple_calendar_screen.dart';
+import 'package:duary/provider/notification_provider.dart';
 import 'package:duary/screen/my_page/change_character_screen.dart';
 import 'package:duary/screen/my_page/couple_info_screen.dart';
 import 'package:duary/screen/my_page/edit_birthday_screen.dart';
@@ -18,6 +18,7 @@ import 'package:duary/widget/base_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
@@ -26,9 +27,12 @@ class MyPageScreen extends StatefulWidget {
   State<MyPageScreen> createState() => _MyPageScreenState();
 }
 
-class _MyPageScreenState extends State<MyPageScreen> {
+class _MyPageScreenState extends State<MyPageScreen> with WidgetsBindingObserver {
+
   DuaryContext duaryContext = DuaryContext();
   late final EventProvider _eventProvider = context.read<EventProvider>();
+  late final NotificationProvider _notificationProvider =
+      context.read<NotificationProvider>();
 
   late Member me;
 
@@ -37,11 +41,16 @@ class _MyPageScreenState extends State<MyPageScreen> {
   late final void Function() meListener;
   late final void Function() coupleListener;
   late final void Function() appleCalendarListener;
+  late final void Function() notiPermissionListener;
 
   List<AppleCalendar> syncedAppleCalendar = [];
 
+  bool isNotificationEnabled = false;
+
   @override
   void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Init my info and Listen my info changes
     me = duaryContext.me.value!;
     meListener = () {
@@ -74,7 +83,31 @@ class _MyPageScreenState extends State<MyPageScreen> {
     };
     _eventProvider.appleCalendars.addListener(appleCalendarListener);
 
-    super.initState();
+    // Init notification settings and listen notification permission
+    isNotificationEnabled = _notificationProvider.isNotificationEnabled.value;
+    notiPermissionListener = () {
+      setState(() {
+        isNotificationEnabled =
+            _notificationProvider.isNotificationEnabled.value;
+      });
+    };
+    _notificationProvider.isNotificationEnabled
+        .addListener(notiPermissionListener);
+
+    // 앱 실행 중 알림 권한이 바뀌었을 가능성이 있으므로, init state 시 권한을 다시 조회
+    // init state 시 바로 권한을 받아올 경우 initState 중 setState가 발생할 가능성이 있음
+    // -> 빌드 완료 된 후 권한 조회
+    WidgetsBinding.instance.addPostFrameCallback((d) {
+      _notificationProvider.getPermission();
+    });
+  }
+
+  // 앱이 다시 foreground 로 전환될 경우, 알림 권한을 다시 설정했을 가능성이 있으므로 다시 조회
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _notificationProvider.getPermission();
+    }
   }
 
   String formatDateTime(DateTime req) => DateFormat('yy.MM.dd').format(req);
@@ -83,14 +116,13 @@ class _MyPageScreenState extends State<MyPageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBarBase(
-        appBarObj: AppBar(),
-        leadingBuilder: (context) => FutureButton(
-            onTap: () async {
-              Navigator.pop(context);
-            },
-            child: const Icon(Icons.navigate_before)),
-        centerBuilder: (context) => const SubPageTitle(title: "마이페이지")
-      ),
+          appBarObj: AppBar(),
+          leadingBuilder: (context) => FutureButton(
+              onTap: () async {
+                Navigator.pop(context);
+              },
+              child: const Icon(Icons.navigate_before)),
+          centerBuilder: (context) => const SubPageTitle(title: "마이페이지")),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -216,7 +248,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   },
                   child: InfoBox(
                       labelText: "생일",
-                      currentValue: me.birthday != null ? formatDateTime(me.birthday!) : "설정해주세요")),
+                      currentValue: me.birthday != null
+                          ? formatDateTime(me.birthday!)
+                          : "설정해주세요")),
               const SizedBox(
                 height: 27,
               ),
@@ -247,24 +281,46 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   },
                   child: InfoBox(
                       labelText: "사랑이 시작된 날",
-                      currentValue: myCouple.relationDate != null ? formatDateTime(myCouple.relationDate!) : "설정해주세요")),
+                      currentValue: myCouple.relationDate != null
+                          ? formatDateTime(myCouple.relationDate!)
+                          : "설정해주세요")),
               const SizedBox(
                 height: 27,
               ),
-              const SectionTitle(text: "캘린더 연동"),
+              const SectionTitle(text: "알림 설정"),
               const SizedBox(
                 height: 8,
               ),
-              GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const AppleCalendarScreen()));
-                  },
-                  child: InfoBox(
-                      labelText: "애플 캘린더",
-                      currentValue: syncedAppleCalendar.isEmpty ? "연동되지 않음" : "연동됨")),
+              FutureButton(
+                onTap: () async {
+                  if (isNotificationEnabled) {
+                    await launchSettings();
+                  } else {
+                    bool isGranted = await _notificationProvider.requestPermission();
+                    if (!isGranted) {
+                      await launchSettings();
+                    }
+                  }
+                },
+                child: InfoBox(
+                    labelText: "알림 권한",
+                    currentValue: isNotificationEnabled ? "허용됨" : "허용되지 않음"),
+              ),
+              // const SectionTitle(text: "캘린더 연동"),
+              // const SizedBox(
+              //   height: 8,
+              // ),
+              // GestureDetector(
+              //     onTap: () {
+              //       Navigator.push(
+              //           context,
+              //           MaterialPageRoute(
+              //               builder: (context) => const AppleCalendarScreen()));
+              //     },
+              //     child: InfoBox(
+              //         labelText: "애플 캘린더",
+              //         currentValue:
+              //         syncedAppleCalendar.isEmpty ? "연동되지 않음" : "연동됨")),
               const Spacer(),
               Align(
                 alignment: Alignment.center,
@@ -298,12 +354,22 @@ class _MyPageScreenState extends State<MyPageScreen> {
     );
   }
 
+  Future<void> launchSettings() async {
+    Uri settings = Uri.parse("app-settings:root=Duary");
+    if (await canLaunchUrl(settings)) {
+      launchUrl(settings);
+    }
+  }
+
   @override
   void dispose() {
+    super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     duaryContext.me.removeListener(meListener);
     duaryContext.myCouple.removeListener(coupleListener);
     _eventProvider.appleCalendars.removeListener(appleCalendarListener);
-    super.dispose();
+    _notificationProvider.isNotificationEnabled
+        .removeListener(notiPermissionListener);
   }
 }
 

@@ -5,6 +5,7 @@ import 'package:duary/model/event.dart';
 import 'package:duary/model/member.dart';
 import 'package:duary/provider/duary_context.dart';
 import 'package:duary/provider/event_provider.dart';
+import 'package:duary/provider/notification_provider.dart';
 import 'package:duary/provider/time_manager.dart';
 import 'package:duary/screen/event/event_details_screen.dart';
 import 'package:duary/screen/my_page/my_page_screen.dart';
@@ -21,8 +22,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, required this.isTokenSignIn, });
 
+  final bool isTokenSignIn;
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -30,6 +32,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late final EventProvider _eventProvider;
   late final TimeManager _timeManager;
+  late final NotificationProvider _notificationProvider = context.read<NotificationProvider>();
   final DuaryContext duaryContext = DuaryContext();
 
   static const String _noOngoingEventMent = "쉬는 중이야";
@@ -58,6 +61,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+
+    // 소셜 로그인으로 home screen 에 접근 and 알림 권한이 허용되지 않은 경우 알림 권한 요청
+    if (widget.isTokenSignIn && !_notificationProvider.isNotificationEnabled.value) {
+      _notificationProvider.requestPermission();
+    }
     today = DateUtils.dateOnly(now);
     _eventProvider = context.read<EventProvider>();
 

@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (duaryContext.isCoupleCreated()) {
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => const HomeScreen(isTokenSignIn: false,)),
           (p) => false);
     }
     // 커플이 생성되어 있지 않으면 StartDuaryScreen 으로 route
