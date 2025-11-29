@@ -62,8 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
-    // 소셜 로그인으로 home screen 에 접근 and 알림 권한이 허용되지 않은 경우 알림 권한 요청
-    if (widget.isTokenSignIn && !_notificationProvider.isNotificationEnabled.value) {
+    // 자동 로그인이 아닌 소셜 로그인으로 home screen 에 접근 and 알림 권한이 허용되지 않은 경우 알림 권한 요청
+    if (!widget.isTokenSignIn && !_notificationProvider.isNotificationEnabled.value) {
       _notificationProvider.requestPermission();
     }
     today = DateUtils.dateOnly(now);
