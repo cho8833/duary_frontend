@@ -18,9 +18,11 @@ class DayView extends StatefulWidget {
   const DayView(
       {super.key,
       required this.currentDate,
-      required this.width});
+      required this.width, required this.events});
 
   final DateTime currentDate;
+
+  final List<Event> events;
 
   final double width;
 
@@ -31,14 +33,10 @@ class DayView extends StatefulWidget {
 class _DayViewState extends State<DayView> {
   final DuaryContext _duaryContext = DuaryContext();
 
-  late final EventProvider _eventProvider = context.read<EventProvider>();
-
   late final TimeManager _timeManager;
 
   static const hourHeight = DuaryTimetable.hourHeight;
   static const _timelineLength = DuaryTimetable.timelineLength;
-
-  List<Event> items = [];
 
   DateTime? now;
 
@@ -52,38 +50,11 @@ class _DayViewState extends State<DayView> {
       _timeManager.addListener(_changeTime);
     }
 
-    _eventProvider.getEventByDay(widget.currentDate).then((list) {
-      WidgetsBinding.instance.addPostFrameCallback((d) {
-        setState(() {
-          items = list;
-        });
-      });
-    });
-
-    _eventProvider.addListener(getEvents);
-    // 유저 정보나 커플 정보가 바뀌면 다시 event 불러오기
-    _duaryContext.me.addListener(getEvents);
-    _duaryContext.lover.addListener(getEvents);
-    _duaryContext.myCouple.addListener(getEvents);
-  }
-
-  void getEvents() {
-    _eventProvider.getEventByDay(widget.currentDate).then((list) {
-      setState(() {
-        items = list;
-      });
-    }).catchError((e) {
-      Fluttertoast.showToast(msg: e.toString());
-    });
   }
 
   @override
   void dispose() {
     _timeManager.removeListener(_changeTime);
-    _eventProvider.removeListener(getEvents);
-    _duaryContext.me.removeListener(getEvents);
-    _duaryContext.lover.removeListener(getEvents);
-    _duaryContext.myCouple.removeListener(getEvents);
     super.dispose();
   }
 
@@ -112,6 +83,8 @@ class _DayViewState extends State<DayView> {
 
   @override
   Widget build(BuildContext context) {
+
+    List<Event> items = widget.events;
     return SizedBox(
       height: hourHeight * 24,
       child: Stack(
@@ -207,12 +180,12 @@ class _DayViewState extends State<DayView> {
             top: yPosition,
             child: GestureDetector(
                 onTap: () {
-                  int zIndex = items.indexOf(event);
+                  int zIndex = events.indexOf(event);
                   // Bubble 이 맨 위로 올라와 있지 않으면 맨 위로 올림
-                  if (zIndex != items.length - 1) {
+                  if (zIndex != events.length - 1) {
                     setState(() {
-                      items.remove(event);
-                      items.add(event);
+                      events.remove(event);
+                      events.add(event);
                     });
                     // Bubble 이 맨 위로 올라와 있으면 Detail Screen 으로 route
                   } else {

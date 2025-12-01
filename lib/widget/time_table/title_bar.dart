@@ -14,63 +14,32 @@ class TitleBar extends StatefulWidget {
   const TitleBar({
     super.key,
     required this.dayFocus,
-    required this.onDateTap,
+    required this.onDateTap, required this.events,
   });
 
   final DateTime dayFocus;
 
   final Function() onDateTap;
 
+  final List<Event> events;
+
   @override
   State<TitleBar> createState() => _TitleBarState();
 }
 
 class _TitleBarState extends State<TitleBar> {
-  List<Event> events = [];
-  late final EventProvider _eventProvider = context.read<EventProvider>();
   final DuaryContext _duaryContext = DuaryContext();
 
-  @override
-  void initState() {
-    super.initState();
-
-    _eventProvider.addListener(getEvents);
-    // 유저 정보나 커플 정보가 바뀌면 다시 event 불러오기
-    _duaryContext.me.addListener(getEvents);
-    _duaryContext.lover.addListener(getEvents);
-    _duaryContext.myCouple.addListener(getEvents);
-
-    _eventProvider.getEventByDay(widget.dayFocus).then((list) {
-      WidgetsBinding.instance.addPostFrameCallback((d) {
-        setState(() {
-          events = list;
-        });
-      });
-    });
-  }
-
-  void getEvents() {
-    _eventProvider.getEventByDay(widget.dayFocus).then((list) {
-      setState(() {
-        events = list;
-      });
-    }).catchError((e) {
-      Fluttertoast.showToast(msg: e.toString());
-    });
-  }
 
   @override
   void dispose() {
-    _eventProvider.removeListener(getEvents);
-    _duaryContext.me.removeListener(getEvents);
-    _duaryContext.lover.removeListener(getEvents);
-    _duaryContext.myCouple.removeListener(getEvents);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final DuaryContext duaryContext = DuaryContext();
+
+    List<Event> events = widget.events;
 
     late String title;
 
@@ -170,11 +139,11 @@ class _TitleBarState extends State<TitleBar> {
                   const SizedBox(
                     width: 20,
                   ),
-                  Expanded(child: myAllDay(events, duaryContext, context)),
+                  Expanded(child: myAllDay(events, _duaryContext, context)),
                   const SizedBox(
                     width: 22,
                   ),
-                  Expanded(child: loverAllDay(events, duaryContext, context)),
+                  Expanded(child: loverAllDay(events, _duaryContext, context)),
                   const SizedBox(
                     width: 20,
                   ),
